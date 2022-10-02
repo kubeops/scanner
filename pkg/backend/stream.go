@@ -236,8 +236,6 @@ func (mgr *Manager) processNextMsg() (err error) {
 	}
 
 	img := string(msgs[0].Data)
-	klog.InfoS("generate.report", "image", img)
-
 	defer func() {
 		// report failure ?
 		if e2 := msgs[0].Ack(); e2 != nil {
@@ -245,8 +243,12 @@ func (mgr *Manager) processNextMsg() (err error) {
 		}
 	}()
 
-	if err = UploadReport(mgr.fs, img); err != nil {
-		err = errors.Wrapf(err, "failed to generate report %s", img)
+	if img != "" {
+		klog.InfoS("generate.report", "image", img)
+
+		if err = UploadReport(mgr.fs, img); err != nil {
+			err = errors.Wrapf(err, "failed to generate report %s", img)
+		}
 	}
 	return nil
 }

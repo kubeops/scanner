@@ -172,6 +172,9 @@ func processDir(nc *nats.Conn, dir string) error {
 
 func scanImages(nc *nats.Conn, refs ...string) {
 	for _, img := range refs {
+		if img == "" {
+			continue
+		}
 		if _, err := nc.Request("scanner.queue.scan", []byte(img), 100*time.Millisecond); err != nil {
 			klog.ErrorS(err, "failed submit scan request", "image", img)
 		} else {
