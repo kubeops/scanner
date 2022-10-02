@@ -59,8 +59,8 @@ endif
 SRC_PKGS := apis cmd pkg # directories which hold app source excluding tests (not vendored)
 SRC_DIRS := $(SRC_PKGS) # directories which hold app source (not vendored)
 
-DOCKER_PLATFORMS := linux/amd64 linux/arm64
-BIN_PLATFORMS    := $(DOCKER_PLATFORMS)
+DOCKER_PLATFORMS := linux/amd64 linux/arm linux/arm64
+BIN_PLATFORMS    := $(DOCKER_PLATFORMS) windows/amd64 darwin/amd64 darwin/arm64
 
 # Used internally.  Users should pass GOOS and/or GOARCH.
 OS   := $(if $(GOOS),$(GOOS),$(shell go env GOOS))
@@ -81,9 +81,10 @@ GO_VERSION       ?= 1.19
 BUILD_IMAGE      ?= appscode/golang-dev:$(GO_VERSION)
 CHART_TEST_IMAGE ?= quay.io/helmpack/chart-testing:v3.5.1
 
-OUTBIN = bin/$(OS)_$(ARCH)/$(BIN)
+OUTBIN = bin/$(BIN)-$(OS)-$(ARCH)
 ifeq ($(OS),windows)
-  OUTBIN = bin/$(OS)_$(ARCH)/$(BIN).exe
+  OUTBIN := bin/$(BIN)-$(OS)-$(ARCH).exe
+  BIN := $(BIN).exe
 endif
 
 # Directories that we need created to build/test.
@@ -127,6 +128,10 @@ push-%:
 	    GOARCH=$(lastword $(subst _, ,$*))
 
 all-build: $(addprefix build-, $(subst /,_, $(BIN_PLATFORMS)))
+ifeq ($(COMPRESS),yes)
+	@cd bin; \
+	sha256sum $(patsubst $(BIN)-windows-%.tar.gz,$(BIN)-windows-%.zip, $(addsuffix .tar.gz, $(addprefix $(BIN)-, $(subst /,-, $(BIN_PLATFORMS))))) > $(BIN)-checksums.txt
+endif
 
 all-container: $(addprefix container-, $(subst /,_, $(DOCKER_PLATFORMS)))
 
@@ -272,26 +277,21 @@ $(OUTBIN): .go/$(OUTBIN).stamp
 	        commit_timestamp=$(commit_timestamp)                \
 	        ./hack/build.sh                                     \
 	    "
-	@if [ $(COMPRESS) = yes ] && [ $(OS) != darwin ]; then          \
-		echo "compressing $(OUTBIN)";                               \
-		@docker run                                                 \
-		    -i                                                      \
-		    --rm                                                    \
-		    -u $$(id -u):$$(id -g)                                  \
-		    -v $$(pwd):/src                                         \
-		    -w /src                                                 \
-		    -v $$(pwd)/.go/bin/$(OS)_$(ARCH):/go/bin                \
-		    -v $$(pwd)/.go/bin/$(OS)_$(ARCH):/go/bin/$(OS)_$(ARCH)  \
-		    -v $$(pwd)/.go/cache:/.cache                            \
-		    --env HTTP_PROXY=$(HTTP_PROXY)                          \
-		    --env HTTPS_PROXY=$(HTTPS_PROXY)                        \
-		    $(BUILD_IMAGE)                                          \
-		    upx --brute /go/$(OUTBIN);                              \
+	@if ! cmp -s .go/bin/$(OS)_$(ARCH)/$(BIN) $(OUTBIN); then   \
+	    mv .go/bin/$(OS)_$(ARCH)/$(BIN) $(OUTBIN);              \
+	    date >$@;                                               \
 	fi
-	@if ! cmp -s .go/$(OUTBIN) $(OUTBIN); then \
-	    mv .go/$(OUTBIN) $(OUTBIN);            \
-	    date >$@;                              \
-	fi
+ifeq ($(COMPRESS),yes)
+ifeq ($(OS),windows)
+	@echo "compressing $(OUTBIN)";                               \
+	cd bin;                                                      \
+	zip -j $(subst .exe,,$(BIN))-$(OS)-$(ARCH).zip $(subst .exe,,$(BIN))-$(OS)-$(ARCH).exe ../LICENSE
+else
+	@echo "compressing $(OUTBIN)";                               \
+	cd bin;                                                      \
+	tar -czvf $(BIN)-$(OS)-$(ARCH).tar.gz $(BIN)-$(OS)-$(ARCH) ../LICENSE
+endif
+endif
 	@echo
 
 # Used to track state in hidden files.
@@ -299,7 +299,7 @@ DOTFILE_IMAGE    = $(subst /,_,$(IMAGE))-$(TAG)
 
 container: bin/.container-$(DOTFILE_IMAGE)-PROD bin/.container-$(DOTFILE_IMAGE)-DBG
 ifeq (,$(SRC_REG))
-bin/.container-$(DOTFILE_IMAGE)-%: bin/$(OS)_$(ARCH)/$(BIN) $(DOCKERFILE_%)
+bin/.container-$(DOTFILE_IMAGE)-%: bin/$(BIN)-$(OS)-$(ARCH) $(DOCKERFILE_%)
 	@echo "container: $(IMAGE):$(TAG_$*)"
 	@sed                                    \
 		-e 's|{ARG_BIN}|$(BIN)|g'           \

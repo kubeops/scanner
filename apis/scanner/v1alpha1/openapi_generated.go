@@ -354,9 +354,26 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"kmodules.xyz/client-go/api/v1.TypedObjectReference":                 schema_kmodulesxyz_client_go_api_v1_TypedObjectReference(ref),
 		"kmodules.xyz/client-go/api/v1.X509Subject":                          schema_kmodulesxyz_client_go_api_v1_X509Subject(ref),
 		"kmodules.xyz/client-go/api/v1.stringSetMerger":                      schema_kmodulesxyz_client_go_api_v1_stringSetMerger(ref),
+		"kubeops.dev/scanner/apis/scanner/v1alpha1.CVSS":                     schema_scanner_apis_scanner_v1alpha1_CVSS(ref),
+		"kubeops.dev/scanner/apis/scanner/v1alpha1.CVSSNvd":                  schema_scanner_apis_scanner_v1alpha1_CVSSNvd(ref),
+		"kubeops.dev/scanner/apis/scanner/v1alpha1.CVSSRedhat":               schema_scanner_apis_scanner_v1alpha1_CVSSRedhat(ref),
+		"kubeops.dev/scanner/apis/scanner/v1alpha1.ImageConfig":              schema_scanner_apis_scanner_v1alpha1_ImageConfig(ref),
+		"kubeops.dev/scanner/apis/scanner/v1alpha1.ImageHistory":             schema_scanner_apis_scanner_v1alpha1_ImageHistory(ref),
+		"kubeops.dev/scanner/apis/scanner/v1alpha1.ImageMetadata":            schema_scanner_apis_scanner_v1alpha1_ImageMetadata(ref),
+		"kubeops.dev/scanner/apis/scanner/v1alpha1.ImageOS":                  schema_scanner_apis_scanner_v1alpha1_ImageOS(ref),
+		"kubeops.dev/scanner/apis/scanner/v1alpha1.ImageRootfs":              schema_scanner_apis_scanner_v1alpha1_ImageRootfs(ref),
+		"kubeops.dev/scanner/apis/scanner/v1alpha1.ImageRuntimeConfig":       schema_scanner_apis_scanner_v1alpha1_ImageRuntimeConfig(ref),
+		"kubeops.dev/scanner/apis/scanner/v1alpha1.MyTime":                   schema_scanner_apis_scanner_v1alpha1_MyTime(ref),
+		"kubeops.dev/scanner/apis/scanner/v1alpha1.Report":                   schema_scanner_apis_scanner_v1alpha1_Report(ref),
+		"kubeops.dev/scanner/apis/scanner/v1alpha1.Result":                   schema_scanner_apis_scanner_v1alpha1_Result(ref),
 		"kubeops.dev/scanner/apis/scanner/v1alpha1.ScanImage":                schema_scanner_apis_scanner_v1alpha1_ScanImage(ref),
 		"kubeops.dev/scanner/apis/scanner/v1alpha1.ScanImageRequest":         schema_scanner_apis_scanner_v1alpha1_ScanImageRequest(ref),
 		"kubeops.dev/scanner/apis/scanner/v1alpha1.ScanImageResponse":        schema_scanner_apis_scanner_v1alpha1_ScanImageResponse(ref),
+		"kubeops.dev/scanner/apis/scanner/v1alpha1.Summary":                  schema_scanner_apis_scanner_v1alpha1_Summary(ref),
+		"kubeops.dev/scanner/apis/scanner/v1alpha1.SummaryResult":            schema_scanner_apis_scanner_v1alpha1_SummaryResult(ref),
+		"kubeops.dev/scanner/apis/scanner/v1alpha1.Vulnerability":            schema_scanner_apis_scanner_v1alpha1_Vulnerability(ref),
+		"kubeops.dev/scanner/apis/scanner/v1alpha1.VulnerabilityDataSource":  schema_scanner_apis_scanner_v1alpha1_VulnerabilityDataSource(ref),
+		"kubeops.dev/scanner/apis/scanner/v1alpha1.VulnerabilityLayer":       schema_scanner_apis_scanner_v1alpha1_VulnerabilityLayer(ref),
 	}
 }
 
@@ -17477,6 +17494,569 @@ func schema_kmodulesxyz_client_go_api_v1_stringSetMerger(ref common.ReferenceCal
 	}
 }
 
+func schema_scanner_apis_scanner_v1alpha1_CVSS(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"nvd": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("kubeops.dev/scanner/apis/scanner/v1alpha1.CVSSNvd"),
+						},
+					},
+					"redhat": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("kubeops.dev/scanner/apis/scanner/v1alpha1.CVSSRedhat"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"kubeops.dev/scanner/apis/scanner/v1alpha1.CVSSNvd", "kubeops.dev/scanner/apis/scanner/v1alpha1.CVSSRedhat"},
+	}
+}
+
+func schema_scanner_apis_scanner_v1alpha1_CVSSNvd(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"V2Vector": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"V3Vector": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"V2Score": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"number"},
+							Format: "double",
+						},
+					},
+					"V3Score": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"number"},
+							Format: "double",
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func schema_scanner_apis_scanner_v1alpha1_CVSSRedhat(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"V2Vector": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"V3Vector": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"V2Score": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"number"},
+							Format: "double",
+						},
+					},
+					"V3Score": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"number"},
+							Format: "double",
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func schema_scanner_apis_scanner_v1alpha1_ImageConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"architecture": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"author": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"container": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"created": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("kubeops.dev/scanner/apis/scanner/v1alpha1.MyTime"),
+						},
+					},
+					"docker_version": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"history": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("kubeops.dev/scanner/apis/scanner/v1alpha1.ImageHistory"),
+									},
+								},
+							},
+						},
+					},
+					"os": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"rootfs": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("kubeops.dev/scanner/apis/scanner/v1alpha1.ImageRootfs"),
+						},
+					},
+					"config": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("kubeops.dev/scanner/apis/scanner/v1alpha1.ImageRuntimeConfig"),
+						},
+					},
+				},
+				Required: []string{"architecture", "created", "history", "os", "rootfs", "config"},
+			},
+		},
+		Dependencies: []string{
+			"kubeops.dev/scanner/apis/scanner/v1alpha1.ImageHistory", "kubeops.dev/scanner/apis/scanner/v1alpha1.ImageRootfs", "kubeops.dev/scanner/apis/scanner/v1alpha1.ImageRuntimeConfig", "kubeops.dev/scanner/apis/scanner/v1alpha1.MyTime"},
+	}
+}
+
+func schema_scanner_apis_scanner_v1alpha1_ImageHistory(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"created": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("kubeops.dev/scanner/apis/scanner/v1alpha1.MyTime"),
+						},
+					},
+					"created_by": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"empty_layer": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"boolean"},
+							Format: "",
+						},
+					},
+					"comment": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+				},
+				Required: []string{"created", "created_by"},
+			},
+		},
+		Dependencies: []string{
+			"kubeops.dev/scanner/apis/scanner/v1alpha1.MyTime"},
+	}
+}
+
+func schema_scanner_apis_scanner_v1alpha1_ImageMetadata(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"OS": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("kubeops.dev/scanner/apis/scanner/v1alpha1.ImageOS"),
+						},
+					},
+					"ImageID": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"DiffIDs": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
+					"RepoTags": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
+					"RepoDigests": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
+					"ImageConfig": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("kubeops.dev/scanner/apis/scanner/v1alpha1.ImageConfig"),
+						},
+					},
+				},
+				Required: []string{"OS", "ImageID", "DiffIDs", "RepoTags", "RepoDigests", "ImageConfig"},
+			},
+		},
+		Dependencies: []string{
+			"kubeops.dev/scanner/apis/scanner/v1alpha1.ImageConfig", "kubeops.dev/scanner/apis/scanner/v1alpha1.ImageOS"},
+	}
+}
+
+func schema_scanner_apis_scanner_v1alpha1_ImageOS(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"Family": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"Name": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+				},
+				Required: []string{"Family", "Name"},
+			},
+		},
+	}
+}
+
+func schema_scanner_apis_scanner_v1alpha1_ImageRootfs(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"type": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"diff_ids": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"type", "diff_ids"},
+			},
+		},
+	}
+}
+
+func schema_scanner_apis_scanner_v1alpha1_ImageRuntimeConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"Cmd": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
+					"Env": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
+					"Image": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"Entrypoint": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
+					"Labels": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
+					"ArgsEscaped": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"boolean"},
+							Format: "",
+						},
+					},
+					"StopSignal": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+				},
+				Required: []string{"Cmd"},
+			},
+		},
+	}
+}
+
+func schema_scanner_apis_scanner_v1alpha1_MyTime(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"Time": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Type:    []string{"string"},
+							Format:  "date-time",
+						},
+					},
+				},
+				Required: []string{"Time"},
+			},
+		},
+	}
+}
+
+func schema_scanner_apis_scanner_v1alpha1_Report(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"SchemaVersion": {
+						SchemaProps: spec.SchemaProps{
+							Default: 0,
+							Type:    []string{"integer"},
+							Format:  "int32",
+						},
+					},
+					"ArtifactName": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"ArtifactType": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"Metadata": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("kubeops.dev/scanner/apis/scanner/v1alpha1.ImageMetadata"),
+						},
+					},
+					"Results": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("kubeops.dev/scanner/apis/scanner/v1alpha1.Result"),
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"SchemaVersion", "ArtifactName", "ArtifactType", "Metadata", "Results"},
+			},
+		},
+		Dependencies: []string{
+			"kubeops.dev/scanner/apis/scanner/v1alpha1.ImageMetadata", "kubeops.dev/scanner/apis/scanner/v1alpha1.Result"},
+	}
+}
+
+func schema_scanner_apis_scanner_v1alpha1_Result(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"Target": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"Class": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"Type": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"Vulnerabilities": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("kubeops.dev/scanner/apis/scanner/v1alpha1.Vulnerability"),
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"Target", "Class", "Type"},
+			},
+		},
+		Dependencies: []string{
+			"kubeops.dev/scanner/apis/scanner/v1alpha1.Vulnerability"},
+	}
+}
+
 func schema_scanner_apis_scanner_v1alpha1_ScanImage(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -17555,5 +18135,301 @@ func schema_scanner_apis_scanner_v1alpha1_ScanImageResponse(ref common.Reference
 		},
 		Dependencies: []string{
 			"k8s.io/apimachinery/pkg/runtime.RawExtension"},
+	}
+}
+
+func schema_scanner_apis_scanner_v1alpha1_Summary(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"SchemaVersion": {
+						SchemaProps: spec.SchemaProps{
+							Default: 0,
+							Type:    []string{"integer"},
+							Format:  "int32",
+						},
+					},
+					"ArtifactName": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"ArtifactType": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"Metadata": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("kubeops.dev/scanner/apis/scanner/v1alpha1.ImageMetadata"),
+						},
+					},
+					"Results": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("kubeops.dev/scanner/apis/scanner/v1alpha1.SummaryResult"),
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"SchemaVersion", "ArtifactName", "ArtifactType", "Metadata", "Results"},
+			},
+		},
+		Dependencies: []string{
+			"kubeops.dev/scanner/apis/scanner/v1alpha1.ImageMetadata", "kubeops.dev/scanner/apis/scanner/v1alpha1.SummaryResult"},
+	}
+}
+
+func schema_scanner_apis_scanner_v1alpha1_SummaryResult(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"Target": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"Class": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"Type": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"Vulnerabilities": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: 0,
+										Type:    []string{"integer"},
+										Format:  "int32",
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"Target", "Class", "Type"},
+			},
+		},
+	}
+}
+
+func schema_scanner_apis_scanner_v1alpha1_Vulnerability(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"VulnerabilityID": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"PkgName": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"InstalledVersion": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"Layer": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("kubeops.dev/scanner/apis/scanner/v1alpha1.VulnerabilityLayer"),
+						},
+					},
+					"SeveritySource": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"PrimaryURL": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"DataSource": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("kubeops.dev/scanner/apis/scanner/v1alpha1.VulnerabilityDataSource"),
+						},
+					},
+					"Title": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"Description": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"Severity": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"CweIDs": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
+					"CVSS": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("kubeops.dev/scanner/apis/scanner/v1alpha1.CVSS"),
+						},
+					},
+					"References": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
+					"PublishedDate": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("kubeops.dev/scanner/apis/scanner/v1alpha1.MyTime"),
+						},
+					},
+					"LastModifiedDate": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("kubeops.dev/scanner/apis/scanner/v1alpha1.MyTime"),
+						},
+					},
+					"FixedVersion": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+				},
+				Required: []string{"VulnerabilityID", "PkgName", "InstalledVersion", "Layer", "SeveritySource", "PrimaryURL", "DataSource", "Description", "Severity", "References"},
+			},
+		},
+		Dependencies: []string{
+			"kubeops.dev/scanner/apis/scanner/v1alpha1.CVSS", "kubeops.dev/scanner/apis/scanner/v1alpha1.MyTime", "kubeops.dev/scanner/apis/scanner/v1alpha1.VulnerabilityDataSource", "kubeops.dev/scanner/apis/scanner/v1alpha1.VulnerabilityLayer"},
+	}
+}
+
+func schema_scanner_apis_scanner_v1alpha1_VulnerabilityDataSource(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"ID": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"Name": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"URL": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+				},
+				Required: []string{"ID", "Name", "URL"},
+			},
+		},
+	}
+}
+
+func schema_scanner_apis_scanner_v1alpha1_VulnerabilityLayer(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"Digest": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"DiffID": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+				},
+				Required: []string{"DiffID"},
+			},
+		},
 	}
 }

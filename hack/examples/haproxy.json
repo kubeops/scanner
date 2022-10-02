@@ -1,0 +1,333 @@
+{
+  "SchemaVersion": 2,
+  "ArtifactName": "appscode/haproxy:2.6.2-alpine",
+  "ArtifactType": "container_image",
+  "Metadata": {
+    "OS": {
+      "Family": "alpine",
+      "Name": "3.15.5"
+    },
+    "ImageID": "sha256:02b803d4619848db32d5804355b924ca6d844ffc88db89829ca31f1338fcb142",
+    "DiffIDs": [
+      "sha256:eb54b7b7991f4d8b024ab36c1c7d67b2257a2aba8b8a2ed81effcd879dfc7e31",
+      "sha256:486ace6b9f6417f944aa157390b3492327ef11bfd54f8c1d9176100747c9cd71",
+      "sha256:20c4e4446a140ed73d626f82a6df8ea1ff2bc0c0a94b14a203085020eb7b1103",
+      "sha256:ffac2b6c3c8f6e6ade31b99ac495b121420fc6f2d7f866e5b2c178ec5ef1216d",
+      "sha256:14c5be2d8d93959609f292a9092bf205c447ece5e3d4dd4d5eadbb1d3178036c",
+      "sha256:96da3a4333e29414cbb684f2e34c0dfc85e05b2ebe8c68459c7f620f61124459",
+      "sha256:aaddc1733dfc8b5821c72f7f052beb518a85d5d8db1c2139f6cf5b0e15ba1ea9",
+      "sha256:4d25e0c7e639d6be3282e8dcd7a890ef1278fcfc3a2f41852493e5c09ba339ff",
+      "sha256:0695a3cdbf884ffd6a514acfee4856d62b428f12212538c7b713b6bc0cdf9617",
+      "sha256:dc86d7ffef916ebb417b03d3e20804279b316dd74ce55d6df9fa0d34b16d195a",
+      "sha256:37915c9dc6f8c8655ebd3e1a1c9d1c9191608dd0f99b66ed9613f53282b3e884"
+    ],
+    "RepoTags": [
+      "appscode/haproxy:2.6.2-alpine"
+    ],
+    "RepoDigests": [
+      "appscode/haproxy@sha256:c8ee402dfae6764d3268d7db52b64d7fd28bee36f7a7431065e549160cf9a6c9"
+    ],
+    "ImageConfig": {
+      "architecture": "arm64",
+      "author": "Dinko Korunic \u003cdkorunic@haproxy.com\u003e",
+      "created": "2022-08-17T02:48:41.060647258Z",
+      "history": [
+        {
+          "created": "2022-07-19T22:39:42Z",
+          "created_by": "/bin/sh -c #(nop) ADD file:158791ae9b4fb18e208925ce1ac7396322e741030bcd9bcae7e320e83f517dfe in / "
+        },
+        {
+          "created": "2022-07-19T22:39:42Z",
+          "created_by": "/bin/sh -c #(nop)  CMD [\"/bin/sh\"]",
+          "empty_layer": true
+        },
+        {
+          "created": "2022-07-22T16:40:46Z",
+          "created_by": "MAINTAINER Dinko Korunic \u003cdkorunic@haproxy.com\u003e",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2022-07-22T16:40:46Z",
+          "created_by": "LABEL Name=HAProxy",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2022-07-22T16:40:46Z",
+          "created_by": "LABEL Release=Community Edition",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2022-07-22T16:40:46Z",
+          "created_by": "LABEL Vendor=HAProxy",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2022-07-22T16:40:46Z",
+          "created_by": "LABEL Version=2.6.2",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2022-07-22T16:40:46Z",
+          "created_by": "LABEL RUN=/usr/bin/docker -d IMAGE",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2022-07-22T16:40:46Z",
+          "created_by": "ENV HAPROXY_BRANCH=2.6",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2022-07-22T16:40:46Z",
+          "created_by": "ENV HAPROXY_MINOR=2.6.2",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2022-07-22T16:40:46Z",
+          "created_by": "ENV HAPROXY_SHA256=f9b7dc06e02eb13b5d94dc66e0864a714aee2af9dfab10fa353ff9f1f52c8202",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2022-07-22T16:40:46Z",
+          "created_by": "ENV HAPROXY_SRC_URL=http://www.haproxy.org/download",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2022-07-22T16:40:46Z",
+          "created_by": "ENV DATAPLANE_MINOR=2.6.0",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2022-07-22T16:40:46Z",
+          "created_by": "ENV DATAPLANE_SHA256=ec685350576898bb0a00d656f427f5da7c28043551a3e0050c1b5301547e235a",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2022-07-22T16:40:46Z",
+          "created_by": "ENV DATAPLANE_URL=https://github.com/haproxytech/dataplaneapi/releases/download",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2022-07-22T16:40:46Z",
+          "created_by": "ENV HAPROXY_UID=haproxy",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2022-07-22T16:40:46Z",
+          "created_by": "ENV HAPROXY_GID=haproxy",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2022-07-22T16:40:46Z",
+          "created_by": "COPY /dataplaneapi /usr/local/bin/dataplaneapi # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2022-07-22T17:22:56Z",
+          "created_by": "RUN /bin/sh -c apk add --no-cache --virtual build-deps ca-certificates gcc libc-dev     linux-headers lua5.3-dev make openssl openssl-dev pcre2-dev tar     zlib-dev curl shadow ca-certificates \u0026\u0026     curl -sfSL \"${HAPROXY_SRC_URL}/${HAPROXY_BRANCH}/src/haproxy-${HAPROXY_MINOR}.tar.gz\" -o haproxy.tar.gz \u0026\u0026     echo \"$HAPROXY_SHA256 *haproxy.tar.gz\" | sha256sum -c - \u0026\u0026     groupadd \"$HAPROXY_GID\" \u0026\u0026     useradd -g \"$HAPROXY_GID\" \"$HAPROXY_UID\" \u0026\u0026     mkdir -p /tmp/haproxy \u0026\u0026     tar -xzf haproxy.tar.gz -C /tmp/haproxy --strip-components=1 \u0026\u0026     rm -f haproxy.tar.gz \u0026\u0026     make -C /tmp/haproxy -j\"$(nproc)\" TARGET=linux-musl CPU=generic USE_PCRE2=1 USE_PCRE2_JIT=1 USE_OPENSSL=1                             USE_TFO=1 USE_LINUX_TPROXY=1 USE_GETADDRINFO=1                             USE_LUA=1 LUA_LIB=/usr/lib/lua5.3 LUA_INC=/usr/include/lua5.3                             USE_PROMEX=1 USE_SLZ=1                             all \u0026\u0026     make -C /tmp/haproxy TARGET=linux2628 install-bin install-man \u0026\u0026     ln -s /usr/local/sbin/haproxy /usr/sbin/haproxy \u0026\u0026     mkdir -p /var/lib/haproxy \u0026\u0026     chown \"$HAPROXY_UID:$HAPROXY_GID\" /var/lib/haproxy \u0026\u0026     mkdir -p /usr/local/etc/haproxy \u0026\u0026     ln -s /usr/local/etc/haproxy /etc/haproxy \u0026\u0026     cp -R /tmp/haproxy/examples/errorfiles /usr/local/etc/haproxy/errors \u0026\u0026     rm -rf /tmp/haproxy \u0026\u0026     chmod +x /usr/local/bin/dataplaneapi \u0026\u0026     ln -s /usr/local/bin/dataplaneapi /usr/bin/dataplaneapi \u0026\u0026     touch /usr/local/etc/haproxy/dataplaneapi.hcl \u0026\u0026     chown \"$HAPROXY_UID:$HAPROXY_GID\" /usr/local/etc/haproxy/dataplaneapi.hcl \u0026\u0026     apk del build-deps \u0026\u0026     apk add --no-cache openssl zlib lua5.3-libs pcre2 \u0026\u0026     rm -f /var/cache/apk/* # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2022-07-22T17:22:56Z",
+          "created_by": "COPY haproxy.cfg /usr/local/etc/haproxy # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2022-07-22T16:17:18Z",
+          "created_by": "COPY docker-entrypoint.sh / # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2022-07-22T16:17:18Z",
+          "created_by": "STOPSIGNAL SIGUSR1",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2022-07-22T16:17:18Z",
+          "created_by": "ENTRYPOINT [\"/docker-entrypoint.sh\"]",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2022-07-22T16:17:18Z",
+          "created_by": "CMD [\"haproxy\" \"-f\" \"/usr/local/etc/haproxy/haproxy.cfg\"]",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2022-08-17T02:47:34Z",
+          "created_by": "RUN /bin/sh -c set -x   \u0026\u0026 apk add --update --no-cache ca-certificates tzdata lua5.3 lua-socket lua-ossl libcap   \u0026\u0026 echo 'Etc/UTC' \u003e /etc/timezone   \u0026\u0026 setcap 'cap_net_bind_service=+ep' $(which haproxy) # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2022-08-17T02:47:36Z",
+          "created_by": "RUN /bin/sh -c set -x   \u0026\u0026 apk add --update --upgrade --no-cache pcre2 # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2022-08-17T02:47:38Z",
+          "created_by": "RUN /bin/sh -c set -x   \u0026\u0026 apk add --update --upgrade --no-cache zlib # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2022-08-17T02:48:41Z",
+          "created_by": "ENV TZ=:/etc/localtime",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2022-08-17T02:48:41Z",
+          "created_by": "ENV LANG=en_US.utf8",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2022-08-17T02:48:41Z",
+          "created_by": "COPY /json.lua /usr/share/lua/5.3/json.lua # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2022-08-17T02:48:41Z",
+          "created_by": "COPY /http.lua /usr/share/haproxy/haproxy-lua-http/http.lua # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2022-08-17T02:48:41Z",
+          "created_by": "COPY /auth-request.lua /usr/share/haproxy/auth-request.lua # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        }
+      ],
+      "os": "linux",
+      "rootfs": {
+        "type": "layers",
+        "diff_ids": [
+          "sha256:eb54b7b7991f4d8b024ab36c1c7d67b2257a2aba8b8a2ed81effcd879dfc7e31",
+          "sha256:486ace6b9f6417f944aa157390b3492327ef11bfd54f8c1d9176100747c9cd71",
+          "sha256:20c4e4446a140ed73d626f82a6df8ea1ff2bc0c0a94b14a203085020eb7b1103",
+          "sha256:ffac2b6c3c8f6e6ade31b99ac495b121420fc6f2d7f866e5b2c178ec5ef1216d",
+          "sha256:14c5be2d8d93959609f292a9092bf205c447ece5e3d4dd4d5eadbb1d3178036c",
+          "sha256:96da3a4333e29414cbb684f2e34c0dfc85e05b2ebe8c68459c7f620f61124459",
+          "sha256:aaddc1733dfc8b5821c72f7f052beb518a85d5d8db1c2139f6cf5b0e15ba1ea9",
+          "sha256:4d25e0c7e639d6be3282e8dcd7a890ef1278fcfc3a2f41852493e5c09ba339ff",
+          "sha256:0695a3cdbf884ffd6a514acfee4856d62b428f12212538c7b713b6bc0cdf9617",
+          "sha256:dc86d7ffef916ebb417b03d3e20804279b316dd74ce55d6df9fa0d34b16d195a",
+          "sha256:37915c9dc6f8c8655ebd3e1a1c9d1c9191608dd0f99b66ed9613f53282b3e884"
+        ]
+      },
+      "config": {
+        "Cmd": [
+          "haproxy",
+          "-f",
+          "/usr/local/etc/haproxy/haproxy.cfg"
+        ],
+        "Entrypoint": [
+          "/docker-entrypoint.sh"
+        ],
+        "Env": [
+          "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+          "HAPROXY_BRANCH=2.6",
+          "HAPROXY_MINOR=2.6.2",
+          "HAPROXY_SHA256=f9b7dc06e02eb13b5d94dc66e0864a714aee2af9dfab10fa353ff9f1f52c8202",
+          "HAPROXY_SRC_URL=http://www.haproxy.org/download",
+          "DATAPLANE_MINOR=2.6.0",
+          "DATAPLANE_SHA256=ec685350576898bb0a00d656f427f5da7c28043551a3e0050c1b5301547e235a",
+          "DATAPLANE_URL=https://github.com/haproxytech/dataplaneapi/releases/download",
+          "HAPROXY_UID=haproxy",
+          "HAPROXY_GID=haproxy",
+          "TZ=:/etc/localtime",
+          "LANG=en_US.utf8"
+        ],
+        "Labels": {
+          "Name": "HAProxy",
+          "RUN": "/usr/bin/docker -d IMAGE",
+          "Release": "Community Edition",
+          "Vendor": "HAProxy",
+          "Version": "2.6.2",
+          "org.opencontainers.image.authors": "haproxytech",
+          "org.opencontainers.image.created": "2022-07-25 14:10:10",
+          "org.opencontainers.image.description": "Created from commit 9428dc6 and ref 2.6.2",
+          "org.opencontainers.image.ref.name": "2.6.2",
+          "org.opencontainers.image.revision": "9428dc6bf73d8a304d76fda8838d39a9a01537ac",
+          "org.opencontainers.image.source": "https://github.com/haproxytech/haproxy-docker-alpine",
+          "org.opencontainers.image.version": "2.6.2"
+        },
+        "ArgsEscaped": true,
+        "StopSignal": "SIGUSR1"
+      }
+    }
+  },
+  "Results": [
+    {
+      "Target": "appscode/haproxy:2.6.2-alpine (alpine 3.15.5)",
+      "Class": "os-pkgs",
+      "Type": "alpine"
+    },
+    {
+      "Target": "usr/local/bin/dataplaneapi",
+      "Class": "lang-pkgs",
+      "Type": "gobinary",
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2022-27664",
+          "PkgName": "golang.org/x/net",
+          "InstalledVersion": "v0.0.0-20220127200216-cd36cc0744dd",
+          "FixedVersion": "0.0.0-20220906165146-f3363e06e74c",
+          "Layer": {
+            "DiffID": "sha256:486ace6b9f6417f944aa157390b3492327ef11bfd54f8c1d9176100747c9cd71"
+          },
+          "SeveritySource": "nvd",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2022-27664",
+          "DataSource": {
+            "ID": "go-vulndb",
+            "Name": "The Go Vulnerability Database",
+            "URL": "https://github.com/golang/vulndb"
+          },
+          "Title": "golang: net/http: handle server errors after sending GOAWAY",
+          "Description": "In net/http in Go before 1.18.6 and 1.19.x before 1.19.1, attackers can cause a denial of service because an HTTP/2 connection can hang during closing if shutdown were preempted by a fatal error.",
+          "Severity": "HIGH",
+          "CVSS": {
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2022-27664",
+            "https://go.dev/cl/428735",
+            "https://go.dev/issue/54658",
+            "https://groups.google.com/g/golang-announce",
+            "https://groups.google.com/g/golang-announce/c/x49AQzIVX-s",
+            "https://groups.google.com/g/golang-announce/c/x49AQzIVX-s/m/0tgO0pjiBQAJ",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/JXKTHIGE5F576MAPFYCIJXNRGBSPISUF/",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/TXS2OQ57KZC5XZKK5UW4SYKPVQAHIOJX/",
+            "https://nvd.nist.gov/vuln/detail/CVE-2022-27664",
+            "https://pkg.go.dev/vuln/GO-2022-0969",
+            "https://security.gentoo.org/glsa/202209-26",
+            "https://security.netapp.com/advisory/ntap-20220923-0004/"
+          ],
+          "PublishedDate": "2022-09-06T18:15:00Z",
+          "LastModifiedDate": "2022-09-29T17:15:00Z"
+        }
+      ]
+    }
+  ]
+}
