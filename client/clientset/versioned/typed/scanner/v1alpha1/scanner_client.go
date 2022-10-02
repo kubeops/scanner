@@ -28,7 +28,8 @@ import (
 
 type ScannerV1alpha1Interface interface {
 	RESTClient() rest.Interface
-	ScanImagesGetter
+	ScanReportsGetter
+	ScanSummariesGetter
 }
 
 // ScannerV1alpha1Client is used to interact with features provided by the scanner.appscode.com group.
@@ -36,8 +37,12 @@ type ScannerV1alpha1Client struct {
 	restClient rest.Interface
 }
 
-func (c *ScannerV1alpha1Client) ScanImages() ScanImageInterface {
-	return newScanImages(c)
+func (c *ScannerV1alpha1Client) ScanReports() ScanReportInterface {
+	return newScanReports(c)
+}
+
+func (c *ScannerV1alpha1Client) ScanSummaries() ScanSummaryInterface {
+	return newScanSummaries(c)
 }
 
 // NewForConfig creates a new ScannerV1alpha1Client for the given config.

@@ -23,6 +23,7 @@ import (
 	"kubeops.dev/scanner/pkg/cmds"
 
 	_ "go.bytebuilders.dev/license-verifier/info"
+	_ "go.uber.org/automaxprocs"
 	"gomodules.xyz/logs"
 	_ "k8s.io/client-go/kubernetes/fake"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"

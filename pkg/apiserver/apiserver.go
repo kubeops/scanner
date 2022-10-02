@@ -21,11 +21,12 @@ import (
 	"fmt"
 
 	"kubeops.dev/scanner/apis/scanner"
-	scannerinstall "kubeops.dev/scanner/apis/scanner/install"
-	scannerv1alpha1 "kubeops.dev/scanner/apis/scanner/v1alpha1"
-	"kubeops.dev/scanner/pkg/registry/scanner/scanimage"
+	"kubeops.dev/scanner/apis/scanner/install"
+	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
+	"kubeops.dev/scanner/pkg/backend"
+	"kubeops.dev/scanner/pkg/registry/scanner/scanreport"
+	"kubeops.dev/scanner/pkg/registry/scanner/scansummary"
 
-	"go.bytebuilders.dev/license-verifier/info"
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -53,7 +54,7 @@ var (
 )
 
 func init() {
-	scannerinstall.Install(Scheme)
+	install.Install(Scheme)
 	utilruntime.Must(clientgoscheme.AddToScheme(Scheme))
 
 	// we need to add the options to empty v1
@@ -76,6 +77,8 @@ type ExtraConfig struct {
 	ClientConfig *restclient.Config
 	LicenseFile  string
 	CacheDir     string
+	NATSAddr     string
+	NATSCredFile string
 }
 
 // Config defines the config for the apiserver
@@ -148,11 +151,7 @@ func (c completedConfig) New(ctx context.Context) (*LicenseProxyServer, error) {
 		return nil, err
 	}
 
-	caData, err := info.LoadLicenseCA()
-	if err != nil {
-		return nil, err
-	}
-	caCert, err := info.ParseCertificate(caData)
+	nc, err := backend.NewConnection(c.ExtraConfig.NATSAddr, c.ExtraConfig.NATSCredFile)
 	if err != nil {
 		return nil, err
 	}
@@ -167,7 +166,8 @@ func (c completedConfig) New(ctx context.Context) (*LicenseProxyServer, error) {
 		apiGroupInfo := genericapiserver.NewDefaultAPIGroupInfo(scanner.GroupName, Scheme, metav1.ParameterCodec, Codecs)
 
 		v1alpha1storage := map[string]rest.Storage{}
-		v1alpha1storage[scannerv1alpha1.ResourceScanImages] = scanimage.NewStorage(cid, caCert)
+		v1alpha1storage[api.ResourceScanReports] = scanreport.NewStorage(cid, nc)
+		v1alpha1storage[api.ResourceScanSummaries] = scansummary.NewStorage(cid, nc)
 		apiGroupInfo.VersionedResourcesStorageMap["v1alpha1"] = v1alpha1storage
 
 		if err := s.GenericAPIServer.InstallAPIGroup(&apiGroupInfo); err != nil {

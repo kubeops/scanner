@@ -28,12 +28,16 @@ type ExtraOptions struct {
 
 	LicenseFile string
 	CacheDir    string
+
+	NATSAddr     string
+	NATSCredFile string
 }
 
 func NewExtraOptions() *ExtraOptions {
 	return &ExtraOptions{
-		QPS:   1e6,
-		Burst: 1e6,
+		QPS:      1e6,
+		Burst:    1e6,
+		NATSAddr: "this-is-nats.appcode.ninja:4222",
 	}
 }
 
@@ -42,11 +46,16 @@ func (s *ExtraOptions) AddFlags(fs *pflag.FlagSet) {
 	fs.IntVar(&s.Burst, "burst", s.Burst, "The maximum burst for throttle")
 	fs.StringVar(&s.LicenseFile, "license-file", s.LicenseFile, "Path to license file")
 	fs.StringVar(&s.CacheDir, "cache-dir", s.CacheDir, "Path to license cache directory")
+
+	fs.StringVar(&s.NATSAddr, "nats-addr", s.NATSAddr, "NATS serve address")
+	fs.StringVar(&s.NATSCredFile, "nats-credential-file", s.NATSCredFile, "PATH to NATS credential file")
 }
 
 func (s *ExtraOptions) ApplyTo(cfg *apiserver.ExtraConfig) error {
 	cfg.LicenseFile = s.LicenseFile
 	cfg.CacheDir = s.CacheDir
+	cfg.NATSAddr = s.NATSAddr
+	cfg.NATSCredFile = s.NATSCredFile
 	cfg.ClientConfig.QPS = float32(s.QPS)
 	cfg.ClientConfig.Burst = s.Burst
 
