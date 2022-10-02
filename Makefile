@@ -59,8 +59,8 @@ endif
 SRC_PKGS := apis cmd pkg # directories which hold app source excluding tests (not vendored)
 SRC_DIRS := $(SRC_PKGS) # directories which hold app source (not vendored)
 
-DOCKER_PLATFORMS := linux/amd64 linux/arm linux/arm64
-BIN_PLATFORMS    := $(DOCKER_PLATFORMS) windows/amd64 darwin/amd64 darwin/arm64
+DOCKER_PLATFORMS := linux/amd64 linux/arm64
+BIN_PLATFORMS    := $(DOCKER_PLATFORMS)
 
 # Used internally.  Users should pass GOOS and/or GOARCH.
 OS   := $(if $(GOOS),$(GOOS),$(shell go env GOOS))
@@ -515,7 +515,7 @@ qa:
 		echo "Are you trying to 'release' binaries to prod?"; \
 		exit 1;                                               \
 	fi
-	@$(MAKE) clean all-push docker-manifest --no-print-directory
+	@$(MAKE) all-push docker-manifest --no-print-directory
 
 .PHONY: release
 release:
@@ -527,7 +527,7 @@ release:
 		echo "apply tag to release binaries and/or docker images."; \
 		exit 1;                                                     \
 	fi
-	@$(MAKE) clean all-push docker-manifest --no-print-directory
+	@$(MAKE) all-push docker-manifest --no-print-directory
 
 .PHONY: clean
 clean:
