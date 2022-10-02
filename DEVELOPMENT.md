@@ -24,7 +24,6 @@ $ systemctl enable scanner-backend.service
 make build OS=linux ARCH=amd64
 scp bin/scanner-linux-amd64 root@this-is-nats.appscode.ninja:/root
 
-
 # on production server
 > ssh root@this-is-nats.appscode.ninja
 
@@ -38,7 +37,7 @@ sudo systemctl restart scanner-backend
 nats -s this-is-nats.appscode.ninja \
   --user=$NATS_USERNAME \
   --password=$NATS_PASSWORD \
-  publish scanner.queue.generate centos
+  publish scanner.queue.scan centos
 
 # read scanner report
 nats -s this-is-nats.appscode.ninja \
