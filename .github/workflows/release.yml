@@ -38,7 +38,7 @@ jobs:
           APPSCODE_ENV: prod
         run: |
           docker login ghcr.io --username ${USERNAME} --password ${DOCKER_TOKEN}
-          make release
+          make release COMPRESS=yes
 
       - name: Publish to Docker Registry
         env:
@@ -48,10 +48,19 @@ jobs:
           APPSCODE_ENV: prod
         run: |
           docker login --username ${USERNAME} --password ${DOCKER_TOKEN}
-          make release
+          make release COMPRESS=yes
 
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            bin/scanner-darwin-amd64.tar.gz
+            bin/scanner-darwin-arm64.tar.gz
+            bin/scanner-linux-amd64.tar.gz
+            bin/scanner-linux-arm.tar.gz
+            bin/scanner-linux-arm64.tar.gz
+            bin/scanner-windows-amd64.zip
+            bin/scanner-checksums.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

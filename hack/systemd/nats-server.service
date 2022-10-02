@@ -1,0 +1,33 @@
+# ref: https://fabianlee.org/2017/05/21/golang-running-a-go-binary-as-a-systemd-service-on-ubuntu-16-04/
+[Unit]
+Description=NATS Server
+After=network.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+LimitNOFILE=1024
+
+Restart=on-failure
+RestartSec=10
+startLimitIntervalSec=60
+
+# Env Vars
+Environment=THIS_IS_NATS_USERNAME=admin
+Environment=THIS_IS_NATS_PASSWORD=
+
+WorkingDirectory=/root
+ExecStart=/usr/local/bin/nats-server -p 4222 -m 8222 -js --user $THIS_IS_NATS_USERNAME --pass $THIS_IS_NATS_PASSWORD
+
+# make sure log directory exists and owned by syslog
+PermissionsStartOnly=true
+ExecStartPre=/bin/mkdir -p /var/log/nats-server
+ExecStartPre=/bin/chown syslog:adm /var/log/nats-server
+ExecStartPre=/bin/chmod 755 /var/log/nats-server
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=nats-server
+
+[Install]
+WantedBy=multi-user.target

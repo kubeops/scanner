@@ -25,7 +25,7 @@ RUN set -x \
   && rm -rf /var/lib/apt/lists/* /usr/share/doc /usr/share/man /tmp/* \
   && echo 'Etc/UTC' > /etc/timezone
 
-ADD bin/{ARG_OS}_{ARG_ARCH}/{ARG_BIN} /{ARG_BIN}
+ADD bin/{ARG_BIN}-{ARG_OS}-{ARG_ARCH} /{ARG_BIN}
 COPY --from=0 /usr/local/bin/dlv /bin/dlv
 
 EXPOSE 40000
