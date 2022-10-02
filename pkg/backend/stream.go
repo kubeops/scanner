@@ -27,7 +27,7 @@ import (
 
 	"github.com/nats-io/nats.go"
 	"github.com/pkg/errors"
-	"go.wandrs.dev/http"
+	"gocloud.dev/gcerrors"
 	"gomodules.xyz/blobfs"
 	"gomodules.xyz/wait"
 	"k8s.io/klog/v2"
@@ -96,14 +96,21 @@ func New(nc *nats.Conn, opts Options) *Manager {
 }
 
 func (mgr *Manager) Start(ctx context.Context, jsmOpts ...nats.JSOpt) error {
-	subj := fmt.Sprintf("%s.report", mgr.stream)
-	_, err := mgr.nc.QueueSubscribe(subj, "scanner-backend", func(msg *nats.Msg) {
+	_, err := mgr.nc.QueueSubscribe(fmt.Sprintf("%s.report", mgr.stream), "scanner-backend", func(msg *nats.Msg) {
 		img := string(msg.Data)
-		klog.InfoS(subj, "image", img)
+		klog.InfoS(msg.Subject, "image", img)
 
 		data, err := DownloadReport(mgr.fs, img)
 		if err != nil {
-			s := http.ErrorToAPIStatus(err)
+			if gcerrors.Code(err) == gcerrors.NotFound {
+				// submit scan request
+				if _, err := mgr.nc.Request(fmt.Sprintf("%s.queue.scan", mgr.stream), []byte(img), natsScanRequestTimeout); err != nil {
+					klog.ErrorS(err, "failed submit scan request", "image", img)
+				} else {
+					klog.InfoS("submitted scan request", "image", img)
+				}
+			}
+			s := ErrorToAPIStatus(err)
 			data, _ = json.Marshal(s)
 		}
 		if err = msg.Respond(data); err != nil {
@@ -114,14 +121,21 @@ func (mgr *Manager) Start(ctx context.Context, jsmOpts ...nats.JSOpt) error {
 		return err
 	}
 
-	subj = fmt.Sprintf("%s.summary", mgr.stream)
-	_, err = mgr.nc.QueueSubscribe(subj, "scanner-backend", func(msg *nats.Msg) {
+	_, err = mgr.nc.QueueSubscribe(fmt.Sprintf("%s.summary", mgr.stream), "scanner-backend", func(msg *nats.Msg) {
 		img := string(msg.Data)
-		klog.InfoS(subj, "image", img)
+		klog.InfoS(msg.Subject, "image", img)
 
 		data, err := DownloadSummary(mgr.fs, img)
 		if err != nil {
-			s := http.ErrorToAPIStatus(err)
+			if gcerrors.Code(err) == gcerrors.NotFound {
+				// submit scan request
+				if _, err := mgr.nc.Request(fmt.Sprintf("%s.queue.scan", mgr.stream), []byte(img), natsScanRequestTimeout); err != nil {
+					klog.ErrorS(err, "failed submit scan request", "image", img)
+				} else {
+					klog.InfoS("submitted scan request", "image", img)
+				}
+			}
+			s := ErrorToAPIStatus(err)
 			data, _ = json.Marshal(s)
 		}
 		if err = msg.Respond(data); err != nil {
@@ -221,19 +235,18 @@ func (mgr *Manager) processNextMsg() (err error) {
 		return
 	}
 
-	defer func() {
-		// report failure ?
-		if e2 := msgs[0].Ack(); e2 != nil {
-			klog.ErrorS(err, "failed ACK msg", "id", msgs[0].Header.Get(nats.MsgIdHdr))
-		}
-	}()
-
 	img := string(msgs[0].Data)
 	klog.InfoS("generate.report", "image", img)
 
-	if err := UploadReport(mgr.fs, img); err != nil {
-		return errors.Wrapf(err, "failed to generate report %s", img)
-	}
+	defer func() {
+		// report failure ?
+		if e2 := msgs[0].Ack(); e2 != nil {
+			klog.ErrorS(err, "failed ACK msg", "image", img)
+		}
+	}()
 
+	if err = UploadReport(mgr.fs, img); err != nil {
+		err = errors.Wrapf(err, "failed to generate report %s", img)
+	}
 	return nil
 }

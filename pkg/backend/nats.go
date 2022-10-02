@@ -30,6 +30,7 @@ const (
 	natsConnectionTimeout       = 350 * time.Millisecond
 	natsConnectionRetryInterval = 100 * time.Millisecond
 	NatsRequestTimeout          = 10 * time.Second
+	natsScanRequestTimeout      = 100 * time.Millisecond
 )
 
 // NewConnection creates a new NATS connection

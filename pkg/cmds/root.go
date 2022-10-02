@@ -35,6 +35,8 @@ func NewRootCmd() *cobra.Command {
 	ctx := genericapiserver.SetupSignalContext()
 	rootCmd.AddCommand(NewCmdRun(ctx, os.Stdout, os.Stderr))
 	rootCmd.AddCommand(NewCmdScanImage())
+	rootCmd.AddCommand(NewCmdDownload())
+	rootCmd.AddCommand(NewCmdScanKubeDB())
 	rootCmd.AddCommand(NewCmdBackend(ctx))
 
 	return rootCmd
