@@ -28,8 +28,12 @@ type FakeScannerV1alpha1 struct {
 	*testing.Fake
 }
 
-func (c *FakeScannerV1alpha1) ScanImages() v1alpha1.ScanImageInterface {
-	return &FakeScanImages{c}
+func (c *FakeScannerV1alpha1) ScanReports() v1alpha1.ScanReportInterface {
+	return &FakeScanReports{c}
+}
+
+func (c *FakeScannerV1alpha1) ScanSummaries() v1alpha1.ScanSummaryInterface {
+	return &FakeScanSummaries{c}
 }
 
 // RESTClient returns a RESTClient that is used to communicate

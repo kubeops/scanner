@@ -19,11 +19,11 @@ package apiserver
 import (
 	"testing"
 
-	identityfuzzer "kubeops.dev/scanner/apis/scanner/fuzzer"
+	"kubeops.dev/scanner/apis/scanner/fuzzer"
 
 	"k8s.io/apimachinery/pkg/api/apitesting/roundtrip"
 )
 
 func TestRoundTripTypes(t *testing.T) {
-	roundtrip.RoundTripTestForScheme(t, Scheme, identityfuzzer.Funcs)
+	roundtrip.RoundTripTestForScheme(t, Scheme, fuzzer.Funcs)
 }

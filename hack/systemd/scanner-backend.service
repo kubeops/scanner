@@ -14,11 +14,13 @@ RestartSec=10
 startLimitIntervalSec=60
 
 # Env Vars
-Environment=THIS_IS_NATS_USERNAME=admin
-Environment=THIS_IS_NATS_PASSWORD=
+Environment=NATS_USERNAME=admin
+Environment=NATS_PASSWORD=
+Environment=AWS_ACCESS_KEY_ID=
+Environment=AWS_SECRET_ACCESS_KEY=
 
 WorkingDirectory=/root
-ExecStart=/usr/local/bin/scanner backend
+ExecStart=/usr/local/bin/scanner backend --nats-addr=localhost:4222
 
 # make sure log directory exists and owned by syslog
 PermissionsStartOnly=true

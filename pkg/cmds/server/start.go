@@ -22,7 +22,7 @@ import (
 	"io"
 	"net"
 
-	scannerv1alpha1 "kubeops.dev/scanner/apis/scanner/v1alpha1"
+	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
 	"kubeops.dev/scanner/pkg/apiserver"
 
 	"github.com/spf13/pflag"
@@ -57,7 +57,7 @@ func NewUIServerOptions(out, errOut io.Writer) *LicenseProxyServerOptions {
 		RecommendedOptions: genericoptions.NewRecommendedOptions(
 			defaultEtcdPathPrefix,
 			apiserver.Codecs.LegacyCodec(
-				scannerv1alpha1.SchemeGroupVersion,
+				api.SchemeGroupVersion,
 			),
 		),
 		ExtraOptions: NewExtraOptions(),
@@ -103,14 +103,15 @@ func (o *LicenseProxyServerOptions) Config() (*apiserver.Config, error) {
 
 	serverConfig.OpenAPIConfig = genericapiserver.DefaultOpenAPIConfig(
 		ou.GetDefinitions(
-			scannerv1alpha1.GetOpenAPIDefinitions,
+			api.GetOpenAPIDefinitions,
 		),
 		openapi.NewDefinitionNamer(apiserver.Scheme))
 	serverConfig.OpenAPIConfig.Info.Title = "scanner"
 	serverConfig.OpenAPIConfig.Info.Version = v.Version.Version
 	serverConfig.OpenAPIConfig.IgnorePrefixes = []string{
 		"/swaggerapi",
-		fmt.Sprintf("/apis/%s/%s", scannerv1alpha1.SchemeGroupVersion, scannerv1alpha1.ResourceScanImages),
+		fmt.Sprintf("/apis/%s/%s", api.SchemeGroupVersion, api.ResourceScanReports),
+		fmt.Sprintf("/apis/%s/%s", api.SchemeGroupVersion, api.ResourceScanSummaries),
 	}
 
 	extraConfig := apiserver.ExtraConfig{

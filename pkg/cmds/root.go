@@ -26,7 +26,7 @@ import (
 
 func NewRootCmd() *cobra.Command {
 	rootCmd := &cobra.Command{
-		Use:               "ui-operator [command]",
+		Use:               "scanner [command]",
 		Short:             `scanner by AppsCode`,
 		DisableAutoGenTag: true,
 	}
@@ -35,6 +35,7 @@ func NewRootCmd() *cobra.Command {
 	ctx := genericapiserver.SetupSignalContext()
 	rootCmd.AddCommand(NewCmdRun(ctx, os.Stdout, os.Stderr))
 	rootCmd.AddCommand(NewCmdScanImage())
+	rootCmd.AddCommand(NewCmdBackend(ctx))
 
 	return rootCmd
 }

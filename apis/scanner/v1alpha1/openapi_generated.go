@@ -366,9 +366,12 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"kubeops.dev/scanner/apis/scanner/v1alpha1.MyTime":                   schema_scanner_apis_scanner_v1alpha1_MyTime(ref),
 		"kubeops.dev/scanner/apis/scanner/v1alpha1.Report":                   schema_scanner_apis_scanner_v1alpha1_Report(ref),
 		"kubeops.dev/scanner/apis/scanner/v1alpha1.Result":                   schema_scanner_apis_scanner_v1alpha1_Result(ref),
-		"kubeops.dev/scanner/apis/scanner/v1alpha1.ScanImage":                schema_scanner_apis_scanner_v1alpha1_ScanImage(ref),
-		"kubeops.dev/scanner/apis/scanner/v1alpha1.ScanImageRequest":         schema_scanner_apis_scanner_v1alpha1_ScanImageRequest(ref),
-		"kubeops.dev/scanner/apis/scanner/v1alpha1.ScanImageResponse":        schema_scanner_apis_scanner_v1alpha1_ScanImageResponse(ref),
+		"kubeops.dev/scanner/apis/scanner/v1alpha1.ScanReport":               schema_scanner_apis_scanner_v1alpha1_ScanReport(ref),
+		"kubeops.dev/scanner/apis/scanner/v1alpha1.ScanReportRequest":        schema_scanner_apis_scanner_v1alpha1_ScanReportRequest(ref),
+		"kubeops.dev/scanner/apis/scanner/v1alpha1.ScanReportResponse":       schema_scanner_apis_scanner_v1alpha1_ScanReportResponse(ref),
+		"kubeops.dev/scanner/apis/scanner/v1alpha1.ScanSummary":              schema_scanner_apis_scanner_v1alpha1_ScanSummary(ref),
+		"kubeops.dev/scanner/apis/scanner/v1alpha1.ScanSummaryRequest":       schema_scanner_apis_scanner_v1alpha1_ScanSummaryRequest(ref),
+		"kubeops.dev/scanner/apis/scanner/v1alpha1.ScanSummaryResponse":      schema_scanner_apis_scanner_v1alpha1_ScanSummaryResponse(ref),
 		"kubeops.dev/scanner/apis/scanner/v1alpha1.Summary":                  schema_scanner_apis_scanner_v1alpha1_Summary(ref),
 		"kubeops.dev/scanner/apis/scanner/v1alpha1.SummaryResult":            schema_scanner_apis_scanner_v1alpha1_SummaryResult(ref),
 		"kubeops.dev/scanner/apis/scanner/v1alpha1.Vulnerability":            schema_scanner_apis_scanner_v1alpha1_Vulnerability(ref),
@@ -18057,7 +18060,7 @@ func schema_scanner_apis_scanner_v1alpha1_Result(ref common.ReferenceCallback) c
 	}
 }
 
-func schema_scanner_apis_scanner_v1alpha1_ScanImage(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_scanner_apis_scanner_v1alpha1_ScanReport(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -18080,24 +18083,24 @@ func schema_scanner_apis_scanner_v1alpha1_ScanImage(ref common.ReferenceCallback
 					"request": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Request describes the attributes for the graph request.",
-							Ref:         ref("kubeops.dev/scanner/apis/scanner/v1alpha1.ScanImageRequest"),
+							Ref:         ref("kubeops.dev/scanner/apis/scanner/v1alpha1.ScanReportRequest"),
 						},
 					},
 					"response": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Response describes the attributes for the graph response.",
-							Ref:         ref("kubeops.dev/scanner/apis/scanner/v1alpha1.ScanImageResponse"),
+							Ref:         ref("kubeops.dev/scanner/apis/scanner/v1alpha1.ScanReportResponse"),
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"kubeops.dev/scanner/apis/scanner/v1alpha1.ScanImageRequest", "kubeops.dev/scanner/apis/scanner/v1alpha1.ScanImageResponse"},
+			"kubeops.dev/scanner/apis/scanner/v1alpha1.ScanReportRequest", "kubeops.dev/scanner/apis/scanner/v1alpha1.ScanReportResponse"},
 	}
 }
 
-func schema_scanner_apis_scanner_v1alpha1_ScanImageRequest(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_scanner_apis_scanner_v1alpha1_ScanReportRequest(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -18117,7 +18120,7 @@ func schema_scanner_apis_scanner_v1alpha1_ScanImageRequest(ref common.ReferenceC
 	}
 }
 
-func schema_scanner_apis_scanner_v1alpha1_ScanImageResponse(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_scanner_apis_scanner_v1alpha1_ScanReportResponse(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -18126,7 +18129,7 @@ func schema_scanner_apis_scanner_v1alpha1_ScanImageResponse(ref common.Reference
 					"result": {
 						SchemaProps: spec.SchemaProps{
 							Default: map[string]interface{}{},
-							Ref:     ref("k8s.io/apimachinery/pkg/runtime.RawExtension"),
+							Ref:     ref("kubeops.dev/scanner/apis/scanner/v1alpha1.Report"),
 						},
 					},
 				},
@@ -18134,7 +18137,88 @@ func schema_scanner_apis_scanner_v1alpha1_ScanImageResponse(ref common.Reference
 			},
 		},
 		Dependencies: []string{
-			"k8s.io/apimachinery/pkg/runtime.RawExtension"},
+			"kubeops.dev/scanner/apis/scanner/v1alpha1.Report"},
+	}
+}
+
+func schema_scanner_apis_scanner_v1alpha1_ScanSummary(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"request": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Request describes the attributes for the graph request.",
+							Ref:         ref("kubeops.dev/scanner/apis/scanner/v1alpha1.ScanSummaryRequest"),
+						},
+					},
+					"response": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Response describes the attributes for the graph response.",
+							Ref:         ref("kubeops.dev/scanner/apis/scanner/v1alpha1.ScanSummaryResponse"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"kubeops.dev/scanner/apis/scanner/v1alpha1.ScanSummaryRequest", "kubeops.dev/scanner/apis/scanner/v1alpha1.ScanSummaryResponse"},
+	}
+}
+
+func schema_scanner_apis_scanner_v1alpha1_ScanSummaryRequest(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"imageRef": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+				},
+				Required: []string{"imageRef"},
+			},
+		},
+	}
+}
+
+func schema_scanner_apis_scanner_v1alpha1_ScanSummaryResponse(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"result": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("kubeops.dev/scanner/apis/scanner/v1alpha1.Summary"),
+						},
+					},
+				},
+				Required: []string{"result"},
+			},
+		},
+		Dependencies: []string{
+			"kubeops.dev/scanner/apis/scanner/v1alpha1.Summary"},
 	}
 }
 

@@ -17,7 +17,7 @@ limitations under the License.
 package cmds
 
 import (
-	"kubeops.dev/scanner/pkg/scanner"
+	"kubeops.dev/scanner/pkg/backend"
 
 	"github.com/spf13/cobra"
 )
@@ -29,7 +29,7 @@ func NewCmdScanImage() *cobra.Command {
 		Short:             "Scan and upload a docker image",
 		DisableAutoGenTag: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return scanner.UploadReport(scanner.NewBlobFS(), img)
+			return backend.UploadReport(backend.NewBlobFS(), img)
 		},
 	}
 
