@@ -31,6 +31,7 @@ const (
 	natsConnectionRetryInterval = 100 * time.Millisecond
 	NatsRequestTimeout          = 10 * time.Second
 	natsScanRequestTimeout      = 100 * time.Millisecond
+	dockerHubRateLimitDelay     = 1 * time.Hour
 )
 
 // NewConnection creates a new NATS connection

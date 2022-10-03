@@ -17,12 +17,13 @@ limitations under the License.
 package backend
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"reflect"
 
+	"github.com/google/go-containerregistry/pkg/v1/remote/transport"
 	"gocloud.dev/gcerrors"
-	_ "gocloud.dev/gcerrors"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/grpclog"
 	"google.golang.org/grpc/status"
@@ -46,6 +47,24 @@ func ErrorToAPIStatus(err error) *metav1.Status {
 			},
 			Status: metav1.StatusSuccess,
 			Code:   http.StatusOK,
+		}
+	}
+
+	var e2 *transport.Error
+	if errors.As(err, &e2) {
+		code := e2.StatusCode
+		if e2.StatusCode == http.StatusUnauthorized ||
+			e2.StatusCode == http.StatusNotFound {
+			code = http.StatusBadRequest // don't retry if bad request
+		}
+		return &metav1.Status{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Status",
+				APIVersion: "v1",
+			},
+			Status:  metav1.StatusFailure,
+			Code:    int32(code),
+			Message: err.Error(),
 		}
 	}
 

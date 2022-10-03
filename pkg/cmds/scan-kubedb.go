@@ -24,6 +24,7 @@ import (
 
 	"github.com/nats-io/nats.go"
 	"github.com/spf13/cobra"
+	"gomodules.xyz/blobfs"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/util/homedir"
 	"k8s.io/klog/v2"
@@ -45,8 +46,9 @@ func NewCmdScanKubeDB() *cobra.Command {
 			if err != nil {
 				return err
 			}
+			fs := backend.NewBlobFS()
 
-			return processDir(nc, dir)
+			return processDir(nc, fs, dir)
 		},
 	}
 
@@ -54,7 +56,7 @@ func NewCmdScanKubeDB() *cobra.Command {
 	return cmd
 }
 
-func processDir(nc *nats.Conn, dir string) error {
+func processDir(nc *nats.Conn, fs blobfs.Interface, dir string) error {
 	return parser.ProcessPath(dir, func(ri parser.ResourceInfo) error {
 		switch ri.Object.GetKind() {
 		case api.ResourceKindElasticsearchVersion:
@@ -63,7 +65,7 @@ func processDir(nc *nats.Conn, dir string) error {
 			if err != nil {
 				return err
 			}
-			scanImages(nc,
+			scanImages(nc, fs,
 				v.Spec.DB.Image,
 				v.Spec.InitContainer.Image,
 				v.Spec.Exporter.Image,
@@ -75,7 +77,7 @@ func processDir(nc *nats.Conn, dir string) error {
 			if err != nil {
 				return err
 			}
-			scanImages(nc,
+			scanImages(nc, fs,
 				v.Spec.DB.Image,
 				v.Spec.Exporter.Image)
 		case api.ResourceKindMariaDBVersion:
@@ -84,7 +86,7 @@ func processDir(nc *nats.Conn, dir string) error {
 			if err != nil {
 				return err
 			}
-			scanImages(nc,
+			scanImages(nc, fs,
 				v.Spec.DB.Image,
 				v.Spec.Exporter.Image,
 				v.Spec.InitContainer.Image,
@@ -95,7 +97,7 @@ func processDir(nc *nats.Conn, dir string) error {
 			if err != nil {
 				return err
 			}
-			scanImages(nc,
+			scanImages(nc, fs,
 				v.Spec.DB.Image,
 				v.Spec.Exporter.Image,
 				v.Spec.InitContainer.Image,
@@ -106,7 +108,7 @@ func processDir(nc *nats.Conn, dir string) error {
 			if err != nil {
 				return err
 			}
-			scanImages(nc,
+			scanImages(nc, fs,
 				v.Spec.DB.Image,
 				v.Spec.Exporter.Image,
 				v.Spec.InitContainer.Image,
@@ -120,7 +122,7 @@ func processDir(nc *nats.Conn, dir string) error {
 			if err != nil {
 				return err
 			}
-			scanImages(nc,
+			scanImages(nc, fs,
 				v.Spec.DB.Image,
 				v.Spec.Exporter.Image,
 				v.Spec.InitContainer.Image)
@@ -130,7 +132,7 @@ func processDir(nc *nats.Conn, dir string) error {
 			if err != nil {
 				return err
 			}
-			scanImages(nc,
+			scanImages(nc, fs,
 				v.Spec.PgBouncer.Image,
 				v.Spec.Exporter.Image,
 				v.Spec.InitContainer.Image)
@@ -140,7 +142,7 @@ func processDir(nc *nats.Conn, dir string) error {
 			if err != nil {
 				return err
 			}
-			scanImages(nc,
+			scanImages(nc, fs,
 				v.Spec.Proxysql.Image,
 				v.Spec.Exporter.Image)
 		case api.ResourceKindRedisVersion:
@@ -149,7 +151,7 @@ func processDir(nc *nats.Conn, dir string) error {
 			if err != nil {
 				return err
 			}
-			scanImages(nc,
+			scanImages(nc, fs,
 				v.Spec.DB.Image,
 				v.Spec.Exporter.Image,
 				v.Spec.Coordinator.Image,
@@ -160,7 +162,7 @@ func processDir(nc *nats.Conn, dir string) error {
 			if err != nil {
 				return err
 			}
-			scanImages(nc,
+			scanImages(nc, fs,
 				v.Spec.DB.Image,
 				v.Spec.Coordinator.Image,
 				v.Spec.Exporter.Image,
@@ -170,15 +172,17 @@ func processDir(nc *nats.Conn, dir string) error {
 	})
 }
 
-func scanImages(nc *nats.Conn, refs ...string) {
+func scanImages(nc *nats.Conn, fs blobfs.Interface, refs ...string) {
 	for _, img := range refs {
 		if img == "" {
 			continue
 		}
-		if _, err := nc.Request("scanner.queue.scan", []byte(img), 100*time.Millisecond); err != nil {
-			klog.ErrorS(err, "failed submit scan request", "image", img)
-		} else {
-			klog.InfoS("submitted scan request", "image", img)
+		if exists, _ := backend.ExistsReport(fs, img); !exists {
+			if _, err := nc.Request("scanner.queue.scan", []byte(img), 100*time.Millisecond); err != nil {
+				klog.ErrorS(err, "failed submit scan request", "image", img)
+			} else {
+				klog.InfoS("submitted scan request", "image", img)
+			}
 		}
 	}
 }

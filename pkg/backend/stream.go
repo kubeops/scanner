@@ -20,6 +20,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"os"
 	"runtime"
 	"strings"
@@ -27,7 +28,6 @@ import (
 
 	"github.com/nats-io/nats.go"
 	"github.com/pkg/errors"
-	"gocloud.dev/gcerrors"
 	"gomodules.xyz/blobfs"
 	"gomodules.xyz/wait"
 	"k8s.io/klog/v2"
@@ -102,16 +102,16 @@ func (mgr *Manager) Start(ctx context.Context, jsmOpts ...nats.JSOpt) error {
 
 		data, err := DownloadReport(mgr.fs, img)
 		if err != nil {
-			if gcerrors.Code(err) == gcerrors.NotFound {
-				// submit scan request
-				if _, err := mgr.nc.Request(fmt.Sprintf("%s.queue.scan", mgr.stream), []byte(img), natsScanRequestTimeout); err != nil {
-					klog.ErrorS(err, "failed submit scan request", "image", img)
-				} else {
-					klog.InfoS("submitted scan request", "image", img)
-				}
-			}
 			s := ErrorToAPIStatus(err)
 			data, _ = json.Marshal(s)
+			if s.Code == http.StatusNotFound {
+				mgr.submitScanRequest(img)
+			} else if s.Code == http.StatusTooManyRequests {
+				go func() {
+					time.Sleep(dockerHubRateLimitDelay)
+					mgr.submitScanRequest(img)
+				}()
+			}
 		}
 		if err = msg.Respond(data); err != nil {
 			klog.ErrorS(err, "failed to respond to", "image", img)
@@ -127,16 +127,16 @@ func (mgr *Manager) Start(ctx context.Context, jsmOpts ...nats.JSOpt) error {
 
 		data, err := DownloadSummary(mgr.fs, img)
 		if err != nil {
-			if gcerrors.Code(err) == gcerrors.NotFound {
-				// submit scan request
-				if _, err := mgr.nc.Request(fmt.Sprintf("%s.queue.scan", mgr.stream), []byte(img), natsScanRequestTimeout); err != nil {
-					klog.ErrorS(err, "failed submit scan request", "image", img)
-				} else {
-					klog.InfoS("submitted scan request", "image", img)
-				}
-			}
 			s := ErrorToAPIStatus(err)
 			data, _ = json.Marshal(s)
+			if s.Code == http.StatusNotFound {
+				mgr.submitScanRequest(img)
+			} else if s.Code == http.StatusTooManyRequests {
+				go func() {
+					time.Sleep(dockerHubRateLimitDelay)
+					mgr.submitScanRequest(img)
+				}()
+			}
 		}
 		if err = msg.Respond(data); err != nil {
 			klog.ErrorS(err, "failed to respond to", "image", img)
@@ -211,6 +211,14 @@ func (mgr *Manager) Start(ctx context.Context, jsmOpts ...nats.JSOpt) error {
 	}
 
 	return nil
+}
+
+func (mgr *Manager) submitScanRequest(img string) {
+	if _, err := mgr.nc.Request(fmt.Sprintf("%s.queue.scan", mgr.stream), []byte(img), natsScanRequestTimeout); err != nil {
+		klog.ErrorS(err, "failed submit scan request", "image", img)
+	} else {
+		klog.InfoS("submitted scan request", "image", img)
+	}
 }
 
 func (mgr *Manager) runWorker() {

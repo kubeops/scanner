@@ -76,6 +76,18 @@ func DownloadSummary(fs blobfs.Interface, img string) ([]byte, error) {
 	return fs.ReadFile(context.TODO(), path.Join(repo, digest, "summary.json"))
 }
 
+func ExistsReport(fs blobfs.Interface, img string) (bool, error) {
+	var err error
+	repo, _, digest := ParseImage(img)
+	if digest == "" {
+		digest, err = crane.Digest(img)
+		if err != nil {
+			return false, err
+		}
+	}
+	return fs.Exists(context.TODO(), path.Join(repo, digest, "summary.json"))
+}
+
 func UploadReport(fs blobfs.Interface, img string) error {
 	report, reportBytes, err := scan(img)
 	if err != nil {
