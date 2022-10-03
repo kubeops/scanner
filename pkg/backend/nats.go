@@ -58,7 +58,9 @@ func NewConnection(addr, credFile string) (nc *nats.Conn, err error) {
 		} else {
 			password = os.Getenv("THIS_IS_NATS_PASSWORD")
 		}
-		opts = append(opts, nats.UserInfo(username, password))
+		if username != "" && password != "" {
+			opts = append(opts, nats.UserInfo(username, password))
+		}
 	} else {
 		opts = append(opts, nats.UserCredentials(credFile))
 	}
