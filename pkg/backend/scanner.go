@@ -26,6 +26,7 @@ import (
 	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
 
 	"github.com/google/go-containerregistry/pkg/crane"
+	"github.com/google/go-containerregistry/pkg/name"
 	_ "gocloud.dev/blob/s3blob"
 	"gomodules.xyz/blobfs"
 	shell "gomodules.xyz/go-sh"
@@ -42,10 +43,10 @@ func NewBlobFS() blobfs.Interface {
 		    "s3ForcePathStyle=true")
 	*/
 	if _, ok := os.LookupEnv("AWS_ACCESS_KEY_ID"); !ok {
-		os.Setenv("AWS_ACCESS_KEY_ID", os.Getenv("LINODE_CLI_OBJ_ACCESS_KEY"))
+		_ = os.Setenv("AWS_ACCESS_KEY_ID", os.Getenv("LINODE_CLI_OBJ_ACCESS_KEY"))
 	}
 	if _, ok := os.LookupEnv("AWS_SECRET_ACCESS_KEY"); !ok {
-		os.Setenv("AWS_SECRET_ACCESS_KEY", os.Getenv("LINODE_CLI_OBJ_SECRET_KEY"))
+		_ = os.Setenv("AWS_SECRET_ACCESS_KEY", os.Getenv("LINODE_CLI_OBJ_SECRET_KEY"))
 	}
 
 	storeURL := "s3://scanner-reports?endpoint=https://us-east-1.linodeobjects.com&region=US"
@@ -53,37 +54,25 @@ func NewBlobFS() blobfs.Interface {
 }
 
 func DownloadReport(fs blobfs.Interface, img string) ([]byte, error) {
-	var err error
-	repo, _, digest := ParseImage(img)
-	if digest == "" {
-		digest, err = crane.Digest(img)
-		if err != nil {
-			return nil, err
-		}
+	repo, digest, err := ParseReference(img)
+	if err != nil {
+		return nil, err
 	}
 	return fs.ReadFile(context.TODO(), path.Join(repo, digest, "report.json"))
 }
 
 func DownloadSummary(fs blobfs.Interface, img string) ([]byte, error) {
-	var err error
-	repo, _, digest := ParseImage(img)
-	if digest == "" {
-		digest, err = crane.Digest(img)
-		if err != nil {
-			return nil, err
-		}
+	repo, digest, err := ParseReference(img)
+	if err != nil {
+		return nil, err
 	}
 	return fs.ReadFile(context.TODO(), path.Join(repo, digest, "summary.json"))
 }
 
 func ExistsReport(fs blobfs.Interface, img string) (bool, error) {
-	var err error
-	repo, _, digest := ParseImage(img)
-	if digest == "" {
-		digest, err = crane.Digest(img)
-		if err != nil {
-			return false, err
-		}
+	repo, digest, err := ParseReference(img)
+	if err != nil {
+		return false, err
 	}
 	return fs.Exists(context.TODO(), path.Join(repo, digest, "summary.json"))
 }
@@ -94,12 +83,9 @@ func UploadReport(fs blobfs.Interface, img string) error {
 		return err
 	}
 
-	repo, _, digest := ParseImage(img)
-	if digest == "" {
-		digest, err = crane.Digest(img)
-		if err != nil {
-			return err
-		}
+	repo, digest, err := ParseReference(img)
+	if err != nil {
+		return err
 	}
 
 	err = fs.WriteFile(context.TODO(), path.Join(repo, digest, "report.json"), reportBytes)
@@ -170,13 +156,16 @@ func scan(img string) (*api.Report, []byte, error) {
 	return &r, out, nil
 }
 
-func ParseImage(s string) (repo, tag, digest string) {
-	idx := strings.IndexRune(s, ':')
-	if idx != -1 {
-		tag = s[idx+1:]
-		s = s[:idx]
+func ParseReference(img string) (repo string, digest string, err error) {
+	ref, err := name.ParseReference(img)
+	if err != nil {
+		return
 	}
-	repo = s
-	_, digest, _ = strings.Cut(tag, "@")
+	repo = ref.Context().String()
+	if strings.HasPrefix(ref.Identifier(), "sha256:") {
+		digest = ref.Identifier()
+		return
+	}
+	digest, err = crane.Digest(img)
 	return
 }

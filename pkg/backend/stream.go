@@ -105,11 +105,11 @@ func (mgr *Manager) Start(ctx context.Context, jsmOpts ...nats.JSOpt) error {
 			s := ErrorToAPIStatus(err)
 			data, _ = json.Marshal(s)
 			if s.Code == http.StatusNotFound {
-				mgr.submitScanRequest(img)
+				mgr.SubmitScanRequest(img)
 			} else if s.Code == http.StatusTooManyRequests {
 				go func() {
 					time.Sleep(dockerHubRateLimitDelay)
-					mgr.submitScanRequest(img)
+					mgr.SubmitScanRequest(img)
 				}()
 			}
 		}
@@ -130,11 +130,11 @@ func (mgr *Manager) Start(ctx context.Context, jsmOpts ...nats.JSOpt) error {
 			s := ErrorToAPIStatus(err)
 			data, _ = json.Marshal(s)
 			if s.Code == http.StatusNotFound {
-				mgr.submitScanRequest(img)
+				mgr.SubmitScanRequest(img)
 			} else if s.Code == http.StatusTooManyRequests {
 				go func() {
 					time.Sleep(dockerHubRateLimitDelay)
-					mgr.submitScanRequest(img)
+					mgr.SubmitScanRequest(img)
 				}()
 			}
 		}
@@ -213,7 +213,7 @@ func (mgr *Manager) Start(ctx context.Context, jsmOpts ...nats.JSOpt) error {
 	return nil
 }
 
-func (mgr *Manager) submitScanRequest(img string) {
+func (mgr *Manager) SubmitScanRequest(img string) {
 	if _, err := mgr.nc.Request(fmt.Sprintf("%s.queue.scan", mgr.stream), []byte(img), natsScanRequestTimeout); err != nil {
 		klog.ErrorS(err, "failed submit scan request", "image", img)
 	} else {
