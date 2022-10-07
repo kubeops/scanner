@@ -51,3 +51,11 @@ nats -s this-is-nats.appscode.ninja \
   --password=$NATS_PASSWORD \
   request scanner.summary centos
 ```
+
+```
+# list all images in a helm chart
+
+helm template . \
+    | yq '..|.image? | select(.)' \
+    | sort -u | uniq | tr -d '"'
+```

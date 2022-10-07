@@ -128,8 +128,8 @@ func (o *LicenseProxyServerOptions) Config() (*apiserver.Config, error) {
 	return config, nil
 }
 
-// RunProxyServer starts a new LicenseProxyServer given LicenseProxyServerOptions
-func (o LicenseProxyServerOptions) RunProxyServer(ctx context.Context) error {
+// Run starts a new LicenseProxyServer given LicenseProxyServerOptions
+func (o LicenseProxyServerOptions) Run(ctx context.Context) error {
 	config, err := o.Config()
 	if err != nil {
 		return err
