@@ -105,11 +105,11 @@ func (mgr *Manager) Start(ctx context.Context, jsmOpts ...nats.JSOpt) error {
 			s := ErrorToAPIStatus(err)
 			data, _ = json.Marshal(s)
 			if s.Code == http.StatusNotFound {
-				mgr.SubmitScanRequest(img)
+				mgr.submitScanRequest(img)
 			} else if s.Code == http.StatusTooManyRequests {
 				go func() {
 					time.Sleep(dockerHubRateLimitDelay)
-					mgr.SubmitScanRequest(img)
+					mgr.submitScanRequest(img)
 				}()
 			}
 		}
@@ -130,11 +130,11 @@ func (mgr *Manager) Start(ctx context.Context, jsmOpts ...nats.JSOpt) error {
 			s := ErrorToAPIStatus(err)
 			data, _ = json.Marshal(s)
 			if s.Code == http.StatusNotFound {
-				mgr.SubmitScanRequest(img)
+				mgr.submitScanRequest(img)
 			} else if s.Code == http.StatusTooManyRequests {
 				go func() {
 					time.Sleep(dockerHubRateLimitDelay)
-					mgr.SubmitScanRequest(img)
+					mgr.submitScanRequest(img)
 				}()
 			}
 		}
@@ -213,8 +213,12 @@ func (mgr *Manager) Start(ctx context.Context, jsmOpts ...nats.JSOpt) error {
 	return nil
 }
 
-func (mgr *Manager) SubmitScanRequest(img string) {
-	if _, err := mgr.nc.Request(fmt.Sprintf("%s.queue.scan", mgr.stream), []byte(img), natsScanRequestTimeout); err != nil {
+func (mgr *Manager) submitScanRequest(img string) {
+	SubmitScanRequest(mgr.nc, fmt.Sprintf("%s.queue.scan", mgr.stream), img)
+}
+
+func SubmitScanRequest(nc *nats.Conn, subj, img string) {
+	if _, err := nc.Request(subj, []byte(img), natsScanRequestTimeout); err != nil {
 		klog.ErrorS(err, "failed submit scan request", "image", img)
 	} else {
 		klog.InfoS("submitted scan request", "image", img)
@@ -252,10 +256,12 @@ func (mgr *Manager) processNextMsg() (err error) {
 	}()
 
 	if img != "" {
-		klog.InfoS("generate.report", "image", img)
+		if exists, _ := ExistsReport(mgr.fs, img); !exists {
+			klog.InfoS("generate.report", "image", img)
 
-		if err = UploadReport(mgr.fs, img); err != nil {
-			err = errors.Wrapf(err, "failed to generate report %s", img)
+			if err = UploadReport(mgr.fs, img); err != nil {
+				err = errors.Wrapf(err, "failed to generate report %s", img)
+			}
 		}
 	}
 	return nil

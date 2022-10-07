@@ -19,11 +19,13 @@ package apiserver
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"kubeops.dev/scanner/apis/scanner"
 	"kubeops.dev/scanner/apis/scanner/install"
 	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
 	"kubeops.dev/scanner/pkg/backend"
+	scannerctrl "kubeops.dev/scanner/pkg/controllers/scanner"
 	"kubeops.dev/scanner/pkg/registry/scanner/scanreport"
 	"kubeops.dev/scanner/pkg/registry/scanner/scansummary"
 
@@ -154,6 +156,11 @@ func (c completedConfig) New(ctx context.Context) (*LicenseProxyServer, error) {
 	nc, err := backend.NewConnection(c.ExtraConfig.NATSAddr, c.ExtraConfig.NATSCredFile)
 	if err != nil {
 		return nil, err
+	}
+
+	if err = (scannerctrl.NewWorkloadReconciler(nc)).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "Workload")
+		os.Exit(1)
 	}
 
 	setupLog.Info("setup done!")
