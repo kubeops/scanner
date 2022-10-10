@@ -20,6 +20,8 @@ import (
 	"fmt"
 
 	apps "k8s.io/api/apps/v1"
+	batch "k8s.io/api/batch/v1"
+	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -27,6 +29,17 @@ import (
 
 func (dst *Workload) Duckify(srcRaw runtime.Object) error {
 	switch src := srcRaw.(type) {
+	case *core.ReplicationController:
+		dst.TypeMeta = metav1.TypeMeta{
+			Kind:       "ReplicationController",
+			APIVersion: core.SchemeGroupVersion.String(),
+		}
+		dst.ObjectMeta = src.ObjectMeta
+		dst.Spec.Selector = &metav1.LabelSelector{
+			MatchLabels: src.Spec.Selector,
+		}
+		dst.Spec.Template = *src.Spec.Template
+		return nil
 	case *apps.Deployment:
 		dst.TypeMeta = metav1.TypeMeta{
 			Kind:       "Deployment",
@@ -53,6 +66,24 @@ func (dst *Workload) Duckify(srcRaw runtime.Object) error {
 		dst.ObjectMeta = src.ObjectMeta
 		dst.Spec.Selector = src.Spec.Selector
 		dst.Spec.Template = src.Spec.Template
+		return nil
+	case *batch.Job:
+		dst.TypeMeta = metav1.TypeMeta{
+			Kind:       "Job",
+			APIVersion: batch.SchemeGroupVersion.String(),
+		}
+		dst.ObjectMeta = src.ObjectMeta
+		dst.Spec.Selector = src.Spec.Selector
+		dst.Spec.Template = src.Spec.Template
+		return nil
+	case *batch.CronJob:
+		dst.TypeMeta = metav1.TypeMeta{
+			Kind:       "CronJob",
+			APIVersion: batch.SchemeGroupVersion.String(),
+		}
+		dst.ObjectMeta = src.ObjectMeta
+		dst.Spec.Selector = src.Spec.JobTemplate.Spec.Selector
+		dst.Spec.Template = src.Spec.JobTemplate.Spec.Template
 		return nil
 	case *unstructured.Unstructured:
 		return runtime.DefaultUnstructuredConverter.FromUnstructured(src.UnstructuredContent(), dst)

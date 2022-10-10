@@ -27,6 +27,7 @@ import (
 	"github.com/google/go-containerregistry/pkg/v1/remote"
 	"github.com/nats-io/nats.go"
 	apps "k8s.io/api/apps/v1"
+	batch "k8s.io/api/batch/v1"
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/sets"
@@ -62,56 +63,69 @@ func (r *WorkloadReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	sel, err := metav1.LabelSelectorAsSelector(mypod.Spec.Selector)
-	if err != nil {
-		return ctrl.Result{}, err
-	}
-
-	var pods core.PodList
-	err = r.List(context.TODO(), &pods,
-		client.InNamespace(mypod.Namespace),
-		client.MatchingLabelsSelector{Selector: sel})
-	if err != nil {
-		return ctrl.Result{}, err
-	}
-
-	fnRef := func(c core.ContainerStatus) (string, error) {
-		imageRef, err := name.ParseReference(c.Image)
-		if err != nil {
-			return "", err
-		}
-		imageIDRef, err := name.ParseReference(c.ImageID)
-		if err != nil {
-			return "", err
-		}
-		if imageRef.Context() != imageIDRef.Context() {
-			return c.Image, nil
-		}
-		return c.ImageID, nil
-	}
-
 	refs := sets.NewString()
-	for _, pod := range pods.Items {
-		for _, c := range pod.Status.ContainerStatuses {
-			ref, err := fnRef(c)
-			if err != nil {
-				return ctrl.Result{}, err
-			}
-			refs.Insert(ref)
+
+	if mypod.Kind == "Job" || mypod.Kind == "CronJob" {
+		for _, c := range mypod.Spec.Template.Spec.Containers {
+			refs.Insert(c.Image)
 		}
-		for _, c := range pod.Status.InitContainerStatuses {
-			ref, err := fnRef(c)
-			if err != nil {
-				return ctrl.Result{}, err
-			}
-			refs.Insert(ref)
+		for _, c := range mypod.Spec.Template.Spec.InitContainers {
+			refs.Insert(c.Image)
 		}
-		for _, c := range pod.Status.EphemeralContainerStatuses {
-			ref, err := fnRef(c)
+		for _, c := range mypod.Spec.Template.Spec.EphemeralContainers {
+			refs.Insert(c.Image)
+		}
+	} else {
+		sel, err := metav1.LabelSelectorAsSelector(mypod.Spec.Selector)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
+		var pods core.PodList
+		err = r.List(context.TODO(), &pods,
+			client.InNamespace(mypod.Namespace),
+			client.MatchingLabelsSelector{Selector: sel})
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
+		fnRef := func(c core.ContainerStatus) (string, error) {
+			imageRef, err := name.ParseReference(c.Image)
 			if err != nil {
-				return ctrl.Result{}, err
+				return "", err
 			}
-			refs.Insert(ref)
+			imageIDRef, err := name.ParseReference(c.ImageID)
+			if err != nil {
+				return "", err
+			}
+			if imageRef.Context() != imageIDRef.Context() {
+				return c.Image, nil
+			}
+			return c.ImageID, nil
+		}
+
+		for _, pod := range pods.Items {
+			for _, c := range pod.Status.ContainerStatuses {
+				ref, err := fnRef(c)
+				if err != nil {
+					return ctrl.Result{}, err
+				}
+				refs.Insert(ref)
+			}
+			for _, c := range pod.Status.InitContainerStatuses {
+				ref, err := fnRef(c)
+				if err != nil {
+					return ctrl.Result{}, err
+				}
+				refs.Insert(ref)
+			}
+			for _, c := range pod.Status.EphemeralContainerStatuses {
+				ref, err := fnRef(c)
+				if err != nil {
+					return ctrl.Result{}, err
+				}
+				refs.Insert(ref)
+			}
 		}
 	}
 
@@ -139,9 +153,12 @@ func (r *WorkloadReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return duck.ControllerManagedBy(mgr).
 		For(&api.Workload{}).
 		WithUnderlyingTypes(
+			core.SchemeGroupVersion.WithKind("ReplicationController"),
 			apps.SchemeGroupVersion.WithKind("Deployment"),
 			apps.SchemeGroupVersion.WithKind("StatefulSet"),
 			apps.SchemeGroupVersion.WithKind("DaemonSet"),
+			batch.SchemeGroupVersion.WithKind("Job"),
+			batch.SchemeGroupVersion.WithKind("CronJob"),
 		).
 		Complete(func() duck.Reconciler {
 			wr := new(WorkloadReconciler)
