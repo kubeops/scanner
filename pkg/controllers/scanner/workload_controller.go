@@ -29,7 +29,6 @@ import (
 	apps "k8s.io/api/apps/v1"
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"kmodules.xyz/client-go/client/duck"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -40,8 +39,7 @@ import (
 // WorkloadReconciler reconciles a Workload object
 type WorkloadReconciler struct {
 	client.Client
-	scheme *runtime.Scheme
-	nc     *nats.Conn
+	nc *nats.Conn
 }
 
 var _ duck.Reconciler = &WorkloadReconciler{}
@@ -131,12 +129,8 @@ func (r *WorkloadReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	return ctrl.Result{}, nil
 }
 
-func (r *WorkloadReconciler) InjectClient(c client.Client) {
+func (r *WorkloadReconciler) InjectClient(c client.Client) error {
 	r.Client = c
-}
-
-func (r *WorkloadReconciler) InjectScheme(s *runtime.Scheme) error {
-	r.scheme = s
 	return nil
 }
 

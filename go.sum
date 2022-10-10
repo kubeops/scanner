@@ -2596,8 +2596,8 @@ k8s.io/utils v0.0.0-20220210201930-3a6ce19ff2f9/go.mod h1:jPW/WVKK9YHAvNhRxK0md/
 k8s.io/utils v0.0.0-20220728103510-ee6ede2d64ed/go.mod h1:jPW/WVKK9YHAvNhRxK0md/EJ228hCsBRufyofKtW8HA=
 k8s.io/utils v0.0.0-20220823124924-e9cbc92d1a73 h1:H9TCJUUx+2VA0ZiD9lvtaX8fthFsMoD+Izn93E/hm8U=
 k8s.io/utils v0.0.0-20220823124924-e9cbc92d1a73/go.mod h1:jPW/WVKK9YHAvNhRxK0md/EJ228hCsBRufyofKtW8HA=
-kmodules.xyz/client-go v0.25.7-0.20221006085910-705a65c7033d h1:evOuOQHNsAIXIO24UKyMZlPqw7Oa+zYEMSq4NmdIsac=
-kmodules.xyz/client-go v0.25.7-0.20221006085910-705a65c7033d/go.mod h1:6VSRxDP2UqoWUcF0aSpWu3m/56bEUzuuvZUrAxSFBr8=
+kmodules.xyz/client-go v0.25.8 h1:2rdKd+EfdjGAMK8cgfdUtiS9uExlQNREqlZ9Ttsitfs=
+kmodules.xyz/client-go v0.25.8/go.mod h1:6VSRxDP2UqoWUcF0aSpWu3m/56bEUzuuvZUrAxSFBr8=
 kmodules.xyz/custom-resources v0.25.0 h1:5JQTEuiv6lC/+VVFNKqzfX4YtJCmN5E7mcNtGnHGVQM=
 kmodules.xyz/custom-resources v0.25.0/go.mod h1:ULwzvLmOqZJcPSXKI7iLclYL5eYRlKx8Nbex28Ht19E=
 kubedb.dev/apimachinery v0.28.4-0.20220930062326-31c66a343e38 h1:qNQp0dQEOUYYTNa7VcSahy49DCs51oHHoELHO9HeNpM=
