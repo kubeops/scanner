@@ -21,9 +21,9 @@ import (
 	"fmt"
 	"os"
 
-	"kubeops.dev/scanner/apis/scanner"
-	"kubeops.dev/scanner/apis/scanner/install"
-	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
+	"kubeops.dev/scanner/apis/cves"
+	"kubeops.dev/scanner/apis/cves/install"
+	api "kubeops.dev/scanner/apis/cves/v1alpha1"
 	"kubeops.dev/scanner/pkg/backend"
 	scannerctrl "kubeops.dev/scanner/pkg/controllers/scanner"
 	registry "kubeops.dev/scanner/pkg/registry/scanner"

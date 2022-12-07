@@ -23,7 +23,7 @@ import (
 	"path"
 	"strings"
 
-	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
+	api "kubeops.dev/scanner/apis/cves/v1alpha1"
 
 	"github.com/google/go-containerregistry/pkg/crane"
 	"github.com/google/go-containerregistry/pkg/name"

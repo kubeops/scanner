@@ -20,7 +20,7 @@ import (
 	"context"
 	"encoding/json"
 
-	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
+	api "kubeops.dev/scanner/apis/cves/v1alpha1"
 	"kubeops.dev/scanner/pkg/backend"
 
 	"github.com/nats-io/nats.go"

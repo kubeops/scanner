@@ -20,7 +20,7 @@ import (
 	"context"
 	"errors"
 
-	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
+	api "kubeops.dev/scanner/apis/cves/v1alpha1"
 
 	"github.com/nats-io/nats.go"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"

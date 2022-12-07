@@ -19,7 +19,7 @@ package scanner
 import (
 	"context"
 
-	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
+	api "kubeops.dev/scanner/apis/cves/v1alpha1"
 	"kubeops.dev/scanner/pkg/backend"
 
 	"github.com/google/go-containerregistry/pkg/name"
