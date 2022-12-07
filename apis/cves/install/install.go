@@ -14,8 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package scanner
+package install
 
-const (
-	GroupName = "scanner.appscode.com"
+import (
+	"kubeops.dev/scanner/apis/cves/v1alpha1"
+
+	"k8s.io/apimachinery/pkg/runtime"
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 )
+
+// Install registers the API group and adds types to a scheme
+func Install(scheme *runtime.Scheme) {
+	utilruntime.Must(v1alpha1.AddToScheme(scheme))
+}
