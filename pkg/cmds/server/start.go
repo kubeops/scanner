@@ -64,7 +64,7 @@ func NewUIServerOptions(out, errOut io.Writer) *LicenseProxyServerOptions {
 		StdOut:       out,
 		StdErr:       errOut,
 	}
-	o.RecommendedOptions.Etcd = nil
+	// o.RecommendedOptions.Etcd = nil
 	o.RecommendedOptions.Admission = nil
 	return o
 }

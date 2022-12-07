@@ -443,8 +443,8 @@ install:
 	@cd ../installer; \
 	helm upgrade -i scanner charts/scanner --wait \
 		--namespace=$(KUBE_NAMESPACE) --create-namespace \
-		--set image.registry=$(REGISTRY) \
-		--set image.tag=$(TAG_PROD) \
+		--set app.registry=$(REGISTRY) \
+		--set app.tag=$(TAG_PROD) \
 		--set imagePullPolicy=$(IMAGE_PULL_POLICY) \
 		--set nats.addr=$(NATS_ADDR) \
 		--set nats.auth.username=$(NATS_USERNAME) \

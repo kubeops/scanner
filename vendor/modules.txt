@@ -1489,7 +1489,7 @@ k8s.io/utils/trace
 kmodules.xyz/authorizer/rbac
 kmodules.xyz/authorizer/rbac/helpers
 kmodules.xyz/authorizer/rbac/validation
-# kmodules.xyz/client-go v0.25.11
+# kmodules.xyz/client-go v0.25.12
 ## explicit; go 1.18
 kmodules.xyz/client-go
 kmodules.xyz/client-go/api/v1

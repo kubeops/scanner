@@ -27,7 +27,7 @@ require (
 	k8s.io/kube-openapi v0.0.0-20220928191237-829ce0c27909
 	k8s.io/utils v0.0.0-20220823124924-e9cbc92d1a73
 	kmodules.xyz/authorizer v0.25.0
-	kmodules.xyz/client-go v0.25.11
+	kmodules.xyz/client-go v0.25.12
 	kubedb.dev/apimachinery v0.28.4-0.20221010094511-7d01a527ae60
 	sigs.k8s.io/controller-runtime v0.13.0
 )
