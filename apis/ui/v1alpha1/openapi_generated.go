@@ -354,39 +354,39 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"kmodules.xyz/client-go/api/v1.TypedObjectReference":                 schema_kmodulesxyz_client_go_api_v1_TypedObjectReference(ref),
 		"kmodules.xyz/client-go/api/v1.X509Subject":                          schema_kmodulesxyz_client_go_api_v1_X509Subject(ref),
 		"kmodules.xyz/client-go/api/v1.stringSetMerger":                      schema_kmodulesxyz_client_go_api_v1_stringSetMerger(ref),
-		"kubeops.dev/scanner/apis/cves/v1alpha1.CVSS":                     schema_scanner_apis_scanner_v1alpha1_CVSS(ref),
-		"kubeops.dev/scanner/apis/cves/v1alpha1.CVSSNvd":                  schema_scanner_apis_scanner_v1alpha1_CVSSNvd(ref),
-		"kubeops.dev/scanner/apis/cves/v1alpha1.CVSSRedhat":               schema_scanner_apis_scanner_v1alpha1_CVSSRedhat(ref),
-		"kubeops.dev/scanner/apis/cves/v1alpha1.ImageConfig":              schema_scanner_apis_scanner_v1alpha1_ImageConfig(ref),
-		"kubeops.dev/scanner/apis/cves/v1alpha1.ImageHistory":             schema_scanner_apis_scanner_v1alpha1_ImageHistory(ref),
-		"kubeops.dev/scanner/apis/cves/v1alpha1.ImageMetadata":            schema_scanner_apis_scanner_v1alpha1_ImageMetadata(ref),
-		"kubeops.dev/scanner/apis/cves/v1alpha1.ImageOS":                  schema_scanner_apis_scanner_v1alpha1_ImageOS(ref),
-		"kubeops.dev/scanner/apis/cves/v1alpha1.ImageReport":              schema_scanner_apis_scanner_v1alpha1_ImageReport(ref),
-		"kubeops.dev/scanner/apis/cves/v1alpha1.ImageRootfs":              schema_scanner_apis_scanner_v1alpha1_ImageRootfs(ref),
-		"kubeops.dev/scanner/apis/cves/v1alpha1.ImageRuntimeConfig":       schema_scanner_apis_scanner_v1alpha1_ImageRuntimeConfig(ref),
-		"kubeops.dev/scanner/apis/cves/v1alpha1.ImageScanReport":          schema_scanner_apis_scanner_v1alpha1_ImageScanReport(ref),
-		"kubeops.dev/scanner/apis/cves/v1alpha1.ImageScanReportSpec":      schema_scanner_apis_scanner_v1alpha1_ImageScanReportSpec(ref),
-		"kubeops.dev/scanner/apis/cves/v1alpha1.ImageScanReportStatus":    schema_scanner_apis_scanner_v1alpha1_ImageScanReportStatus(ref),
-		"kubeops.dev/scanner/apis/cves/v1alpha1.ImageScanRequest":         schema_scanner_apis_scanner_v1alpha1_ImageScanRequest(ref),
-		"kubeops.dev/scanner/apis/cves/v1alpha1.ImageScanRequestSpec":     schema_scanner_apis_scanner_v1alpha1_ImageScanRequestSpec(ref),
-		"kubeops.dev/scanner/apis/cves/v1alpha1.MyTime":                   schema_scanner_apis_scanner_v1alpha1_MyTime(ref),
-		"kubeops.dev/scanner/apis/cves/v1alpha1.Report":                   schema_scanner_apis_scanner_v1alpha1_Report(ref),
-		"kubeops.dev/scanner/apis/cves/v1alpha1.ReportRequest":            schema_scanner_apis_scanner_v1alpha1_ReportRequest(ref),
-		"kubeops.dev/scanner/apis/cves/v1alpha1.ReportResponse":           schema_scanner_apis_scanner_v1alpha1_ReportResponse(ref),
-		"kubeops.dev/scanner/apis/cves/v1alpha1.Result":                   schema_scanner_apis_scanner_v1alpha1_Result(ref),
-		"kubeops.dev/scanner/apis/cves/v1alpha1.ScanSummary":              schema_scanner_apis_scanner_v1alpha1_ScanSummary(ref),
-		"kubeops.dev/scanner/apis/cves/v1alpha1.ScanSummaryRequest":       schema_scanner_apis_scanner_v1alpha1_ScanSummaryRequest(ref),
-		"kubeops.dev/scanner/apis/cves/v1alpha1.ScanSummaryResponse":      schema_scanner_apis_scanner_v1alpha1_ScanSummaryResponse(ref),
-		"kubeops.dev/scanner/apis/cves/v1alpha1.SingleReport":             schema_scanner_apis_scanner_v1alpha1_SingleReport(ref),
-		"kubeops.dev/scanner/apis/cves/v1alpha1.Summary":                  schema_scanner_apis_scanner_v1alpha1_Summary(ref),
-		"kubeops.dev/scanner/apis/cves/v1alpha1.SummaryResult":            schema_scanner_apis_scanner_v1alpha1_SummaryResult(ref),
-		"kubeops.dev/scanner/apis/cves/v1alpha1.Vulnerability":            schema_scanner_apis_scanner_v1alpha1_Vulnerability(ref),
-		"kubeops.dev/scanner/apis/cves/v1alpha1.VulnerabilityDataSource":  schema_scanner_apis_scanner_v1alpha1_VulnerabilityDataSource(ref),
-		"kubeops.dev/scanner/apis/cves/v1alpha1.VulnerabilityInfo":        schema_scanner_apis_scanner_v1alpha1_VulnerabilityInfo(ref),
-		"kubeops.dev/scanner/apis/cves/v1alpha1.VulnerabilityLayer":       schema_scanner_apis_scanner_v1alpha1_VulnerabilityLayer(ref),
-		"kubeops.dev/scanner/apis/cves/v1alpha1.Workload":                 schema_scanner_apis_scanner_v1alpha1_Workload(ref),
-		"kubeops.dev/scanner/apis/cves/v1alpha1.WorkloadList":             schema_scanner_apis_scanner_v1alpha1_WorkloadList(ref),
-		"kubeops.dev/scanner/apis/cves/v1alpha1.WorkloadSpec":             schema_scanner_apis_scanner_v1alpha1_WorkloadSpec(ref),
+		"kubeops.dev/scanner/apis/ui/v1alpha1.CVSS":                     schema_scanner_apis_scanner_v1alpha1_CVSS(ref),
+		"kubeops.dev/scanner/apis/ui/v1alpha1.CVSSNvd":                  schema_scanner_apis_scanner_v1alpha1_CVSSNvd(ref),
+		"kubeops.dev/scanner/apis/ui/v1alpha1.CVSSRedhat":               schema_scanner_apis_scanner_v1alpha1_CVSSRedhat(ref),
+		"kubeops.dev/scanner/apis/ui/v1alpha1.ImageConfig":              schema_scanner_apis_scanner_v1alpha1_ImageConfig(ref),
+		"kubeops.dev/scanner/apis/ui/v1alpha1.ImageHistory":             schema_scanner_apis_scanner_v1alpha1_ImageHistory(ref),
+		"kubeops.dev/scanner/apis/ui/v1alpha1.ImageMetadata":            schema_scanner_apis_scanner_v1alpha1_ImageMetadata(ref),
+		"kubeops.dev/scanner/apis/ui/v1alpha1.ImageOS":                  schema_scanner_apis_scanner_v1alpha1_ImageOS(ref),
+		"kubeops.dev/scanner/apis/ui/v1alpha1.ImageReport":              schema_scanner_apis_scanner_v1alpha1_ImageReport(ref),
+		"kubeops.dev/scanner/apis/ui/v1alpha1.ImageRootfs":              schema_scanner_apis_scanner_v1alpha1_ImageRootfs(ref),
+		"kubeops.dev/scanner/apis/ui/v1alpha1.ImageRuntimeConfig":       schema_scanner_apis_scanner_v1alpha1_ImageRuntimeConfig(ref),
+		"kubeops.dev/scanner/apis/ui/v1alpha1.ImageScanReport":          schema_scanner_apis_scanner_v1alpha1_ImageScanReport(ref),
+		"kubeops.dev/scanner/apis/ui/v1alpha1.ImageScanReportSpec":      schema_scanner_apis_scanner_v1alpha1_ImageScanReportSpec(ref),
+		"kubeops.dev/scanner/apis/ui/v1alpha1.ImageScanReportStatus":    schema_scanner_apis_scanner_v1alpha1_ImageScanReportStatus(ref),
+		"kubeops.dev/scanner/apis/ui/v1alpha1.ImageScanRequest":         schema_scanner_apis_scanner_v1alpha1_ImageScanRequest(ref),
+		"kubeops.dev/scanner/apis/ui/v1alpha1.ImageScanRequestSpec":     schema_scanner_apis_scanner_v1alpha1_ImageScanRequestSpec(ref),
+		"kubeops.dev/scanner/apis/ui/v1alpha1.MyTime":                   schema_scanner_apis_scanner_v1alpha1_MyTime(ref),
+		"kubeops.dev/scanner/apis/ui/v1alpha1.Report":                   schema_scanner_apis_scanner_v1alpha1_Report(ref),
+		"kubeops.dev/scanner/apis/ui/v1alpha1.ReportRequest":            schema_scanner_apis_scanner_v1alpha1_ReportRequest(ref),
+		"kubeops.dev/scanner/apis/ui/v1alpha1.ReportResponse":           schema_scanner_apis_scanner_v1alpha1_ReportResponse(ref),
+		"kubeops.dev/scanner/apis/ui/v1alpha1.Result":                   schema_scanner_apis_scanner_v1alpha1_Result(ref),
+		"kubeops.dev/scanner/apis/ui/v1alpha1.ScanSummary":              schema_scanner_apis_scanner_v1alpha1_ScanSummary(ref),
+		"kubeops.dev/scanner/apis/ui/v1alpha1.ScanSummaryRequest":       schema_scanner_apis_scanner_v1alpha1_ScanSummaryRequest(ref),
+		"kubeops.dev/scanner/apis/ui/v1alpha1.ScanSummaryResponse":      schema_scanner_apis_scanner_v1alpha1_ScanSummaryResponse(ref),
+		"kubeops.dev/scanner/apis/ui/v1alpha1.SingleReport":             schema_scanner_apis_scanner_v1alpha1_SingleReport(ref),
+		"kubeops.dev/scanner/apis/ui/v1alpha1.Summary":                  schema_scanner_apis_scanner_v1alpha1_Summary(ref),
+		"kubeops.dev/scanner/apis/ui/v1alpha1.SummaryResult":            schema_scanner_apis_scanner_v1alpha1_SummaryResult(ref),
+		"kubeops.dev/scanner/apis/ui/v1alpha1.Vulnerability":            schema_scanner_apis_scanner_v1alpha1_Vulnerability(ref),
+		"kubeops.dev/scanner/apis/ui/v1alpha1.VulnerabilityDataSource":  schema_scanner_apis_scanner_v1alpha1_VulnerabilityDataSource(ref),
+		"kubeops.dev/scanner/apis/ui/v1alpha1.VulnerabilityInfo":        schema_scanner_apis_scanner_v1alpha1_VulnerabilityInfo(ref),
+		"kubeops.dev/scanner/apis/ui/v1alpha1.VulnerabilityLayer":       schema_scanner_apis_scanner_v1alpha1_VulnerabilityLayer(ref),
+		"kubeops.dev/scanner/apis/ui/v1alpha1.Workload":                 schema_scanner_apis_scanner_v1alpha1_Workload(ref),
+		"kubeops.dev/scanner/apis/ui/v1alpha1.WorkloadList":             schema_scanner_apis_scanner_v1alpha1_WorkloadList(ref),
+		"kubeops.dev/scanner/apis/ui/v1alpha1.WorkloadSpec":             schema_scanner_apis_scanner_v1alpha1_WorkloadSpec(ref),
 	}
 }
 
@@ -17515,19 +17515,19 @@ func schema_scanner_apis_scanner_v1alpha1_CVSS(ref common.ReferenceCallback) com
 				Properties: map[string]spec.Schema{
 					"nvd": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("kubeops.dev/scanner/apis/cves/v1alpha1.CVSSNvd"),
+							Ref: ref("kubeops.dev/scanner/apis/ui/v1alpha1.CVSSNvd"),
 						},
 					},
 					"redhat": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("kubeops.dev/scanner/apis/cves/v1alpha1.CVSSRedhat"),
+							Ref: ref("kubeops.dev/scanner/apis/ui/v1alpha1.CVSSRedhat"),
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"kubeops.dev/scanner/apis/cves/v1alpha1.CVSSNvd", "kubeops.dev/scanner/apis/cves/v1alpha1.CVSSRedhat"},
+			"kubeops.dev/scanner/apis/ui/v1alpha1.CVSSNvd", "kubeops.dev/scanner/apis/ui/v1alpha1.CVSSRedhat"},
 	}
 }
 
@@ -17631,7 +17631,7 @@ func schema_scanner_apis_scanner_v1alpha1_ImageConfig(ref common.ReferenceCallba
 					"created": {
 						SchemaProps: spec.SchemaProps{
 							Default: map[string]interface{}{},
-							Ref:     ref("kubeops.dev/scanner/apis/cves/v1alpha1.MyTime"),
+							Ref:     ref("kubeops.dev/scanner/apis/ui/v1alpha1.MyTime"),
 						},
 					},
 					"docker_version": {
@@ -17647,7 +17647,7 @@ func schema_scanner_apis_scanner_v1alpha1_ImageConfig(ref common.ReferenceCallba
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
 										Default: map[string]interface{}{},
-										Ref:     ref("kubeops.dev/scanner/apis/cves/v1alpha1.ImageHistory"),
+										Ref:     ref("kubeops.dev/scanner/apis/ui/v1alpha1.ImageHistory"),
 									},
 								},
 							},
@@ -17663,13 +17663,13 @@ func schema_scanner_apis_scanner_v1alpha1_ImageConfig(ref common.ReferenceCallba
 					"rootfs": {
 						SchemaProps: spec.SchemaProps{
 							Default: map[string]interface{}{},
-							Ref:     ref("kubeops.dev/scanner/apis/cves/v1alpha1.ImageRootfs"),
+							Ref:     ref("kubeops.dev/scanner/apis/ui/v1alpha1.ImageRootfs"),
 						},
 					},
 					"config": {
 						SchemaProps: spec.SchemaProps{
 							Default: map[string]interface{}{},
-							Ref:     ref("kubeops.dev/scanner/apis/cves/v1alpha1.ImageRuntimeConfig"),
+							Ref:     ref("kubeops.dev/scanner/apis/ui/v1alpha1.ImageRuntimeConfig"),
 						},
 					},
 				},
@@ -17677,7 +17677,7 @@ func schema_scanner_apis_scanner_v1alpha1_ImageConfig(ref common.ReferenceCallba
 			},
 		},
 		Dependencies: []string{
-			"kubeops.dev/scanner/apis/cves/v1alpha1.ImageHistory", "kubeops.dev/scanner/apis/cves/v1alpha1.ImageRootfs", "kubeops.dev/scanner/apis/cves/v1alpha1.ImageRuntimeConfig", "kubeops.dev/scanner/apis/cves/v1alpha1.MyTime"},
+			"kubeops.dev/scanner/apis/ui/v1alpha1.ImageHistory", "kubeops.dev/scanner/apis/ui/v1alpha1.ImageRootfs", "kubeops.dev/scanner/apis/ui/v1alpha1.ImageRuntimeConfig", "kubeops.dev/scanner/apis/ui/v1alpha1.MyTime"},
 	}
 }
 
@@ -17690,7 +17690,7 @@ func schema_scanner_apis_scanner_v1alpha1_ImageHistory(ref common.ReferenceCallb
 					"created": {
 						SchemaProps: spec.SchemaProps{
 							Default: map[string]interface{}{},
-							Ref:     ref("kubeops.dev/scanner/apis/cves/v1alpha1.MyTime"),
+							Ref:     ref("kubeops.dev/scanner/apis/ui/v1alpha1.MyTime"),
 						},
 					},
 					"created_by": {
@@ -17717,7 +17717,7 @@ func schema_scanner_apis_scanner_v1alpha1_ImageHistory(ref common.ReferenceCallb
 			},
 		},
 		Dependencies: []string{
-			"kubeops.dev/scanner/apis/cves/v1alpha1.MyTime"},
+			"kubeops.dev/scanner/apis/ui/v1alpha1.MyTime"},
 	}
 }
 
@@ -17730,7 +17730,7 @@ func schema_scanner_apis_scanner_v1alpha1_ImageMetadata(ref common.ReferenceCall
 					"OS": {
 						SchemaProps: spec.SchemaProps{
 							Default: map[string]interface{}{},
-							Ref:     ref("kubeops.dev/scanner/apis/cves/v1alpha1.ImageOS"),
+							Ref:     ref("kubeops.dev/scanner/apis/ui/v1alpha1.ImageOS"),
 						},
 					},
 					"ImageID": {
@@ -17785,7 +17785,7 @@ func schema_scanner_apis_scanner_v1alpha1_ImageMetadata(ref common.ReferenceCall
 					"ImageConfig": {
 						SchemaProps: spec.SchemaProps{
 							Default: map[string]interface{}{},
-							Ref:     ref("kubeops.dev/scanner/apis/cves/v1alpha1.ImageConfig"),
+							Ref:     ref("kubeops.dev/scanner/apis/ui/v1alpha1.ImageConfig"),
 						},
 					},
 				},
@@ -17793,7 +17793,7 @@ func schema_scanner_apis_scanner_v1alpha1_ImageMetadata(ref common.ReferenceCall
 			},
 		},
 		Dependencies: []string{
-			"kubeops.dev/scanner/apis/cves/v1alpha1.ImageConfig", "kubeops.dev/scanner/apis/cves/v1alpha1.ImageOS"},
+			"kubeops.dev/scanner/apis/ui/v1alpha1.ImageConfig", "kubeops.dev/scanner/apis/ui/v1alpha1.ImageOS"},
 	}
 }
 
@@ -17852,7 +17852,7 @@ func schema_scanner_apis_scanner_v1alpha1_ImageReport(ref common.ReferenceCallba
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
 										Default: map[string]interface{}{},
-										Ref:     ref("kubeops.dev/scanner/apis/cves/v1alpha1.VulnerabilityInfo"),
+										Ref:     ref("kubeops.dev/scanner/apis/ui/v1alpha1.VulnerabilityInfo"),
 									},
 								},
 							},
@@ -17891,7 +17891,7 @@ func schema_scanner_apis_scanner_v1alpha1_ImageReport(ref common.ReferenceCallba
 			},
 		},
 		Dependencies: []string{
-			"kubeops.dev/scanner/apis/cves/v1alpha1.VulnerabilityInfo"},
+			"kubeops.dev/scanner/apis/ui/v1alpha1.VulnerabilityInfo"},
 	}
 }
 
@@ -18048,21 +18048,21 @@ func schema_scanner_apis_scanner_v1alpha1_ImageScanReport(ref common.ReferenceCa
 						SchemaProps: spec.SchemaProps{
 							Description: "Spec describes the attributes for the Image Scan SingleReport",
 							Default:     map[string]interface{}{},
-							Ref:         ref("kubeops.dev/scanner/apis/cves/v1alpha1.ImageScanReportSpec"),
+							Ref:         ref("kubeops.dev/scanner/apis/ui/v1alpha1.ImageScanReportSpec"),
 						},
 					},
 					"status": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Status holds all the SingleReport-related details of the specified image",
 							Default:     map[string]interface{}{},
-							Ref:         ref("kubeops.dev/scanner/apis/cves/v1alpha1.ImageScanReportStatus"),
+							Ref:         ref("kubeops.dev/scanner/apis/ui/v1alpha1.ImageScanReportStatus"),
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta", "kubeops.dev/scanner/apis/cves/v1alpha1.ImageScanReportSpec", "kubeops.dev/scanner/apis/cves/v1alpha1.ImageScanReportStatus"},
+			"k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta", "kubeops.dev/scanner/apis/ui/v1alpha1.ImageScanReportSpec", "kubeops.dev/scanner/apis/ui/v1alpha1.ImageScanReportStatus"},
 	}
 }
 
@@ -18109,7 +18109,7 @@ func schema_scanner_apis_scanner_v1alpha1_ImageScanReportStatus(ref common.Refer
 					"lastChecked": {
 						SchemaProps: spec.SchemaProps{
 							Default: map[string]interface{}{},
-							Ref:     ref("kubeops.dev/scanner/apis/cves/v1alpha1.MyTime"),
+							Ref:     ref("kubeops.dev/scanner/apis/ui/v1alpha1.MyTime"),
 						},
 					},
 					"trivyDBVersion": {
@@ -18122,7 +18122,7 @@ func schema_scanner_apis_scanner_v1alpha1_ImageScanReportStatus(ref common.Refer
 					"report": {
 						SchemaProps: spec.SchemaProps{
 							Default: map[string]interface{}{},
-							Ref:     ref("kubeops.dev/scanner/apis/cves/v1alpha1.SingleReport"),
+							Ref:     ref("kubeops.dev/scanner/apis/ui/v1alpha1.SingleReport"),
 						},
 					},
 				},
@@ -18130,7 +18130,7 @@ func schema_scanner_apis_scanner_v1alpha1_ImageScanReportStatus(ref common.Refer
 			},
 		},
 		Dependencies: []string{
-			"kubeops.dev/scanner/apis/cves/v1alpha1.MyTime", "kubeops.dev/scanner/apis/cves/v1alpha1.SingleReport"},
+			"kubeops.dev/scanner/apis/ui/v1alpha1.MyTime", "kubeops.dev/scanner/apis/ui/v1alpha1.SingleReport"},
 	}
 }
 
@@ -18157,14 +18157,14 @@ func schema_scanner_apis_scanner_v1alpha1_ImageScanRequest(ref common.ReferenceC
 					"request": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Request describes the attributes for the graph request.",
-							Ref:         ref("kubeops.dev/scanner/apis/cves/v1alpha1.ImageScanRequestSpec"),
+							Ref:         ref("kubeops.dev/scanner/apis/ui/v1alpha1.ImageScanRequestSpec"),
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"kubeops.dev/scanner/apis/cves/v1alpha1.ImageScanRequestSpec"},
+			"kubeops.dev/scanner/apis/ui/v1alpha1.ImageScanRequestSpec"},
 	}
 }
 
@@ -18252,19 +18252,19 @@ func schema_scanner_apis_scanner_v1alpha1_Report(ref common.ReferenceCallback) c
 					"request": {
 						SchemaProps: spec.SchemaProps{
 							Description: "1. Request equals nil means, we want the report in cluster scope 2. Group is set to \"\"(core) & Kind to Namespace means, we want the report in particular namespaced scope 3. For general cases, all the fields need to be set.",
-							Ref:         ref("kubeops.dev/scanner/apis/cves/v1alpha1.ReportRequest"),
+							Ref:         ref("kubeops.dev/scanner/apis/ui/v1alpha1.ReportRequest"),
 						},
 					},
 					"response": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("kubeops.dev/scanner/apis/cves/v1alpha1.ReportResponse"),
+							Ref: ref("kubeops.dev/scanner/apis/ui/v1alpha1.ReportResponse"),
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"kubeops.dev/scanner/apis/cves/v1alpha1.ReportRequest", "kubeops.dev/scanner/apis/cves/v1alpha1.ReportResponse"},
+			"kubeops.dev/scanner/apis/ui/v1alpha1.ReportRequest", "kubeops.dev/scanner/apis/ui/v1alpha1.ReportResponse"},
 	}
 }
 
@@ -18308,7 +18308,7 @@ func schema_scanner_apis_scanner_v1alpha1_ReportResponse(ref common.ReferenceCal
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
 										Default: map[string]interface{}{},
-										Ref:     ref("kubeops.dev/scanner/apis/cves/v1alpha1.ImageReport"),
+										Ref:     ref("kubeops.dev/scanner/apis/ui/v1alpha1.ImageReport"),
 									},
 								},
 							},
@@ -18335,7 +18335,7 @@ func schema_scanner_apis_scanner_v1alpha1_ReportResponse(ref common.ReferenceCal
 			},
 		},
 		Dependencies: []string{
-			"kubeops.dev/scanner/apis/cves/v1alpha1.ImageReport"},
+			"kubeops.dev/scanner/apis/ui/v1alpha1.ImageReport"},
 	}
 }
 
@@ -18373,7 +18373,7 @@ func schema_scanner_apis_scanner_v1alpha1_Result(ref common.ReferenceCallback) c
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
 										Default: map[string]interface{}{},
-										Ref:     ref("kubeops.dev/scanner/apis/cves/v1alpha1.Vulnerability"),
+										Ref:     ref("kubeops.dev/scanner/apis/ui/v1alpha1.Vulnerability"),
 									},
 								},
 							},
@@ -18384,7 +18384,7 @@ func schema_scanner_apis_scanner_v1alpha1_Result(ref common.ReferenceCallback) c
 			},
 		},
 		Dependencies: []string{
-			"kubeops.dev/scanner/apis/cves/v1alpha1.Vulnerability"},
+			"kubeops.dev/scanner/apis/ui/v1alpha1.Vulnerability"},
 	}
 }
 
@@ -18411,20 +18411,20 @@ func schema_scanner_apis_scanner_v1alpha1_ScanSummary(ref common.ReferenceCallba
 					"request": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Request describes the attributes for the graph request.",
-							Ref:         ref("kubeops.dev/scanner/apis/cves/v1alpha1.ScanSummaryRequest"),
+							Ref:         ref("kubeops.dev/scanner/apis/ui/v1alpha1.ScanSummaryRequest"),
 						},
 					},
 					"response": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Response describes the attributes for the graph response.",
-							Ref:         ref("kubeops.dev/scanner/apis/cves/v1alpha1.ScanSummaryResponse"),
+							Ref:         ref("kubeops.dev/scanner/apis/ui/v1alpha1.ScanSummaryResponse"),
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"kubeops.dev/scanner/apis/cves/v1alpha1.ScanSummaryRequest", "kubeops.dev/scanner/apis/cves/v1alpha1.ScanSummaryResponse"},
+			"kubeops.dev/scanner/apis/ui/v1alpha1.ScanSummaryRequest", "kubeops.dev/scanner/apis/ui/v1alpha1.ScanSummaryResponse"},
 	}
 }
 
@@ -18457,7 +18457,7 @@ func schema_scanner_apis_scanner_v1alpha1_ScanSummaryResponse(ref common.Referen
 					"result": {
 						SchemaProps: spec.SchemaProps{
 							Default: map[string]interface{}{},
-							Ref:     ref("kubeops.dev/scanner/apis/cves/v1alpha1.Summary"),
+							Ref:     ref("kubeops.dev/scanner/apis/ui/v1alpha1.Summary"),
 						},
 					},
 				},
@@ -18465,7 +18465,7 @@ func schema_scanner_apis_scanner_v1alpha1_ScanSummaryResponse(ref common.Referen
 			},
 		},
 		Dependencies: []string{
-			"kubeops.dev/scanner/apis/cves/v1alpha1.Summary"},
+			"kubeops.dev/scanner/apis/ui/v1alpha1.Summary"},
 	}
 }
 
@@ -18499,7 +18499,7 @@ func schema_scanner_apis_scanner_v1alpha1_SingleReport(ref common.ReferenceCallb
 					"Metadata": {
 						SchemaProps: spec.SchemaProps{
 							Default: map[string]interface{}{},
-							Ref:     ref("kubeops.dev/scanner/apis/cves/v1alpha1.ImageMetadata"),
+							Ref:     ref("kubeops.dev/scanner/apis/ui/v1alpha1.ImageMetadata"),
 						},
 					},
 					"Results": {
@@ -18509,7 +18509,7 @@ func schema_scanner_apis_scanner_v1alpha1_SingleReport(ref common.ReferenceCallb
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
 										Default: map[string]interface{}{},
-										Ref:     ref("kubeops.dev/scanner/apis/cves/v1alpha1.Result"),
+										Ref:     ref("kubeops.dev/scanner/apis/ui/v1alpha1.Result"),
 									},
 								},
 							},
@@ -18520,7 +18520,7 @@ func schema_scanner_apis_scanner_v1alpha1_SingleReport(ref common.ReferenceCallb
 			},
 		},
 		Dependencies: []string{
-			"kubeops.dev/scanner/apis/cves/v1alpha1.ImageMetadata", "kubeops.dev/scanner/apis/cves/v1alpha1.Result"},
+			"kubeops.dev/scanner/apis/ui/v1alpha1.ImageMetadata", "kubeops.dev/scanner/apis/ui/v1alpha1.Result"},
 	}
 }
 
@@ -18554,7 +18554,7 @@ func schema_scanner_apis_scanner_v1alpha1_Summary(ref common.ReferenceCallback) 
 					"Metadata": {
 						SchemaProps: spec.SchemaProps{
 							Default: map[string]interface{}{},
-							Ref:     ref("kubeops.dev/scanner/apis/cves/v1alpha1.ImageMetadata"),
+							Ref:     ref("kubeops.dev/scanner/apis/ui/v1alpha1.ImageMetadata"),
 						},
 					},
 					"Results": {
@@ -18564,7 +18564,7 @@ func schema_scanner_apis_scanner_v1alpha1_Summary(ref common.ReferenceCallback) 
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
 										Default: map[string]interface{}{},
-										Ref:     ref("kubeops.dev/scanner/apis/cves/v1alpha1.SummaryResult"),
+										Ref:     ref("kubeops.dev/scanner/apis/ui/v1alpha1.SummaryResult"),
 									},
 								},
 							},
@@ -18575,7 +18575,7 @@ func schema_scanner_apis_scanner_v1alpha1_Summary(ref common.ReferenceCallback) 
 			},
 		},
 		Dependencies: []string{
-			"kubeops.dev/scanner/apis/cves/v1alpha1.ImageMetadata", "kubeops.dev/scanner/apis/cves/v1alpha1.SummaryResult"},
+			"kubeops.dev/scanner/apis/ui/v1alpha1.ImageMetadata", "kubeops.dev/scanner/apis/ui/v1alpha1.SummaryResult"},
 	}
 }
 
@@ -18665,7 +18665,7 @@ func schema_scanner_apis_scanner_v1alpha1_Vulnerability(ref common.ReferenceCall
 					"Layer": {
 						SchemaProps: spec.SchemaProps{
 							Default: map[string]interface{}{},
-							Ref:     ref("kubeops.dev/scanner/apis/cves/v1alpha1.VulnerabilityLayer"),
+							Ref:     ref("kubeops.dev/scanner/apis/ui/v1alpha1.VulnerabilityLayer"),
 						},
 					},
 					"SeveritySource": {
@@ -18685,7 +18685,7 @@ func schema_scanner_apis_scanner_v1alpha1_Vulnerability(ref common.ReferenceCall
 					"DataSource": {
 						SchemaProps: spec.SchemaProps{
 							Default: map[string]interface{}{},
-							Ref:     ref("kubeops.dev/scanner/apis/cves/v1alpha1.VulnerabilityDataSource"),
+							Ref:     ref("kubeops.dev/scanner/apis/ui/v1alpha1.VulnerabilityDataSource"),
 						},
 					},
 					"Title": {
@@ -18725,7 +18725,7 @@ func schema_scanner_apis_scanner_v1alpha1_Vulnerability(ref common.ReferenceCall
 					"CVSS": {
 						SchemaProps: spec.SchemaProps{
 							Default: map[string]interface{}{},
-							Ref:     ref("kubeops.dev/scanner/apis/cves/v1alpha1.CVSS"),
+							Ref:     ref("kubeops.dev/scanner/apis/ui/v1alpha1.CVSS"),
 						},
 					},
 					"References": {
@@ -18744,12 +18744,12 @@ func schema_scanner_apis_scanner_v1alpha1_Vulnerability(ref common.ReferenceCall
 					},
 					"PublishedDate": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("kubeops.dev/scanner/apis/cves/v1alpha1.MyTime"),
+							Ref: ref("kubeops.dev/scanner/apis/ui/v1alpha1.MyTime"),
 						},
 					},
 					"LastModifiedDate": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("kubeops.dev/scanner/apis/cves/v1alpha1.MyTime"),
+							Ref: ref("kubeops.dev/scanner/apis/ui/v1alpha1.MyTime"),
 						},
 					},
 					"FixedVersion": {
@@ -18763,7 +18763,7 @@ func schema_scanner_apis_scanner_v1alpha1_Vulnerability(ref common.ReferenceCall
 			},
 		},
 		Dependencies: []string{
-			"kubeops.dev/scanner/apis/cves/v1alpha1.CVSS", "kubeops.dev/scanner/apis/cves/v1alpha1.MyTime", "kubeops.dev/scanner/apis/cves/v1alpha1.VulnerabilityDataSource", "kubeops.dev/scanner/apis/cves/v1alpha1.VulnerabilityLayer"},
+			"kubeops.dev/scanner/apis/ui/v1alpha1.CVSS", "kubeops.dev/scanner/apis/ui/v1alpha1.MyTime", "kubeops.dev/scanner/apis/ui/v1alpha1.VulnerabilityDataSource", "kubeops.dev/scanner/apis/ui/v1alpha1.VulnerabilityLayer"},
 	}
 }
 
@@ -18911,14 +18911,14 @@ func schema_scanner_apis_scanner_v1alpha1_Workload(ref common.ReferenceCallback)
 					"spec": {
 						SchemaProps: spec.SchemaProps{
 							Default: map[string]interface{}{},
-							Ref:     ref("kubeops.dev/scanner/apis/cves/v1alpha1.WorkloadSpec"),
+							Ref:     ref("kubeops.dev/scanner/apis/ui/v1alpha1.WorkloadSpec"),
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta", "kubeops.dev/scanner/apis/cves/v1alpha1.WorkloadSpec"},
+			"k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta", "kubeops.dev/scanner/apis/ui/v1alpha1.WorkloadSpec"},
 	}
 }
 
@@ -18955,7 +18955,7 @@ func schema_scanner_apis_scanner_v1alpha1_WorkloadList(ref common.ReferenceCallb
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
 										Default: map[string]interface{}{},
-										Ref:     ref("kubeops.dev/scanner/apis/cves/v1alpha1.Workload"),
+										Ref:     ref("kubeops.dev/scanner/apis/ui/v1alpha1.Workload"),
 									},
 								},
 							},
@@ -18966,7 +18966,7 @@ func schema_scanner_apis_scanner_v1alpha1_WorkloadList(ref common.ReferenceCallb
 			},
 		},
 		Dependencies: []string{
-			"k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta", "kubeops.dev/scanner/apis/cves/v1alpha1.Workload"},
+			"k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta", "kubeops.dev/scanner/apis/ui/v1alpha1.Workload"},
 	}
 }
 

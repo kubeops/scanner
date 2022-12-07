@@ -20,4 +20,4 @@ limitations under the License.
 // +k8s:deepcopy-gen=package
 // +k8s:defaulter-gen=TypeMeta
 // +groupName=ui.scanner.appscode.com
-package v1alpha1 // import "kubeops.dev/scanner/apis/cves/v1alpha1"
+package v1alpha1 // import "kubeops.dev/scanner/apis/ui/v1alpha1"

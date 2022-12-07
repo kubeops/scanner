@@ -17,7 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"kubeops.dev/scanner/apis/cves"
+	"kubeops.dev/scanner/apis/ui"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -49,10 +49,7 @@ func Resource(resource string) schema.GroupResource {
 // Adds the list of known types to api.Scheme.
 func addKnownTypes(scheme *runtime.Scheme) error {
 	scheme.AddKnownTypes(SchemeGroupVersion,
-		&ImageScanRequest{},
-		&ScanSummary{},
-		&Workload{},
-		&WorkloadList{},
+		&Report{},
 	)
 
 	scheme.AddKnownTypes(SchemeGroupVersion,
