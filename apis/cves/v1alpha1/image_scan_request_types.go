@@ -31,8 +31,6 @@ const (
 // +genclient:nonNamespaced
 // +genclient:onlyVerbs=create
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-// +kubebuilder:object:root=true
-// +kubebuilder:resource:path=imagescanrequests,singular=imagescanrequest,shortName=isreq,scope=Cluster
 type ImageScanRequest struct {
 	metav1.TypeMeta `json:",inline"`
 	// Request describes the attributes for the graph request.

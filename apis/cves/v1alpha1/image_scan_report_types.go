@@ -21,19 +21,17 @@ import (
 )
 
 const (
-	ResourceCodeImageScanReport = "isrep"
 	ResourceKindImageScanReport = "ImageScanReport"
 	ResourceImageScanReport     = "imagescanreport"
 	ResourceImageScanReports    = "imagescanreports"
 )
 
+// ImageScanReport defines the vulnerability report a Docker image reference.
+
 // +genclient
 // +genclient:nonNamespaced
 // +k8s:openapi-gen=true
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-// +kubebuilder:object:root=true
-// +kubebuilder:subresource:status
-// +kubebuilder:resource:path=imagescanreports,singular=imagescanreport,shortName=isrep,scope=Cluster
 type ImageScanReport struct {
 	metav1.TypeMeta `json:",inline"`
 	// Name will be formed by hashing the ImageRef + Tag + Digest
@@ -56,4 +54,13 @@ type ImageScanReportStatus struct {
 	LastChecked    MyTime       `json:"lastChecked"`
 	TrivyDBVersion string       `json:"trivyDBVersion"`
 	Report         SingleReport `json:"report"`
+}
+
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+type ImageScanReportList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	// Items is a list of Memcached TPR objects
+	Items []ImageScanReport `json:"items,omitempty"`
 }

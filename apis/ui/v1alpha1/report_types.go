@@ -30,8 +30,6 @@ const (
 // +genclient
 // +genclient:onlyVerbs=create
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-// +kubebuilder:object:root=true
-// +kubebuilder:resource:path=reports,singular=report
 type Report struct {
 	metav1.TypeMeta `json:",inline"`
 	// 1. Request equals nil means, we want the report in cluster scope

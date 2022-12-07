@@ -129,17 +129,17 @@ type Result struct {
 	Vulnerabilities []Vulnerability `json:"Vulnerabilities,omitempty"`
 }
 
-type Summary struct {
-	SchemaVersion int             `json:"SchemaVersion"`
-	ArtifactName  string          `json:"ArtifactName"`
-	ArtifactType  string          `json:"ArtifactType"`
-	Metadata      ImageMetadata   `json:"Metadata"`
-	Results       []SummaryResult `json:"Results"`
-}
-
-type SummaryResult struct {
-	Target          string         `json:"Target"`
-	Class           string         `json:"Class"`
-	Type            string         `json:"Type"`
-	Vulnerabilities map[string]int `json:"Vulnerabilities,omitempty"`
-}
+//type Summary struct {
+//	SchemaVersion int             `json:"SchemaVersion"`
+//	ArtifactName  string          `json:"ArtifactName"`
+//	ArtifactType  string          `json:"ArtifactType"`
+//	Metadata      ImageMetadata   `json:"Metadata"`
+//	Results       []SummaryResult `json:"Results"`
+//}
+//
+//type SummaryResult struct {
+//	Target          string         `json:"Target"`
+//	Class           string         `json:"Class"`
+//	Type            string         `json:"Type"`
+//	Vulnerabilities map[string]int `json:"Vulnerabilities,omitempty"`
+//}
