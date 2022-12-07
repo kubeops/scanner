@@ -110,8 +110,8 @@ func (o *LicenseProxyServerOptions) Config() (*apiserver.Config, error) {
 	serverConfig.OpenAPIConfig.Info.Version = v.Version.Version
 	serverConfig.OpenAPIConfig.IgnorePrefixes = []string{
 		"/swaggerapi",
+		fmt.Sprintf("/apis/%s/%s", api.SchemeGroupVersion, api.ResourceImageScanRequests),
 		fmt.Sprintf("/apis/%s/%s", api.SchemeGroupVersion, api.ResourceImageScanReports),
-		fmt.Sprintf("/apis/%s/%s", api.SchemeGroupVersion, api.ResourceScanSummaries),
 	}
 
 	extraConfig := apiserver.ExtraConfig{

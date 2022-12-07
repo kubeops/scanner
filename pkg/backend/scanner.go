@@ -78,7 +78,7 @@ func ExistsReport(fs blobfs.Interface, img string) (bool, error) {
 }
 
 func UploadReport(fs blobfs.Interface, img string) error {
-	report, reportBytes, err := scan(img)
+	_, reportBytes, err := scan(img)
 	if err != nil {
 		return err
 	}
@@ -93,34 +93,34 @@ func UploadReport(fs blobfs.Interface, img string) error {
 		return err
 	}
 
-	summary := api.Summary{
-		SchemaVersion: report.SchemaVersion,
-		ArtifactName:  report.ArtifactName,
-		ArtifactType:  report.ArtifactType,
-		Metadata:      report.Metadata,
-		Results:       make([]api.SummaryResult, 0, len(report.Results)),
-	}
-	for _, r := range report.Results {
-		stats := map[string]int{}
-		for _, vul := range r.Vulnerabilities {
-			stats[vul.Severity] = stats[vul.Severity] + 1
-		}
-		sr := api.SummaryResult{
-			Target:          r.Target,
-			Class:           r.Class,
-			Type:            r.Type,
-			Vulnerabilities: stats,
-		}
-		summary.Results = append(summary.Results, sr)
-	}
-	sBytes, err := json.Marshal(summary)
-	if err != nil {
-		return err
-	}
-	err = fs.WriteFile(context.TODO(), path.Join(repo, digest, "summary.json"), sBytes)
-	if err != nil {
-		return err
-	}
+	//summary := api.Summary{
+	//	SchemaVersion: report.SchemaVersion,
+	//	ArtifactName:  report.ArtifactName,
+	//	ArtifactType:  report.ArtifactType,
+	//	Metadata:      report.Metadata,
+	//	Results:       make([]api.SummaryResult, 0, len(report.Results)),
+	//}
+	//for _, r := range report.Results {
+	//	stats := map[string]int{}
+	//	for _, vul := range r.Vulnerabilities {
+	//		stats[vul.Severity] = stats[vul.Severity] + 1
+	//	}
+	//	sr := api.SummaryResult{
+	//		Target:          r.Target,
+	//		Class:           r.Class,
+	//		Type:            r.Type,
+	//		Vulnerabilities: stats,
+	//	}
+	//	summary.Results = append(summary.Results, sr)
+	//}
+	//sBytes, err := json.Marshal(summary)
+	//if err != nil {
+	//	return err
+	//}
+	//err = fs.WriteFile(context.TODO(), path.Join(repo, digest, "summary.json"), sBytes)
+	//if err != nil {
+	//	return err
+	//}
 
 	return nil
 }

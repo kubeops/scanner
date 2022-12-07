@@ -30,7 +30,7 @@ var Funcs = func(codecs runtimeserializer.CodecFactory) []interface{} {
 		func(s *v1alpha1.ImageScanRequest, c fuzz.Continue) {
 			c.FuzzNoCustom(s) // fuzz self without calling this function again
 		},
-		func(s *v1alpha1.ScanSummary, c fuzz.Continue) {
+		func(s *v1alpha1.ImageScanReport, c fuzz.Continue) {
 			c.FuzzNoCustom(s) // fuzz self without calling this function again
 		},
 	}
