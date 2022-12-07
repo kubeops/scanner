@@ -19,14 +19,14 @@ package apiserver
 import (
 	"context"
 	"fmt"
-	"kubeops.dev/scanner/apis/cves"
-	"kubeops.dev/scanner/pkg/registry"
 	"os"
 
+	"kubeops.dev/scanner/apis/cves"
 	"kubeops.dev/scanner/apis/cves/install"
 	api "kubeops.dev/scanner/apis/cves/v1alpha1"
 	"kubeops.dev/scanner/pkg/backend"
 	scannerctrl "kubeops.dev/scanner/pkg/controllers/scanner"
+	"kubeops.dev/scanner/pkg/registry"
 	cvesregistry "kubeops.dev/scanner/pkg/registry/cves"
 	imagescanreportstorage "kubeops.dev/scanner/pkg/registry/cves/imagescanreport"
 
@@ -175,7 +175,7 @@ func (c completedConfig) New(ctx context.Context) (*LicenseProxyServer, error) {
 
 		v1alpha1storage := map[string]rest.Storage{}
 		v1alpha1storage[api.ResourceImageScanRequests] = cvesregistry.NewScanReportStorage(cid, nc)
-		v1alpha1storage[api.ResourceImageScanReports] =  registry.RESTInPeace(imagescanreportstorage.NewREST(Scheme, c.GenericConfig.RESTOptionsGetter))
+		v1alpha1storage[api.ResourceImageScanReports] = registry.RESTInPeace(imagescanreportstorage.NewREST(Scheme, c.GenericConfig.RESTOptionsGetter))
 
 		apiGroupInfo.VersionedResourcesStorageMap["v1alpha1"] = v1alpha1storage
 

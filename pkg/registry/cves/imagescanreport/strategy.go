@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	cves "kubeops.dev/scanner/apis/cves/v1alpha1"
+
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -11,7 +13,6 @@ import (
 	"k8s.io/apiserver/pkg/registry/generic"
 	"k8s.io/apiserver/pkg/storage"
 	"k8s.io/apiserver/pkg/storage/names"
-	cves "kubeops.dev/scanner/apis/cves/v1alpha1"
 )
 
 // NewStrategy creates and returns a fischerStrategy instance
