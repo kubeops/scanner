@@ -18,6 +18,10 @@ limitations under the License.
 
 package v1alpha1
 
-type ScanReportExpansion interface{}
+type ImageScanReportExpansion interface{}
+
+type ImageScanRequestExpansion interface{}
+
+type ReportExpansion interface{}
 
 type ScanSummaryExpansion interface{}

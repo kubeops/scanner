@@ -38,7 +38,7 @@ func TestReport(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := tl.RoundTripFile(tt.name, &Report{})
+			err := tl.RoundTripFile(tt.name, &SingleReport{})
 			if (err != nil) != tt.wantErr {
 				t.Errorf("RoundTripFile() error = %v, wantErr %v", err, tt.wantErr)
 				return

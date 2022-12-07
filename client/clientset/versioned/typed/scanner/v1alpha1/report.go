@@ -27,37 +27,40 @@ import (
 	scheme "kubeops.dev/scanner/client/clientset/versioned/scheme"
 )
 
-// ScanReportsGetter has a method to return a ScanReportInterface.
+// ReportsGetter has a method to return a ReportInterface.
 // A group's client should implement this interface.
-type ScanReportsGetter interface {
-	ScanReports() ScanReportInterface
+type ReportsGetter interface {
+	Reports(namespace string) ReportInterface
 }
 
-// ScanReportInterface has methods to work with ImageScanRequest resources.
-type ScanReportInterface interface {
-	Create(ctx context.Context, scanReport *v1alpha1.ImageScanRequest, opts v1.CreateOptions) (*v1alpha1.ImageScanRequest, error)
-	ScanReportExpansion
+// ReportInterface has methods to work with Report resources.
+type ReportInterface interface {
+	Create(ctx context.Context, report *v1alpha1.Report, opts v1.CreateOptions) (*v1alpha1.Report, error)
+	ReportExpansion
 }
 
-// scanReports implements ScanReportInterface
-type scanReports struct {
+// reports implements ReportInterface
+type reports struct {
 	client rest.Interface
+	ns     string
 }
 
-// newScanReports returns a ScanReports
-func newScanReports(c *ScannerV1alpha1Client) *scanReports {
-	return &scanReports{
+// newReports returns a Reports
+func newReports(c *ScannerV1alpha1Client, namespace string) *reports {
+	return &reports{
 		client: c.RESTClient(),
+		ns:     namespace,
 	}
 }
 
-// Create takes the representation of a scanReport and creates it.  Returns the server's representation of the scanReport, and an error, if there is any.
-func (c *scanReports) Create(ctx context.Context, scanReport *v1alpha1.ImageScanRequest, opts v1.CreateOptions) (result *v1alpha1.ImageScanRequest, err error) {
-	result = &v1alpha1.ImageScanRequest{}
+// Create takes the representation of a report and creates it.  Returns the server's representation of the report, and an error, if there is any.
+func (c *reports) Create(ctx context.Context, report *v1alpha1.Report, opts v1.CreateOptions) (result *v1alpha1.Report, err error) {
+	result = &v1alpha1.Report{}
 	err = c.client.Post().
-		Resource("scanreports").
+		Namespace(c.ns).
+		Resource("reports").
 		VersionedParams(&opts, scheme.ParameterCodec).
-		Body(scanReport).
+		Body(report).
 		Do(ctx).
 		Into(result)
 	return

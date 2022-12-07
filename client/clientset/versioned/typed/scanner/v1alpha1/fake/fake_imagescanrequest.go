@@ -27,19 +27,19 @@ import (
 	v1alpha1 "kubeops.dev/scanner/apis/scanner/v1alpha1"
 )
 
-// FakeScanReports implements ScanReportInterface
-type FakeScanReports struct {
+// FakeImageScanRequests implements ImageScanRequestInterface
+type FakeImageScanRequests struct {
 	Fake *FakeScannerV1alpha1
 }
 
-var scanreportsResource = schema.GroupVersionResource{Group: "scanner.appscode.com", Version: "v1alpha1", Resource: "scanreports"}
+var imagescanrequestsResource = schema.GroupVersionResource{Group: "scanner.appscode.com", Version: "v1alpha1", Resource: "imagescanrequests"}
 
-var scanreportsKind = schema.GroupVersionKind{Group: "scanner.appscode.com", Version: "v1alpha1", Kind: "ImageScanRequest"}
+var imagescanrequestsKind = schema.GroupVersionKind{Group: "scanner.appscode.com", Version: "v1alpha1", Kind: "ImageScanRequest"}
 
-// Create takes the representation of a scanReport and creates it.  Returns the server's representation of the scanReport, and an error, if there is any.
-func (c *FakeScanReports) Create(ctx context.Context, scanReport *v1alpha1.ImageScanRequest, opts v1.CreateOptions) (result *v1alpha1.ImageScanRequest, err error) {
+// Create takes the representation of a imageScanRequest and creates it.  Returns the server's representation of the imageScanRequest, and an error, if there is any.
+func (c *FakeImageScanRequests) Create(ctx context.Context, imageScanRequest *v1alpha1.ImageScanRequest, opts v1.CreateOptions) (result *v1alpha1.ImageScanRequest, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewRootCreateAction(scanreportsResource, scanReport), &v1alpha1.ImageScanRequest{})
+		Invokes(testing.NewRootCreateAction(imagescanrequestsResource, imageScanRequest), &v1alpha1.ImageScanRequest{})
 	if obj == nil {
 		return nil, err
 	}

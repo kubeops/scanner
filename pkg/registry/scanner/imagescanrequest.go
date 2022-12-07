@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package scanreport
+package scanner
 
 import (
 	"context"
@@ -30,56 +30,54 @@ import (
 	"k8s.io/apiserver/pkg/registry/rest"
 )
 
-type Storage struct {
+type ImageRequest struct {
 	cid string
 	nc  *nats.Conn
 }
 
 var (
-	_ rest.GroupVersionKindProvider = &Storage{}
-	_ rest.Scoper                   = &Storage{}
-	_ rest.Creater                  = &Storage{}
-	_ rest.Storage                  = &Storage{}
+	_ rest.GroupVersionKindProvider = &ImageRequest{}
+	_ rest.Scoper                   = &ImageRequest{}
+	_ rest.Creater                  = &ImageRequest{}
+	_ rest.Storage                  = &ImageRequest{}
 )
 
-func NewStorage(cid string, nc *nats.Conn) *Storage {
-	s := &Storage{
+func NewScanReportStorage(cid string, nc *nats.Conn) *ImageRequest {
+	s := &ImageRequest{
 		cid: cid,
 		nc:  nc,
 	}
 	return s
 }
 
-func (r *Storage) GroupVersionKind(_ schema.GroupVersion) schema.GroupVersionKind {
-	return api.SchemeGroupVersion.WithKind(api.ResourceKindScanReport)
+func (r *ImageRequest) GroupVersionKind(_ schema.GroupVersion) schema.GroupVersionKind {
+	return api.SchemeGroupVersion.WithKind(api.ResourceKindImageScanRequest)
 }
 
-func (r *Storage) NamespaceScoped() bool {
+func (r *ImageRequest) NamespaceScoped() bool {
 	return false
 }
 
-func (r *Storage) New() runtime.Object {
-	return &api.ScanReport{}
+func (r *ImageRequest) New() runtime.Object {
+	return &api.ImageScanRequest{}
 }
 
-func (r *Storage) Destroy() {}
+func (r *ImageRequest) Destroy() {}
 
-func (r *Storage) Create(ctx context.Context, obj runtime.Object, _ rest.ValidateObjectFunc, _ *metav1.CreateOptions) (runtime.Object, error) {
-	in := obj.(*api.ScanReport)
+func (r *ImageRequest) Create(ctx context.Context, obj runtime.Object, _ rest.ValidateObjectFunc, _ *metav1.CreateOptions) (runtime.Object, error) {
+	in := obj.(*api.ImageScanRequest)
 
 	msg, err := r.nc.Request("scanner.report", []byte(in.Request.ImageRef), backend.NatsRequestTimeout)
 	if err != nil {
 		return nil, err
 	}
 
-	var report api.Report
+	var report api.SingleReport
 	err = json.Unmarshal(msg.Data, &report)
 	if err != nil {
 		return nil, err
 	}
 
-	in.Response = &api.ScanReportResponse{
-		Result: report,
-	}
+	// TODO : kubectl apply ImageScanReport
 	return obj, nil
 }

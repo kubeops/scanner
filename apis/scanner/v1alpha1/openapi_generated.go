@@ -361,21 +361,28 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"kubeops.dev/scanner/apis/scanner/v1alpha1.ImageHistory":             schema_scanner_apis_scanner_v1alpha1_ImageHistory(ref),
 		"kubeops.dev/scanner/apis/scanner/v1alpha1.ImageMetadata":            schema_scanner_apis_scanner_v1alpha1_ImageMetadata(ref),
 		"kubeops.dev/scanner/apis/scanner/v1alpha1.ImageOS":                  schema_scanner_apis_scanner_v1alpha1_ImageOS(ref),
+		"kubeops.dev/scanner/apis/scanner/v1alpha1.ImageReport":              schema_scanner_apis_scanner_v1alpha1_ImageReport(ref),
 		"kubeops.dev/scanner/apis/scanner/v1alpha1.ImageRootfs":              schema_scanner_apis_scanner_v1alpha1_ImageRootfs(ref),
 		"kubeops.dev/scanner/apis/scanner/v1alpha1.ImageRuntimeConfig":       schema_scanner_apis_scanner_v1alpha1_ImageRuntimeConfig(ref),
+		"kubeops.dev/scanner/apis/scanner/v1alpha1.ImageScanReport":          schema_scanner_apis_scanner_v1alpha1_ImageScanReport(ref),
+		"kubeops.dev/scanner/apis/scanner/v1alpha1.ImageScanReportSpec":      schema_scanner_apis_scanner_v1alpha1_ImageScanReportSpec(ref),
+		"kubeops.dev/scanner/apis/scanner/v1alpha1.ImageScanReportStatus":    schema_scanner_apis_scanner_v1alpha1_ImageScanReportStatus(ref),
+		"kubeops.dev/scanner/apis/scanner/v1alpha1.ImageScanRequest":         schema_scanner_apis_scanner_v1alpha1_ImageScanRequest(ref),
+		"kubeops.dev/scanner/apis/scanner/v1alpha1.ImageScanRequestSpec":     schema_scanner_apis_scanner_v1alpha1_ImageScanRequestSpec(ref),
 		"kubeops.dev/scanner/apis/scanner/v1alpha1.MyTime":                   schema_scanner_apis_scanner_v1alpha1_MyTime(ref),
 		"kubeops.dev/scanner/apis/scanner/v1alpha1.Report":                   schema_scanner_apis_scanner_v1alpha1_Report(ref),
+		"kubeops.dev/scanner/apis/scanner/v1alpha1.ReportRequest":            schema_scanner_apis_scanner_v1alpha1_ReportRequest(ref),
+		"kubeops.dev/scanner/apis/scanner/v1alpha1.ReportResponse":           schema_scanner_apis_scanner_v1alpha1_ReportResponse(ref),
 		"kubeops.dev/scanner/apis/scanner/v1alpha1.Result":                   schema_scanner_apis_scanner_v1alpha1_Result(ref),
-		"kubeops.dev/scanner/apis/scanner/v1alpha1.ScanReport":               schema_scanner_apis_scanner_v1alpha1_ScanReport(ref),
-		"kubeops.dev/scanner/apis/scanner/v1alpha1.ScanReportRequest":        schema_scanner_apis_scanner_v1alpha1_ScanReportRequest(ref),
-		"kubeops.dev/scanner/apis/scanner/v1alpha1.ScanReportResponse":       schema_scanner_apis_scanner_v1alpha1_ScanReportResponse(ref),
 		"kubeops.dev/scanner/apis/scanner/v1alpha1.ScanSummary":              schema_scanner_apis_scanner_v1alpha1_ScanSummary(ref),
 		"kubeops.dev/scanner/apis/scanner/v1alpha1.ScanSummaryRequest":       schema_scanner_apis_scanner_v1alpha1_ScanSummaryRequest(ref),
 		"kubeops.dev/scanner/apis/scanner/v1alpha1.ScanSummaryResponse":      schema_scanner_apis_scanner_v1alpha1_ScanSummaryResponse(ref),
+		"kubeops.dev/scanner/apis/scanner/v1alpha1.SingleReport":             schema_scanner_apis_scanner_v1alpha1_SingleReport(ref),
 		"kubeops.dev/scanner/apis/scanner/v1alpha1.Summary":                  schema_scanner_apis_scanner_v1alpha1_Summary(ref),
 		"kubeops.dev/scanner/apis/scanner/v1alpha1.SummaryResult":            schema_scanner_apis_scanner_v1alpha1_SummaryResult(ref),
 		"kubeops.dev/scanner/apis/scanner/v1alpha1.Vulnerability":            schema_scanner_apis_scanner_v1alpha1_Vulnerability(ref),
 		"kubeops.dev/scanner/apis/scanner/v1alpha1.VulnerabilityDataSource":  schema_scanner_apis_scanner_v1alpha1_VulnerabilityDataSource(ref),
+		"kubeops.dev/scanner/apis/scanner/v1alpha1.VulnerabilityInfo":        schema_scanner_apis_scanner_v1alpha1_VulnerabilityInfo(ref),
 		"kubeops.dev/scanner/apis/scanner/v1alpha1.VulnerabilityLayer":       schema_scanner_apis_scanner_v1alpha1_VulnerabilityLayer(ref),
 		"kubeops.dev/scanner/apis/scanner/v1alpha1.Workload":                 schema_scanner_apis_scanner_v1alpha1_Workload(ref),
 		"kubeops.dev/scanner/apis/scanner/v1alpha1.WorkloadList":             schema_scanner_apis_scanner_v1alpha1_WorkloadList(ref),
@@ -2008,7 +2015,7 @@ func schema_k8sio_api_core_v1_AttachedVolume(ref common.ReferenceCallback) commo
 				Properties: map[string]spec.Schema{
 					"name": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Image of the attached volume",
+							Description: "Name of the attached volume",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -2067,7 +2074,7 @@ func schema_k8sio_api_core_v1_AzureDiskVolumeSource(ref common.ReferenceCallback
 				Properties: map[string]spec.Schema{
 					"diskName": {
 						SchemaProps: spec.SchemaProps{
-							Description: "diskName is the Image of the data disk in the blob storage",
+							Description: "diskName is the Name of the data disk in the blob storage",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -2125,7 +2132,7 @@ func schema_k8sio_api_core_v1_AzureFilePersistentVolumeSource(ref common.Referen
 				Properties: map[string]spec.Schema{
 					"secretName": {
 						SchemaProps: spec.SchemaProps{
-							Description: "secretName is the name of secret that contains Azure Storage Account Image and Key",
+							Description: "secretName is the name of secret that contains Azure Storage Account Name and Key",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -2133,7 +2140,7 @@ func schema_k8sio_api_core_v1_AzureFilePersistentVolumeSource(ref common.Referen
 					},
 					"shareName": {
 						SchemaProps: spec.SchemaProps{
-							Description: "shareName is the azure Share Image",
+							Description: "shareName is the azure Share Name",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -2148,7 +2155,7 @@ func schema_k8sio_api_core_v1_AzureFilePersistentVolumeSource(ref common.Referen
 					},
 					"secretNamespace": {
 						SchemaProps: spec.SchemaProps{
-							Description: "secretNamespace is the namespace of the secret that contains Azure Storage Account Image and Key default is the same as the Pod",
+							Description: "secretNamespace is the namespace of the secret that contains Azure Storage Account Name and Key default is the same as the Pod",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -2169,7 +2176,7 @@ func schema_k8sio_api_core_v1_AzureFileVolumeSource(ref common.ReferenceCallback
 				Properties: map[string]spec.Schema{
 					"secretName": {
 						SchemaProps: spec.SchemaProps{
-							Description: "secretName is the  name of secret that contains Azure Storage Account Image and Key",
+							Description: "secretName is the  name of secret that contains Azure Storage Account Name and Key",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -2177,7 +2184,7 @@ func schema_k8sio_api_core_v1_AzureFileVolumeSource(ref common.ReferenceCallback
 					},
 					"shareName": {
 						SchemaProps: spec.SchemaProps{
-							Description: "shareName is the azure share Image",
+							Description: "shareName is the azure share Name",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -2908,7 +2915,7 @@ func schema_k8sio_api_core_v1_ConfigMapEnvSource(ref common.ReferenceCallback) c
 				Properties: map[string]spec.Schema{
 					"name": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Image of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
+							Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -2935,7 +2942,7 @@ func schema_k8sio_api_core_v1_ConfigMapKeySelector(ref common.ReferenceCallback)
 				Properties: map[string]spec.Schema{
 					"name": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Image of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
+							Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -3035,7 +3042,7 @@ func schema_k8sio_api_core_v1_ConfigMapNodeConfigSource(ref common.ReferenceCall
 					},
 					"name": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Image is the metadata.name of the referenced ConfigMap. This field is required in all cases.",
+							Description: "Name is the metadata.name of the referenced ConfigMap. This field is required in all cases.",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -3079,7 +3086,7 @@ func schema_k8sio_api_core_v1_ConfigMapProjection(ref common.ReferenceCallback) 
 				Properties: map[string]spec.Schema{
 					"name": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Image of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
+							Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -3122,7 +3129,7 @@ func schema_k8sio_api_core_v1_ConfigMapVolumeSource(ref common.ReferenceCallback
 				Properties: map[string]spec.Schema{
 					"name": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Image of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
+							Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -3172,7 +3179,7 @@ func schema_k8sio_api_core_v1_Container(ref common.ReferenceCallback) common.Ope
 				Properties: map[string]spec.Schema{
 					"name": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Image of the container specified as a DNS_LABEL. Each container in a pod must have a unique name (DNS_LABEL). Cannot be updated.",
+							Description: "Name of the container specified as a DNS_LABEL. Each container in a pod must have a unique name (DNS_LABEL). Cannot be updated.",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -3453,7 +3460,7 @@ func schema_k8sio_api_core_v1_ContainerPort(ref common.ReferenceCallback) common
 				Properties: map[string]spec.Schema{
 					"name": {
 						SchemaProps: spec.SchemaProps{
-							Description: "If specified, this must be an IANA_SVC_NAME and unique within the pod. Each named port in a pod must have a unique name. Image for the port that can be referred to by services.",
+							Description: "If specified, this must be an IANA_SVC_NAME and unique within the pod. Each named port in a pod must have a unique name. Name for the port that can be referred to by services.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -4043,7 +4050,7 @@ func schema_k8sio_api_core_v1_Endpoints(ref common.ReferenceCallback) common.Ope
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "Endpoints is a collection of endpoints that implement the actual service. Example:\n\n\t Image: \"mysvc\",\n\t Subsets: [\n\t   {\n\t     Addresses: [{\"ip\": \"10.10.1.1\"}, {\"ip\": \"10.10.2.2\"}],\n\t     Ports: [{\"name\": \"a\", \"port\": 8675}, {\"name\": \"b\", \"port\": 309}]\n\t   },\n\t   {\n\t     Addresses: [{\"ip\": \"10.10.3.3\"}],\n\t     Ports: [{\"name\": \"a\", \"port\": 93}, {\"name\": \"b\", \"port\": 76}]\n\t   },\n\t]",
+				Description: "Endpoints is a collection of endpoints that implement the actual service. Example:\n\n\t Name: \"mysvc\",\n\t Subsets: [\n\t   {\n\t     Addresses: [{\"ip\": \"10.10.1.1\"}, {\"ip\": \"10.10.2.2\"}],\n\t     Ports: [{\"name\": \"a\", \"port\": 8675}, {\"name\": \"b\", \"port\": 309}]\n\t   },\n\t   {\n\t     Addresses: [{\"ip\": \"10.10.3.3\"}],\n\t     Ports: [{\"name\": \"a\", \"port\": 93}, {\"name\": \"b\", \"port\": 76}]\n\t   },\n\t]",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"kind": {
@@ -4183,7 +4190,7 @@ func schema_k8sio_api_core_v1_EnvVar(ref common.ReferenceCallback) common.OpenAP
 				Properties: map[string]spec.Schema{
 					"name": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Image of the environment variable. Must be a C_IDENTIFIER.",
+							Description: "Name of the environment variable. Must be a C_IDENTIFIER.",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -4259,7 +4266,7 @@ func schema_k8sio_api_core_v1_EphemeralContainer(ref common.ReferenceCallback) c
 				Properties: map[string]spec.Schema{
 					"name": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Image of the ephemeral container specified as a DNS_LABEL. This name must be unique among all containers, init containers and ephemeral containers.",
+							Description: "Name of the ephemeral container specified as a DNS_LABEL. This name must be unique among all containers, init containers and ephemeral containers.",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -4512,7 +4519,7 @@ func schema_k8sio_api_core_v1_EphemeralContainerCommon(ref common.ReferenceCallb
 				Properties: map[string]spec.Schema{
 					"name": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Image of the ephemeral container specified as a DNS_LABEL. This name must be unique among all containers, init containers and ephemeral containers.",
+							Description: "Name of the ephemeral container specified as a DNS_LABEL. This name must be unique among all containers, init containers and ephemeral containers.",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -4882,7 +4889,7 @@ func schema_k8sio_api_core_v1_Event(ref common.ReferenceCallback) common.OpenAPI
 					},
 					"reportingComponent": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Image of the controller that emitted this Event, e.g. `kubernetes.io/kubelet`.",
+							Description: "Name of the controller that emitted this Event, e.g. `kubernetes.io/kubelet`.",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -5233,7 +5240,7 @@ func schema_k8sio_api_core_v1_FlockerVolumeSource(ref common.ReferenceCallback) 
 				Properties: map[string]spec.Schema{
 					"datasetName": {
 						SchemaProps: spec.SchemaProps{
-							Description: "datasetName is Image of the dataset stored as metadata -> name on the dataset for Flocker should be considered as deprecated",
+							Description: "datasetName is Name of the dataset stored as metadata -> name on the dataset for Flocker should be considered as deprecated",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -5456,7 +5463,7 @@ func schema_k8sio_api_core_v1_HTTPGetAction(ref common.ReferenceCallback) common
 					},
 					"port": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Image or number of the port to access on the container. Number must be in the range 1 to 65535. Image must be an IANA_SVC_NAME.",
+							Description: "Name or number of the port to access on the container. Number must be in the range 1 to 65535. Name must be an IANA_SVC_NAME.",
 							Default:     map[string]interface{}{},
 							Ref:         ref("k8s.io/apimachinery/pkg/util/intstr.IntOrString"),
 						},
@@ -5609,7 +5616,7 @@ func schema_k8sio_api_core_v1_ISCSIPersistentVolumeSource(ref common.ReferenceCa
 					},
 					"iqn": {
 						SchemaProps: spec.SchemaProps{
-							Description: "iqn is Target iSCSI Qualified Image.",
+							Description: "iqn is Target iSCSI Qualified Name.",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -5625,7 +5632,7 @@ func schema_k8sio_api_core_v1_ISCSIPersistentVolumeSource(ref common.ReferenceCa
 					},
 					"iscsiInterface": {
 						SchemaProps: spec.SchemaProps{
-							Description: "iscsiInterface is the interface Image that uses an iSCSI transport. Defaults to 'default' (tcp).",
+							Description: "iscsiInterface is the interface Name that uses an iSCSI transport. Defaults to 'default' (tcp).",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -5681,7 +5688,7 @@ func schema_k8sio_api_core_v1_ISCSIPersistentVolumeSource(ref common.ReferenceCa
 					},
 					"initiatorName": {
 						SchemaProps: spec.SchemaProps{
-							Description: "initiatorName is the custom iSCSI Initiator Image. If initiatorName is specified with iscsiInterface simultaneously, new iSCSI interface <target portal>:<volume name> will be created for the connection.",
+							Description: "initiatorName is the custom iSCSI Initiator Name. If initiatorName is specified with iscsiInterface simultaneously, new iSCSI interface <target portal>:<volume name> will be created for the connection.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -5712,7 +5719,7 @@ func schema_k8sio_api_core_v1_ISCSIVolumeSource(ref common.ReferenceCallback) co
 					},
 					"iqn": {
 						SchemaProps: spec.SchemaProps{
-							Description: "iqn is the target iSCSI Qualified Image.",
+							Description: "iqn is the target iSCSI Qualified Name.",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -5728,7 +5735,7 @@ func schema_k8sio_api_core_v1_ISCSIVolumeSource(ref common.ReferenceCallback) co
 					},
 					"iscsiInterface": {
 						SchemaProps: spec.SchemaProps{
-							Description: "iscsiInterface is the interface Image that uses an iSCSI transport. Defaults to 'default' (tcp).",
+							Description: "iscsiInterface is the interface Name that uses an iSCSI transport. Defaults to 'default' (tcp).",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -5784,7 +5791,7 @@ func schema_k8sio_api_core_v1_ISCSIVolumeSource(ref common.ReferenceCallback) co
 					},
 					"initiatorName": {
 						SchemaProps: spec.SchemaProps{
-							Description: "initiatorName is the custom iSCSI Initiator Image. If initiatorName is specified with iscsiInterface simultaneously, new iSCSI interface <target portal>:<volume name> will be created for the connection.",
+							Description: "initiatorName is the custom iSCSI Initiator Name. If initiatorName is specified with iscsiInterface simultaneously, new iSCSI interface <target portal>:<volume name> will be created for the connection.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -6255,7 +6262,7 @@ func schema_k8sio_api_core_v1_LocalObjectReference(ref common.ReferenceCallback)
 				Properties: map[string]spec.Schema{
 					"name": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Image of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
+							Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -7449,7 +7456,7 @@ func schema_k8sio_api_core_v1_ObjectReference(ref common.ReferenceCallback) comm
 					},
 					"name": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Image of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
+							Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -9065,7 +9072,7 @@ func schema_k8sio_api_core_v1_PodOS(ref common.ReferenceCallback) common.OpenAPI
 				Properties: map[string]spec.Schema{
 					"name": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Image is the name of the operating system. The currently supported values are linux and windows. Additional value may be defined in future and can be one of: https://github.com/opencontainers/runtime-spec/blob/master/config.md#platform-specific-configuration Clients should expect to handle additional values and treat unrecognized values in this field as os: null",
+							Description: "Name is the name of the operating system. The currently supported values are linux and windows. Additional value may be defined in future and can be one of: https://github.com/opencontainers/runtime-spec/blob/master/config.md#platform-specific-configuration Clients should expect to handle additional values and treat unrecognized values in this field as os: null",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -11580,7 +11587,7 @@ func schema_k8sio_api_core_v1_SecretEnvSource(ref common.ReferenceCallback) comm
 				Properties: map[string]spec.Schema{
 					"name": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Image of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
+							Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -11607,7 +11614,7 @@ func schema_k8sio_api_core_v1_SecretKeySelector(ref common.ReferenceCallback) co
 				Properties: map[string]spec.Schema{
 					"name": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Image of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
+							Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -11699,7 +11706,7 @@ func schema_k8sio_api_core_v1_SecretProjection(ref common.ReferenceCallback) com
 				Properties: map[string]spec.Schema{
 					"name": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Image of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
+							Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -12243,7 +12250,7 @@ func schema_k8sio_api_core_v1_ServicePort(ref common.ReferenceCallback) common.O
 					},
 					"targetPort": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Number or name of the port to access on the pods targeted by the service. Number must be in the range 1 to 65535. Image must be an IANA_SVC_NAME. If this is a string, it will be looked up as a named port in the target Pod's container ports. If this is not specified, the value of the 'port' field is used (an identity map). This field is ignored for services with clusterIP=None, and should be omitted or set equal to the 'port' field. More info: https://kubernetes.io/docs/concepts/services-networking/service/#defining-a-service",
+							Description: "Number or name of the port to access on the pods targeted by the service. Number must be in the range 1 to 65535. Name must be an IANA_SVC_NAME. If this is a string, it will be looked up as a named port in the target Pod's container ports. If this is not specified, the value of the 'port' field is used (an identity map). This field is ignored for services with clusterIP=None, and should be omitted or set equal to the 'port' field. More info: https://kubernetes.io/docs/concepts/services-networking/service/#defining-a-service",
 							Default:     map[string]interface{}{},
 							Ref:         ref("k8s.io/apimachinery/pkg/util/intstr.IntOrString"),
 						},
@@ -12693,7 +12700,7 @@ func schema_k8sio_api_core_v1_Sysctl(ref common.ReferenceCallback) common.OpenAP
 				Properties: map[string]spec.Schema{
 					"name": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Image of a property to set",
+							Description: "Name of a property to set",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -12723,7 +12730,7 @@ func schema_k8sio_api_core_v1_TCPSocketAction(ref common.ReferenceCallback) comm
 				Properties: map[string]spec.Schema{
 					"port": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Number or name of the port to access on the container. Number must be in the range 1 to 65535. Image must be an IANA_SVC_NAME.",
+							Description: "Number or name of the port to access on the container. Number must be in the range 1 to 65535. Name must be an IANA_SVC_NAME.",
 							Default:     map[string]interface{}{},
 							Ref:         ref("k8s.io/apimachinery/pkg/util/intstr.IntOrString"),
 						},
@@ -13019,7 +13026,7 @@ func schema_k8sio_api_core_v1_TypedLocalObjectReference(ref common.ReferenceCall
 					},
 					"name": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Image is the name of resource being referenced",
+							Description: "Name is the name of resource being referenced",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -13274,7 +13281,7 @@ func schema_k8sio_api_core_v1_VolumeMount(ref common.ReferenceCallback) common.O
 				Properties: map[string]spec.Schema{
 					"name": {
 						SchemaProps: spec.SchemaProps{
-							Description: "This must match the Image of a Volume.",
+							Description: "This must match the Name of a Volume.",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -14256,7 +14263,7 @@ func schema_k8sio_api_rbac_v1_RoleRef(ref common.ReferenceCallback) common.OpenA
 					},
 					"name": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Image is the name of resource being referenced",
+							Description: "Name is the name of resource being referenced",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -14298,7 +14305,7 @@ func schema_k8sio_api_rbac_v1_Subject(ref common.ReferenceCallback) common.OpenA
 					},
 					"name": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Image of the object being referenced.",
+							Description: "Name of the object being referenced.",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -15595,14 +15602,14 @@ func schema_pkg_apis_meta_v1_ObjectMeta(ref common.ReferenceCallback) common.Ope
 				Properties: map[string]spec.Schema{
 					"name": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Image must be unique within a namespace. Is required when creating resources, although some resources may allow a client to request the generation of an appropriate name automatically. Image is primarily intended for creation idempotence and configuration definition. Cannot be updated. More info: http://kubernetes.io/docs/user-guide/identifiers#names",
+							Description: "Name must be unique within a namespace. Is required when creating resources, although some resources may allow a client to request the generation of an appropriate name automatically. Name is primarily intended for creation idempotence and configuration definition. Cannot be updated. More info: http://kubernetes.io/docs/user-guide/identifiers#names",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 					"generateName": {
 						SchemaProps: spec.SchemaProps{
-							Description: "GenerateName is an optional prefix, used by the server, to generate a unique name ONLY IF the Image field has not been provided. If this field is used, the name returned to the client will be different than the name passed. This value will also be combined with a unique suffix. The provided value has the same validation rules as the Image field, and may be truncated by the length of the suffix required to make the value unique on the server.\n\nIf this field is specified and the generated name exists, the server will return a 409.\n\nApplied only if Image is not specified. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#idempotency",
+							Description: "GenerateName is an optional prefix, used by the server, to generate a unique name ONLY IF the Name field has not been provided. If this field is used, the name returned to the client will be different than the name passed. This value will also be combined with a unique suffix. The provided value has the same validation rules as the Name field, and may be truncated by the length of the suffix required to make the value unique on the server.\n\nIf this field is specified and the generated name exists, the server will return a 409.\n\nApplied only if Name is not specified. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#idempotency",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -15781,7 +15788,7 @@ func schema_pkg_apis_meta_v1_OwnerReference(ref common.ReferenceCallback) common
 					},
 					"name": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Image of the referent. More info: http://kubernetes.io/docs/user-guide/identifiers#names",
+							Description: "Name of the referent. More info: http://kubernetes.io/docs/user-guide/identifiers#names",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -16870,7 +16877,7 @@ func schema_kmodulesxyz_client_go_api_v1_CertificateSpec(ref common.ReferenceCal
 					},
 					"subject": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Full X509 name specification (https://golang.org/pkg/crypto/x509/pkix/#Image).",
+							Description: "Full X509 name specification (https://golang.org/pkg/crypto/x509/pkix/#Name).",
 							Ref:         ref("kmodules.xyz/client-go/api/v1.X509Subject"),
 						},
 					},
@@ -17180,7 +17187,7 @@ func schema_kmodulesxyz_client_go_api_v1_ObjectReference(ref common.ReferenceCal
 					},
 					"name": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Image of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
+							Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -17250,7 +17257,7 @@ func schema_kmodulesxyz_client_go_api_v1_ResourceID(ref common.ReferenceCallback
 					},
 					"name": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Image is the plural name of the resource to serve.  It must match the name of the CustomResourceDefinition-registration too: plural.group and it must be all lowercase.",
+							Description: "Name is the plural name of the resource to serve.  It must match the name of the CustomResourceDefinition-registration too: plural.group and it must be all lowercase.",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -17352,7 +17359,7 @@ func schema_kmodulesxyz_client_go_api_v1_TypedObjectReference(ref common.Referen
 					},
 					"name": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Image of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
+							Description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -17803,7 +17810,7 @@ func schema_scanner_apis_scanner_v1alpha1_ImageOS(ref common.ReferenceCallback) 
 							Format:  "",
 						},
 					},
-					"Image": {
+					"Name": {
 						SchemaProps: spec.SchemaProps{
 							Default: "",
 							Type:    []string{"string"},
@@ -17811,9 +17818,80 @@ func schema_scanner_apis_scanner_v1alpha1_ImageOS(ref common.ReferenceCallback) 
 						},
 					},
 				},
-				Required: []string{"Family", "Image"},
+				Required: []string{"Family", "Name"},
 			},
 		},
+	}
+}
+
+func schema_scanner_apis_scanner_v1alpha1_ImageReport(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"name": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"digest": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Name + (Tag if any)",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"vulnerabilityInfos": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("kubeops.dev/scanner/apis/scanner/v1alpha1.VulnerabilityInfo"),
+									},
+								},
+							},
+						},
+					},
+					"pods": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
+					"containers": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"name", "digest", "pods", "containers"},
+			},
+		},
+		Dependencies: []string{
+			"kubeops.dev/scanner/apis/scanner/v1alpha1.VulnerabilityInfo"},
 	}
 }
 
@@ -17939,6 +18017,198 @@ func schema_scanner_apis_scanner_v1alpha1_ImageRuntimeConfig(ref common.Referenc
 	}
 }
 
+func schema_scanner_apis_scanner_v1alpha1_ImageScanReport(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Name will be formed by hashing the ImageRef + Tag + Digest",
+							Default:     map[string]interface{}{},
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
+						},
+					},
+					"spec": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Spec describes the attributes for the Image Scan SingleReport",
+							Default:     map[string]interface{}{},
+							Ref:         ref("kubeops.dev/scanner/apis/scanner/v1alpha1.ImageScanReportSpec"),
+						},
+					},
+					"status": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Status holds all the SingleReport-related details of the specified image",
+							Default:     map[string]interface{}{},
+							Ref:         ref("kubeops.dev/scanner/apis/scanner/v1alpha1.ImageScanReportStatus"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta", "kubeops.dev/scanner/apis/scanner/v1alpha1.ImageScanReportSpec", "kubeops.dev/scanner/apis/scanner/v1alpha1.ImageScanReportStatus"},
+	}
+}
+
+func schema_scanner_apis_scanner_v1alpha1_ImageScanReportSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"image": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"tag": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"digest": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+				},
+				Required: []string{"image", "tag", "digest"},
+			},
+		},
+	}
+}
+
+func schema_scanner_apis_scanner_v1alpha1_ImageScanReportStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"lastChecked": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("kubeops.dev/scanner/apis/scanner/v1alpha1.MyTime"),
+						},
+					},
+					"trivyDBVersion": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"report": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("kubeops.dev/scanner/apis/scanner/v1alpha1.SingleReport"),
+						},
+					},
+				},
+				Required: []string{"lastChecked", "trivyDBVersion", "report"},
+			},
+		},
+		Dependencies: []string{
+			"kubeops.dev/scanner/apis/scanner/v1alpha1.MyTime", "kubeops.dev/scanner/apis/scanner/v1alpha1.SingleReport"},
+	}
+}
+
+func schema_scanner_apis_scanner_v1alpha1_ImageScanRequest(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"request": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Request describes the attributes for the graph request.",
+							Ref:         ref("kubeops.dev/scanner/apis/scanner/v1alpha1.ImageScanRequestSpec"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"kubeops.dev/scanner/apis/scanner/v1alpha1.ImageScanRequestSpec"},
+	}
+}
+
+func schema_scanner_apis_scanner_v1alpha1_ImageScanRequestSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"imageRef": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"pullSecrets": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
+					"namespace": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+				},
+				Required: []string{"imageRef", "pullSecrets", "namespace"},
+			},
+		},
+	}
+}
+
 func schema_scanner_apis_scanner_v1alpha1_MyTime(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -17965,52 +18235,107 @@ func schema_scanner_apis_scanner_v1alpha1_Report(ref common.ReferenceCallback) c
 			SchemaProps: spec.SchemaProps{
 				Type: []string{"object"},
 				Properties: map[string]spec.Schema{
-					"SchemaVersion": {
+					"kind": {
 						SchemaProps: spec.SchemaProps{
-							Default: 0,
-							Type:    []string{"integer"},
-							Format:  "int32",
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
-					"ArtifactName": {
+					"apiVersion": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
-					"ArtifactType": {
+					"request": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Description: "1. Request equals nil means, we want the report in cluster scope 2. Group is set to \"\"(core) & Kind to Namespace means, we want the report in particular namespaced scope 3. For general cases, all the fields need to be set.",
+							Ref:         ref("kubeops.dev/scanner/apis/scanner/v1alpha1.ReportRequest"),
 						},
 					},
-					"Metadata": {
+					"response": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("kubeops.dev/scanner/apis/scanner/v1alpha1.ReportResponse"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"kubeops.dev/scanner/apis/scanner/v1alpha1.ReportRequest", "kubeops.dev/scanner/apis/scanner/v1alpha1.ReportResponse"},
+	}
+}
+
+func schema_scanner_apis_scanner_v1alpha1_ReportRequest(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"resource": {
 						SchemaProps: spec.SchemaProps{
 							Default: map[string]interface{}{},
-							Ref:     ref("kubeops.dev/scanner/apis/scanner/v1alpha1.ImageMetadata"),
+							Ref:     ref("kmodules.xyz/client-go/api/v1.ResourceID"),
 						},
 					},
-					"Results": {
+					"ref": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("kmodules.xyz/client-go/api/v1.ObjectReference"),
+						},
+					},
+				},
+				Required: []string{"resource", "ref"},
+			},
+		},
+		Dependencies: []string{
+			"kmodules.xyz/client-go/api/v1.ObjectReference", "kmodules.xyz/client-go/api/v1.ResourceID"},
+	}
+}
+
+func schema_scanner_apis_scanner_v1alpha1_ReportResponse(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"images": {
 						SchemaProps: spec.SchemaProps{
 							Type: []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
 										Default: map[string]interface{}{},
-										Ref:     ref("kubeops.dev/scanner/apis/scanner/v1alpha1.Result"),
+										Ref:     ref("kubeops.dev/scanner/apis/scanner/v1alpha1.ImageReport"),
+									},
+								},
+							},
+						},
+					},
+					"vulnerabilities": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Aggregated for all the images under this ref. ex HIGH: 3, MEDIUM: 7, LOW: 4",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: 0,
+										Type:    []string{"integer"},
+										Format:  "int32",
 									},
 								},
 							},
 						},
 					},
 				},
-				Required: []string{"SchemaVersion", "ArtifactName", "ArtifactType", "Metadata", "Results"},
+				Required: []string{"images"},
 			},
 		},
 		Dependencies: []string{
-			"kubeops.dev/scanner/apis/scanner/v1alpha1.ImageMetadata", "kubeops.dev/scanner/apis/scanner/v1alpha1.Result"},
+			"kubeops.dev/scanner/apis/scanner/v1alpha1.ImageReport"},
 	}
 }
 
@@ -18060,87 +18385,6 @@ func schema_scanner_apis_scanner_v1alpha1_Result(ref common.ReferenceCallback) c
 		},
 		Dependencies: []string{
 			"kubeops.dev/scanner/apis/scanner/v1alpha1.Vulnerability"},
-	}
-}
-
-func schema_scanner_apis_scanner_v1alpha1_ScanReport(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Type: []string{"object"},
-				Properties: map[string]spec.Schema{
-					"kind": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"apiVersion": {
-						SchemaProps: spec.SchemaProps{
-							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"request": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Request describes the attributes for the graph request.",
-							Ref:         ref("kubeops.dev/scanner/apis/scanner/v1alpha1.ScanReportRequest"),
-						},
-					},
-					"response": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Response describes the attributes for the graph response.",
-							Ref:         ref("kubeops.dev/scanner/apis/scanner/v1alpha1.ScanReportResponse"),
-						},
-					},
-				},
-			},
-		},
-		Dependencies: []string{
-			"kubeops.dev/scanner/apis/scanner/v1alpha1.ScanReportRequest", "kubeops.dev/scanner/apis/scanner/v1alpha1.ScanReportResponse"},
-	}
-}
-
-func schema_scanner_apis_scanner_v1alpha1_ScanReportRequest(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Type: []string{"object"},
-				Properties: map[string]spec.Schema{
-					"imageRef": {
-						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
-						},
-					},
-				},
-				Required: []string{"imageRef"},
-			},
-		},
-	}
-}
-
-func schema_scanner_apis_scanner_v1alpha1_ScanReportResponse(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Type: []string{"object"},
-				Properties: map[string]spec.Schema{
-					"result": {
-						SchemaProps: spec.SchemaProps{
-							Default: map[string]interface{}{},
-							Ref:     ref("kubeops.dev/scanner/apis/scanner/v1alpha1.Report"),
-						},
-					},
-				},
-				Required: []string{"result"},
-			},
-		},
-		Dependencies: []string{
-			"kubeops.dev/scanner/apis/scanner/v1alpha1.Report"},
 	}
 }
 
@@ -18222,6 +18466,61 @@ func schema_scanner_apis_scanner_v1alpha1_ScanSummaryResponse(ref common.Referen
 		},
 		Dependencies: []string{
 			"kubeops.dev/scanner/apis/scanner/v1alpha1.Summary"},
+	}
+}
+
+func schema_scanner_apis_scanner_v1alpha1_SingleReport(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"SchemaVersion": {
+						SchemaProps: spec.SchemaProps{
+							Default: 0,
+							Type:    []string{"integer"},
+							Format:  "int32",
+						},
+					},
+					"ArtifactName": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"ArtifactType": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"Metadata": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("kubeops.dev/scanner/apis/scanner/v1alpha1.ImageMetadata"),
+						},
+					},
+					"Results": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("kubeops.dev/scanner/apis/scanner/v1alpha1.Result"),
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"SchemaVersion", "ArtifactName", "ArtifactType", "Metadata", "Results"},
+			},
+		},
+		Dependencies: []string{
+			"kubeops.dev/scanner/apis/scanner/v1alpha1.ImageMetadata", "kubeops.dev/scanner/apis/scanner/v1alpha1.Result"},
 	}
 }
 
@@ -18349,6 +18648,13 @@ func schema_scanner_apis_scanner_v1alpha1_Vulnerability(ref common.ReferenceCall
 							Format:  "",
 						},
 					},
+					"PkgID": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
 					"InstalledVersion": {
 						SchemaProps: spec.SchemaProps{
 							Default: "",
@@ -18453,7 +18759,7 @@ func schema_scanner_apis_scanner_v1alpha1_Vulnerability(ref common.ReferenceCall
 						},
 					},
 				},
-				Required: []string{"VulnerabilityID", "PkgName", "InstalledVersion", "Layer", "SeveritySource", "PrimaryURL", "DataSource", "Description", "Severity", "References"},
+				Required: []string{"VulnerabilityID", "PkgName", "PkgID", "InstalledVersion", "Layer", "SeveritySource", "PrimaryURL", "DataSource", "Description", "Severity", "References"},
 			},
 		},
 		Dependencies: []string{
@@ -18474,7 +18780,7 @@ func schema_scanner_apis_scanner_v1alpha1_VulnerabilityDataSource(ref common.Ref
 							Format:  "",
 						},
 					},
-					"Image": {
+					"Name": {
 						SchemaProps: spec.SchemaProps{
 							Default: "",
 							Type:    []string{"string"},
@@ -18489,7 +18795,62 @@ func schema_scanner_apis_scanner_v1alpha1_VulnerabilityDataSource(ref common.Ref
 						},
 					},
 				},
-				Required: []string{"ID", "Image", "URL"},
+				Required: []string{"ID", "Name", "URL"},
+			},
+		},
+	}
+}
+
+func schema_scanner_apis_scanner_v1alpha1_VulnerabilityInfo(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"PkgName": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"InstalledVersion": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"Title": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"Severity": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"URL": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"FixedVersion": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+				},
+				Required: []string{"PkgName", "InstalledVersion", "Title", "Severity", "URL", "FixedVersion"},
 			},
 		},
 	}

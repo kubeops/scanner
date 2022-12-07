@@ -26,8 +26,7 @@ import (
 	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
 	"kubeops.dev/scanner/pkg/backend"
 	scannerctrl "kubeops.dev/scanner/pkg/controllers/scanner"
-	"kubeops.dev/scanner/pkg/registry/scanner/scanreport"
-	"kubeops.dev/scanner/pkg/registry/scanner/scansummary"
+	registry "kubeops.dev/scanner/pkg/registry/scanner"
 
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -41,6 +40,7 @@ import (
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/klog/v2/klogr"
+	"kmodules.xyz/authorizer/rbac"
 	cu "kmodules.xyz/client-go/client"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -163,6 +163,8 @@ func (c completedConfig) New(ctx context.Context) (*LicenseProxyServer, error) {
 		os.Exit(1)
 	}
 
+	rbacAuthorizer := rbac.NewForManagerOrDie(ctx, mgr)
+
 	setupLog.Info("setup done!")
 
 	s := &LicenseProxyServer{
@@ -173,8 +175,10 @@ func (c completedConfig) New(ctx context.Context) (*LicenseProxyServer, error) {
 		apiGroupInfo := genericapiserver.NewDefaultAPIGroupInfo(scanner.GroupName, Scheme, metav1.ParameterCodec, Codecs)
 
 		v1alpha1storage := map[string]rest.Storage{}
-		v1alpha1storage[api.ResourceScanReports] = scanreport.NewStorage(cid, nc)
-		v1alpha1storage[api.ResourceScanSummaries] = scansummary.NewStorage(cid, nc)
+		v1alpha1storage[api.ResourceImageScanReports] = registry.NewScanReportStorage(cid, nc)
+		v1alpha1storage[api.ResourceScanSummaries] = registry.NewScanSummaryStorage(cid, nc)
+		// TODO: Pass client as kc
+		v1alpha1storage[api.ResourceReports] = registry.NewAppReportStorage(cid, nc, nil, rbacAuthorizer)
 		apiGroupInfo.VersionedResourcesStorageMap["v1alpha1"] = v1alpha1storage
 
 		if err := s.GenericAPIServer.InstallAPIGroup(&apiGroupInfo); err != nil {

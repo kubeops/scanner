@@ -126,7 +126,7 @@ func UploadReport(fs blobfs.Interface, img string) error {
 }
 
 // trivy image ubuntu --security-checks vuln --format json --quiet
-func scan(img string) (*api.Report, []byte, error) {
+func scan(img string) (*api.SingleReport, []byte, error) {
 	sh := shell.NewSession()
 	// sh.SetEnv("BUILD_ID", "123")
 	sh.SetDir("/tmp")
@@ -147,7 +147,7 @@ func scan(img string) (*api.Report, []byte, error) {
 		return nil, nil, err
 	}
 
-	var r api.Report
+	var r api.SingleReport
 	err = json.Unmarshal(out, &r)
 	if err != nil {
 		return nil, nil, err

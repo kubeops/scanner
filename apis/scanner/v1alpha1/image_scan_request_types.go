@@ -21,9 +21,10 @@ import (
 )
 
 const (
-	ResourceKindScanReport = "ScanReport"
-	ResourceScanReport     = "scanreport"
-	ResourceScanReports    = "scanreports"
+	ResourceCodeImageScanRequest = "isreq"
+	ResourceKindImageScanRequest = "ImageScanRequest"
+	ResourceImageScanRequest     = "imagescanrequest"
+	ResourceImageScanRequests    = "imagescanrequests"
 )
 
 // +genclient
@@ -31,21 +32,16 @@ const (
 // +genclient:onlyVerbs=create
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +kubebuilder:object:root=true
-// +kubebuilder:resource:path=scanreports,singular=scanreport,scope=Cluster
-type ScanReport struct {
+// +kubebuilder:resource:path=imagescanrequests,singular=imagescanrequest,shortName=isreq,scope=Cluster
+type ImageScanRequest struct {
 	metav1.TypeMeta `json:",inline"`
 	// Request describes the attributes for the graph request.
 	// +optional
-	Request *ScanReportRequest `json:"request,omitempty"`
-	// Response describes the attributes for the graph response.
-	// +optional
-	Response *ScanReportResponse `json:"response,omitempty"`
+	Request *ImageScanRequestSpec `json:"request,omitempty"`
 }
 
-type ScanReportRequest struct {
-	ImageRef string `json:"imageRef"`
-}
-
-type ScanReportResponse struct {
-	Result Report `json:"result"`
+type ImageScanRequestSpec struct {
+	ImageRef    string   `json:"imageRef"`
+	PullSecrets []string `json:"pullSecrets"`
+	Namespace   string   `json:"namespace"`
 }

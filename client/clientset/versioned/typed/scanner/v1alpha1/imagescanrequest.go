@@ -27,37 +27,37 @@ import (
 	scheme "kubeops.dev/scanner/client/clientset/versioned/scheme"
 )
 
-// ScanReportsGetter has a method to return a ScanReportInterface.
+// ImageScanRequestsGetter has a method to return a ImageScanRequestInterface.
 // A group's client should implement this interface.
-type ScanReportsGetter interface {
-	ScanReports() ScanReportInterface
+type ImageScanRequestsGetter interface {
+	ImageScanRequests() ImageScanRequestInterface
 }
 
-// ScanReportInterface has methods to work with ImageScanRequest resources.
-type ScanReportInterface interface {
-	Create(ctx context.Context, scanReport *v1alpha1.ImageScanRequest, opts v1.CreateOptions) (*v1alpha1.ImageScanRequest, error)
-	ScanReportExpansion
+// ImageScanRequestInterface has methods to work with ImageScanRequest resources.
+type ImageScanRequestInterface interface {
+	Create(ctx context.Context, imageScanRequest *v1alpha1.ImageScanRequest, opts v1.CreateOptions) (*v1alpha1.ImageScanRequest, error)
+	ImageScanRequestExpansion
 }
 
-// scanReports implements ScanReportInterface
-type scanReports struct {
+// imageScanRequests implements ImageScanRequestInterface
+type imageScanRequests struct {
 	client rest.Interface
 }
 
-// newScanReports returns a ScanReports
-func newScanReports(c *ScannerV1alpha1Client) *scanReports {
-	return &scanReports{
+// newImageScanRequests returns a ImageScanRequests
+func newImageScanRequests(c *ScannerV1alpha1Client) *imageScanRequests {
+	return &imageScanRequests{
 		client: c.RESTClient(),
 	}
 }
 
-// Create takes the representation of a scanReport and creates it.  Returns the server's representation of the scanReport, and an error, if there is any.
-func (c *scanReports) Create(ctx context.Context, scanReport *v1alpha1.ImageScanRequest, opts v1.CreateOptions) (result *v1alpha1.ImageScanRequest, err error) {
+// Create takes the representation of a imageScanRequest and creates it.  Returns the server's representation of the imageScanRequest, and an error, if there is any.
+func (c *imageScanRequests) Create(ctx context.Context, imageScanRequest *v1alpha1.ImageScanRequest, opts v1.CreateOptions) (result *v1alpha1.ImageScanRequest, err error) {
 	result = &v1alpha1.ImageScanRequest{}
 	err = c.client.Post().
-		Resource("scanreports").
+		Resource("imagescanrequests").
 		VersionedParams(&opts, scheme.ParameterCodec).
-		Body(scanReport).
+		Body(imageScanRequest).
 		Do(ctx).
 		Into(result)
 	return

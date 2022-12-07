@@ -28,7 +28,9 @@ import (
 
 type ScannerV1alpha1Interface interface {
 	RESTClient() rest.Interface
-	ScanReportsGetter
+	ImageScanReportsGetter
+	ImageScanRequestsGetter
+	ReportsGetter
 	ScanSummariesGetter
 }
 
@@ -37,8 +39,16 @@ type ScannerV1alpha1Client struct {
 	restClient rest.Interface
 }
 
-func (c *ScannerV1alpha1Client) ScanReports() ScanReportInterface {
-	return newScanReports(c)
+func (c *ScannerV1alpha1Client) ImageScanReports() ImageScanReportInterface {
+	return newImageScanReports(c)
+}
+
+func (c *ScannerV1alpha1Client) ImageScanRequests() ImageScanRequestInterface {
+	return newImageScanRequests(c)
+}
+
+func (c *ScannerV1alpha1Client) Reports(namespace string) ReportInterface {
+	return newReports(c, namespace)
 }
 
 func (c *ScannerV1alpha1Client) ScanSummaries() ScanSummaryInterface {

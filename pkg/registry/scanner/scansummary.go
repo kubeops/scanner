@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package scansummary
+package scanner
 
 import (
 	"context"
@@ -30,41 +30,41 @@ import (
 	"k8s.io/apiserver/pkg/registry/rest"
 )
 
-type Storage struct {
+type ScanSummary struct {
 	cid string
 	nc  *nats.Conn
 }
 
 var (
-	_ rest.GroupVersionKindProvider = &Storage{}
-	_ rest.Scoper                   = &Storage{}
-	_ rest.Creater                  = &Storage{}
-	_ rest.Storage                  = &Storage{}
+	_ rest.GroupVersionKindProvider = &ScanSummary{}
+	_ rest.Scoper                   = &ScanSummary{}
+	_ rest.Creater                  = &ScanSummary{}
+	_ rest.Storage                  = &ScanSummary{}
 )
 
-func NewStorage(cid string, nc *nats.Conn) *Storage {
-	s := &Storage{
+func NewScanSummaryStorage(cid string, nc *nats.Conn) *ScanSummary {
+	s := &ScanSummary{
 		cid: cid,
 		nc:  nc,
 	}
 	return s
 }
 
-func (r *Storage) GroupVersionKind(_ schema.GroupVersion) schema.GroupVersionKind {
+func (r *ScanSummary) GroupVersionKind(_ schema.GroupVersion) schema.GroupVersionKind {
 	return api.SchemeGroupVersion.WithKind(api.ResourceKindScanSummary)
 }
 
-func (r *Storage) NamespaceScoped() bool {
+func (r *ScanSummary) NamespaceScoped() bool {
 	return false
 }
 
-func (r *Storage) New() runtime.Object {
+func (r *ScanSummary) New() runtime.Object {
 	return &api.ScanSummary{}
 }
 
-func (r *Storage) Destroy() {}
+func (r *ScanSummary) Destroy() {}
 
-func (r *Storage) Create(ctx context.Context, obj runtime.Object, _ rest.ValidateObjectFunc, _ *metav1.CreateOptions) (runtime.Object, error) {
+func (r *ScanSummary) Create(ctx context.Context, obj runtime.Object, _ rest.ValidateObjectFunc, _ *metav1.CreateOptions) (runtime.Object, error) {
 	in := obj.(*api.ScanSummary)
 
 	msg, err := r.nc.Request("scanner.summary", []byte(in.Request.ImageRef), backend.NatsRequestTimeout)

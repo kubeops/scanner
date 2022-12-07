@@ -27,21 +27,23 @@ import (
 	v1alpha1 "kubeops.dev/scanner/apis/scanner/v1alpha1"
 )
 
-// FakeScanReports implements ScanReportInterface
-type FakeScanReports struct {
+// FakeReports implements ReportInterface
+type FakeReports struct {
 	Fake *FakeScannerV1alpha1
+	ns   string
 }
 
-var scanreportsResource = schema.GroupVersionResource{Group: "scanner.appscode.com", Version: "v1alpha1", Resource: "scanreports"}
+var reportsResource = schema.GroupVersionResource{Group: "scanner.appscode.com", Version: "v1alpha1", Resource: "reports"}
 
-var scanreportsKind = schema.GroupVersionKind{Group: "scanner.appscode.com", Version: "v1alpha1", Kind: "ImageScanRequest"}
+var reportsKind = schema.GroupVersionKind{Group: "scanner.appscode.com", Version: "v1alpha1", Kind: "Report"}
 
-// Create takes the representation of a scanReport and creates it.  Returns the server's representation of the scanReport, and an error, if there is any.
-func (c *FakeScanReports) Create(ctx context.Context, scanReport *v1alpha1.ImageScanRequest, opts v1.CreateOptions) (result *v1alpha1.ImageScanRequest, err error) {
+// Create takes the representation of a report and creates it.  Returns the server's representation of the report, and an error, if there is any.
+func (c *FakeReports) Create(ctx context.Context, report *v1alpha1.Report, opts v1.CreateOptions) (result *v1alpha1.Report, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewRootCreateAction(scanreportsResource, scanReport), &v1alpha1.ImageScanRequest{})
+		Invokes(testing.NewCreateAction(reportsResource, c.ns, report), &v1alpha1.Report{})
+
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*v1alpha1.ImageScanRequest), err
+	return obj.(*v1alpha1.Report), err
 }
