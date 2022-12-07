@@ -25,24 +25,32 @@ import (
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
 	flowcontrol "k8s.io/client-go/util/flowcontrol"
-	scannerv1alpha1 "kubeops.dev/scanner/client/clientset/versioned/typed/scanner/v1alpha1"
+	cvesv1alpha1 "kubeops.dev/scanner/client/clientset/versioned/typed/cves/v1alpha1"
+	uiv1alpha1 "kubeops.dev/scanner/client/clientset/versioned/typed/ui/v1alpha1"
 )
 
 type Interface interface {
 	Discovery() discovery.DiscoveryInterface
-	ScannerV1alpha1() scannerv1alpha1.ScannerV1alpha1Interface
+	CvesV1alpha1() cvesv1alpha1.CvesV1alpha1Interface
+	UiV1alpha1() uiv1alpha1.UiV1alpha1Interface
 }
 
 // Clientset contains the clients for groups. Each group has exactly one
 // version included in a Clientset.
 type Clientset struct {
 	*discovery.DiscoveryClient
-	scannerV1alpha1 *scannerv1alpha1.ScannerV1alpha1Client
+	cvesV1alpha1 *cvesv1alpha1.CvesV1alpha1Client
+	uiV1alpha1   *uiv1alpha1.UiV1alpha1Client
 }
 
-// ScannerV1alpha1 retrieves the ScannerV1alpha1Client
-func (c *Clientset) ScannerV1alpha1() scannerv1alpha1.ScannerV1alpha1Interface {
-	return c.scannerV1alpha1
+// CvesV1alpha1 retrieves the CvesV1alpha1Client
+func (c *Clientset) CvesV1alpha1() cvesv1alpha1.CvesV1alpha1Interface {
+	return c.cvesV1alpha1
+}
+
+// UiV1alpha1 retrieves the UiV1alpha1Client
+func (c *Clientset) UiV1alpha1() uiv1alpha1.UiV1alpha1Interface {
+	return c.uiV1alpha1
 }
 
 // Discovery retrieves the DiscoveryClient
@@ -89,7 +97,11 @@ func NewForConfigAndClient(c *rest.Config, httpClient *http.Client) (*Clientset,
 
 	var cs Clientset
 	var err error
-	cs.scannerV1alpha1, err = scannerv1alpha1.NewForConfigAndClient(&configShallowCopy, httpClient)
+	cs.cvesV1alpha1, err = cvesv1alpha1.NewForConfigAndClient(&configShallowCopy, httpClient)
+	if err != nil {
+		return nil, err
+	}
+	cs.uiV1alpha1, err = uiv1alpha1.NewForConfigAndClient(&configShallowCopy, httpClient)
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +126,8 @@ func NewForConfigOrDie(c *rest.Config) *Clientset {
 // New creates a new Clientset for the given RESTClient.
 func New(c rest.Interface) *Clientset {
 	var cs Clientset
-	cs.scannerV1alpha1 = scannerv1alpha1.New(c)
+	cs.cvesV1alpha1 = cvesv1alpha1.New(c)
+	cs.uiV1alpha1 = uiv1alpha1.New(c)
 
 	cs.DiscoveryClient = discovery.NewDiscoveryClient(c)
 	return &cs

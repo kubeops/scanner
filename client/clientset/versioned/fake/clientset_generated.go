@@ -25,8 +25,10 @@ import (
 	fakediscovery "k8s.io/client-go/discovery/fake"
 	"k8s.io/client-go/testing"
 	clientset "kubeops.dev/scanner/client/clientset/versioned"
-	scannerv1alpha1 "kubeops.dev/scanner/client/clientset/versioned/typed/scanner/v1alpha1"
-	fakescannerv1alpha1 "kubeops.dev/scanner/client/clientset/versioned/typed/scanner/v1alpha1/fake"
+	cvesv1alpha1 "kubeops.dev/scanner/client/clientset/versioned/typed/cves/v1alpha1"
+	fakecvesv1alpha1 "kubeops.dev/scanner/client/clientset/versioned/typed/cves/v1alpha1/fake"
+	uiv1alpha1 "kubeops.dev/scanner/client/clientset/versioned/typed/ui/v1alpha1"
+	fakeuiv1alpha1 "kubeops.dev/scanner/client/clientset/versioned/typed/ui/v1alpha1/fake"
 )
 
 // NewSimpleClientset returns a clientset that will respond with the provided objects.
@@ -79,7 +81,12 @@ var (
 	_ testing.FakeClient  = &Clientset{}
 )
 
-// ScannerV1alpha1 retrieves the ScannerV1alpha1Client
-func (c *Clientset) ScannerV1alpha1() scannerv1alpha1.ScannerV1alpha1Interface {
-	return &fakescannerv1alpha1.FakeScannerV1alpha1{Fake: &c.Fake}
+// CvesV1alpha1 retrieves the CvesV1alpha1Client
+func (c *Clientset) CvesV1alpha1() cvesv1alpha1.CvesV1alpha1Interface {
+	return &fakecvesv1alpha1.FakeCvesV1alpha1{Fake: &c.Fake}
+}
+
+// UiV1alpha1 retrieves the UiV1alpha1Client
+func (c *Clientset) UiV1alpha1() uiv1alpha1.UiV1alpha1Interface {
+	return &fakeuiv1alpha1.FakeUiV1alpha1{Fake: &c.Fake}
 }

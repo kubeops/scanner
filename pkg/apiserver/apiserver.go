@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"os"
 
-	"kubeops.dev/scanner/apis/cves"
 	"kubeops.dev/scanner/apis/cves/install"
 	api "kubeops.dev/scanner/apis/cves/v1alpha1"
 	"kubeops.dev/scanner/pkg/backend"

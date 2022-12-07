@@ -1,0 +1,308 @@
+
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  name: imagescanreports.cves.scanner.appscode.com
+spec:
+  group: cves.scanner.appscode.com
+  names:
+    kind: ImageScanReport
+    listKind: ImageScanReportList
+    plural: imagescanreports
+    singular: imagescanreport
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: Spec describes the attributes for the Image Scan SingleReport
+            properties:
+              digest:
+                type: string
+              image:
+                type: string
+              tag:
+                type: string
+            required:
+            - digest
+            - image
+            - tag
+            type: object
+          status:
+            description: Status holds all the SingleReport-related details of the
+              specified image
+            properties:
+              lastChecked:
+                format: date-time
+                type: string
+              report:
+                properties:
+                  ArtifactName:
+                    type: string
+                  ArtifactType:
+                    type: string
+                  Metadata:
+                    properties:
+                      DiffIDs:
+                        items:
+                          type: string
+                        type: array
+                      ImageConfig:
+                        properties:
+                          architecture:
+                            type: string
+                          author:
+                            type: string
+                          config:
+                            properties:
+                              ArgsEscaped:
+                                type: boolean
+                              Cmd:
+                                items:
+                                  type: string
+                                type: array
+                              Entrypoint:
+                                items:
+                                  type: string
+                                type: array
+                              Env:
+                                items:
+                                  type: string
+                                type: array
+                              Image:
+                                type: string
+                              Labels:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                              StopSignal:
+                                type: string
+                            required:
+                            - Cmd
+                            type: object
+                          container:
+                            type: string
+                          created:
+                            format: date-time
+                            type: string
+                          docker_version:
+                            type: string
+                          history:
+                            items:
+                              properties:
+                                comment:
+                                  type: string
+                                created:
+                                  format: date-time
+                                  type: string
+                                created_by:
+                                  type: string
+                                empty_layer:
+                                  type: boolean
+                              required:
+                              - created
+                              - created_by
+                              type: object
+                            type: array
+                          os:
+                            type: string
+                          rootfs:
+                            properties:
+                              diff_ids:
+                                items:
+                                  type: string
+                                type: array
+                              type:
+                                type: string
+                            required:
+                            - diff_ids
+                            - type
+                            type: object
+                        required:
+                        - architecture
+                        - config
+                        - created
+                        - history
+                        - os
+                        - rootfs
+                        type: object
+                      ImageID:
+                        type: string
+                      OS:
+                        properties:
+                          Family:
+                            type: string
+                          Name:
+                            type: string
+                        required:
+                        - Family
+                        - Name
+                        type: object
+                      RepoDigests:
+                        items:
+                          type: string
+                        type: array
+                      RepoTags:
+                        items:
+                          type: string
+                        type: array
+                    required:
+                    - DiffIDs
+                    - ImageConfig
+                    - ImageID
+                    - OS
+                    - RepoDigests
+                    - RepoTags
+                    type: object
+                  Results:
+                    items:
+                      properties:
+                        Class:
+                          type: string
+                        Target:
+                          type: string
+                        Type:
+                          type: string
+                        Vulnerabilities:
+                          items:
+                            properties:
+                              CVSS:
+                                properties:
+                                  nvd:
+                                    properties:
+                                      V2Score:
+                                        format: double
+                                        type: number
+                                      V2Vector:
+                                        type: string
+                                      V3Score:
+                                        format: double
+                                        type: number
+                                      V3Vector:
+                                        type: string
+                                    type: object
+                                  redhat:
+                                    properties:
+                                      V2Score:
+                                        format: double
+                                        type: number
+                                      V2Vector:
+                                        type: string
+                                      V3Score:
+                                        format: double
+                                        type: number
+                                      V3Vector:
+                                        type: string
+                                    type: object
+                                type: object
+                              CweIDs:
+                                items:
+                                  type: string
+                                type: array
+                              DataSource:
+                                properties:
+                                  ID:
+                                    type: string
+                                  Name:
+                                    type: string
+                                  URL:
+                                    type: string
+                                required:
+                                - ID
+                                - Name
+                                - URL
+                                type: object
+                              Description:
+                                type: string
+                              FixedVersion:
+                                type: string
+                              InstalledVersion:
+                                type: string
+                              LastModifiedDate:
+                                format: date-time
+                                type: string
+                              Layer:
+                                properties:
+                                  DiffID:
+                                    type: string
+                                  Digest:
+                                    type: string
+                                required:
+                                - DiffID
+                                type: object
+                              PkgID:
+                                type: string
+                              PkgName:
+                                type: string
+                              PrimaryURL:
+                                type: string
+                              PublishedDate:
+                                format: date-time
+                                type: string
+                              References:
+                                items:
+                                  type: string
+                                type: array
+                              Severity:
+                                type: string
+                              SeveritySource:
+                                type: string
+                              Title:
+                                type: string
+                              VulnerabilityID:
+                                type: string
+                            required:
+                            - DataSource
+                            - Description
+                            - InstalledVersion
+                            - Layer
+                            - PkgID
+                            - PkgName
+                            - PrimaryURL
+                            - References
+                            - Severity
+                            - SeveritySource
+                            - VulnerabilityID
+                            type: object
+                          type: array
+                      required:
+                      - Class
+                      - Target
+                      - Type
+                      type: object
+                    type: array
+                  SchemaVersion:
+                    type: integer
+                required:
+                - ArtifactName
+                - ArtifactType
+                - Metadata
+                - Results
+                - SchemaVersion
+                type: object
+              trivyDBVersion:
+                type: string
+            required:
+            - lastChecked
+            - report
+            - trivyDBVersion
+            type: object
+        type: object
+    served: true
+    storage: true
