@@ -31,9 +31,9 @@ import (
 	"k8s.io/apiserver/pkg/storage/names"
 )
 
-// NewStrategy creates and returns a fischerStrategy instance
-func NewStrategy(typer runtime.ObjectTyper) fischerStrategy {
-	return fischerStrategy{typer, names.SimpleNameGenerator}
+// NewStrategy creates and returns a strategy instance
+func NewStrategy(typer runtime.ObjectTyper) strategy {
+	return strategy{typer, names.SimpleNameGenerator}
 }
 
 // GetAttrs returns labels.Set, fields.Set, and error in case the given runtime.Object is not a ImageScanReport
@@ -60,44 +60,44 @@ func SelectableFields(obj *cves.ImageScanReport) fields.Set {
 	return generic.ObjectMetaFieldsSet(&obj.ObjectMeta, true)
 }
 
-type fischerStrategy struct {
+type strategy struct {
 	runtime.ObjectTyper
 	names.NameGenerator
 }
 
-func (fischerStrategy) NamespaceScoped() bool {
+func (strategy) NamespaceScoped() bool {
 	return false
 }
 
-func (fischerStrategy) PrepareForCreate(ctx context.Context, obj runtime.Object) {
+func (strategy) PrepareForCreate(ctx context.Context, obj runtime.Object) {
 }
 
-func (fischerStrategy) PrepareForUpdate(ctx context.Context, obj, old runtime.Object) {
+func (strategy) PrepareForUpdate(ctx context.Context, obj, old runtime.Object) {
 }
 
-func (fischerStrategy) Validate(ctx context.Context, obj runtime.Object) field.ErrorList {
+func (strategy) Validate(ctx context.Context, obj runtime.Object) field.ErrorList {
 	return field.ErrorList{}
 }
 
 // WarningsOnCreate returns warnings for the creation of the given object.
-func (fischerStrategy) WarningsOnCreate(ctx context.Context, obj runtime.Object) []string { return nil }
+func (strategy) WarningsOnCreate(ctx context.Context, obj runtime.Object) []string { return nil }
 
-func (fischerStrategy) AllowCreateOnUpdate() bool {
+func (strategy) AllowCreateOnUpdate() bool {
 	return false
 }
 
-func (fischerStrategy) AllowUnconditionalUpdate() bool {
+func (strategy) AllowUnconditionalUpdate() bool {
 	return false
 }
 
-func (fischerStrategy) Canonicalize(obj runtime.Object) {
+func (strategy) Canonicalize(obj runtime.Object) {
 }
 
-func (fischerStrategy) ValidateUpdate(ctx context.Context, obj, old runtime.Object) field.ErrorList {
+func (strategy) ValidateUpdate(ctx context.Context, obj, old runtime.Object) field.ErrorList {
 	return field.ErrorList{}
 }
 
 // WarningsOnUpdate returns warnings for the given update.
-func (fischerStrategy) WarningsOnUpdate(ctx context.Context, obj, old runtime.Object) []string {
+func (strategy) WarningsOnUpdate(ctx context.Context, obj, old runtime.Object) []string {
 	return nil
 }
