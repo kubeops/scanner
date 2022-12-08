@@ -38,6 +38,7 @@ func NewRootCmd() *cobra.Command {
 	rootCmd.AddCommand(NewCmdDownload())
 	rootCmd.AddCommand(NewCmdScanKubeDB())
 	rootCmd.AddCommand(NewCmdBackend(ctx))
+	rootCmd.AddCommand(NewCmdUploadReport())
 
 	return rootCmd
 }

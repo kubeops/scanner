@@ -113,7 +113,7 @@ func (r *WorkloadReconciler) ScanForPrivateImage(info ImageInfo) error {
 					Command: []string{
 						"sh",
 						"-c",
-						"./tv rootfs --skip-update --security-checks vuln --format json / > report.json",
+						"./tv rootfs --skip-update --security-checks vuln --format json / > report.json && trivy version -f json > trivy.json",
 					},
 					ImagePullPolicy: core.PullIfNotPresent,
 				},
