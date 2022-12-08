@@ -61,7 +61,13 @@ func (c defaultTableConvertor) ConvertToTable(ctx context.Context, object runtim
 			lastScannedTimestamp string
 		)
 		if o, ok := obj.(*v1alpha1.ImageScanReport); ok {
-			image = o.Spec.Image + "@" + o.Spec.Digest
+			if o.Spec.Digest != "" {
+				image = o.Spec.Image + "@" + o.Spec.Digest
+			} else if o.Spec.Tag != "" {
+				image = o.Spec.Image + ":" + o.Spec.Tag
+			} else {
+				image = o.Spec.Image
+			}
 
 			stats := map[string]int{}
 			for _, r := range o.Status.Report.Results {
