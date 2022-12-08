@@ -18,10 +18,13 @@ package scanner
 
 import (
 	"context"
+	"fmt"
 
+	batch "k8s.io/api/batch/v1"
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/klog/v2"
+	"k8s.io/utils/pointer"
 	kutil "kmodules.xyz/client-go"
 	cu "kmodules.xyz/client-go/client"
 	core_util "kmodules.xyz/client-go/core/v1"
@@ -46,7 +49,7 @@ func NewImageInfo(img string, meta ImageMeta) ImageInfo {
 }
 
 const (
-	ScannerPodName   = "scan-image"
+	ScannerJobName   = "scan-image"
 	SharedVolumeName = "shared-disk"
 	TrivyImageName   = "trivy"
 	TrivyImage       = "aquasec/trivy"
@@ -59,34 +62,34 @@ const (
 )
 
 func (r *WorkloadReconciler) ScanForPrivateImage(info ImageInfo) error {
-	ensureVolumeMounts := func(pod *core.Pod) {
+	ensureVolumeMounts := func(pt *core.PodTemplateSpec) {
 		mount := core.VolumeMount{
 			MountPath: WorkDir,
 			Name:      SharedVolumeName,
 		}
-		for i := range pod.Spec.InitContainers {
-			pod.Spec.InitContainers[i].VolumeMounts = core_util.UpsertVolumeMount(pod.Spec.InitContainers[i].VolumeMounts, mount)
+		for i := range pt.Spec.InitContainers {
+			pt.Spec.InitContainers[i].VolumeMounts = core_util.UpsertVolumeMount(pt.Spec.InitContainers[i].VolumeMounts, mount)
 		}
-		for i := range pod.Spec.Containers {
-			pod.Spec.Containers[i].VolumeMounts = core_util.UpsertVolumeMount(pod.Spec.Containers[i].VolumeMounts, mount)
+		for i := range pt.Spec.Containers {
+			pt.Spec.Containers[i].VolumeMounts = core_util.UpsertVolumeMount(pt.Spec.Containers[i].VolumeMounts, mount)
 		}
 	}
 
-	obj, vt, err := cu.CreateOrPatch(context.TODO(), r.Client, &core.Pod{
+	obj, vt, err := cu.CreateOrPatch(context.TODO(), r.Client, &batch.Job{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      ScannerPodName,
+			Name:      ScannerJobName,
 			Namespace: info.Namespace,
 		},
 	}, func(obj client.Object, createOp bool) client.Object {
-		pod := obj.(*core.Pod)
+		job := obj.(*batch.Job)
 		if createOp {
-			pod.Spec.Volumes = core_util.UpsertVolume(pod.Spec.Volumes, core.Volume{
+			job.Spec.Template.Spec.Volumes = core_util.UpsertVolume(job.Spec.Template.Spec.Volumes, core.Volume{
 				Name: SharedVolumeName,
 				VolumeSource: core.VolumeSource{
 					EmptyDir: &core.EmptyDirVolumeSource{},
 				},
 			})
-			pod.Spec.InitContainers = core_util.UpsertContainers(pod.Spec.InitContainers, []core.Container{
+			job.Spec.Template.Spec.InitContainers = core_util.UpsertContainers(job.Spec.Template.Spec.InitContainers, []core.Container{
 				{
 					Name:       TrivyImageName,
 					Image:      TrivyImage,
@@ -113,33 +116,34 @@ func (r *WorkloadReconciler) ScanForPrivateImage(info ImageInfo) error {
 					Command: []string{
 						"sh",
 						"-c",
-						"./tv rootfs --skip-update --security-checks vuln --format json / > report.json && trivy version -f json > trivy.json",
+						"./tv rootfs --skip-update --security-checks vuln --format json / > report.json && ./tv version -f json > trivy.json",
 					},
 					ImagePullPolicy: core.PullIfNotPresent,
 				},
 			})
-			pod.Spec.Containers = core_util.UpsertContainers(pod.Spec.Containers, []core.Container{
+			job.Spec.Template.Spec.Containers = core_util.UpsertContainers(job.Spec.Template.Spec.Containers, []core.Container{
 				{
 					Name:       UploaderImageName,
-					Image:      NatsCLIImage,
+					Image:      r.scannerImage,
 					WorkingDir: WorkDir,
 					Command: []string{
-						"/scripts/upload-report.sh",
+						fmt.Sprintf("scanner upload-report --report-file report.json --trivy-file trivy.json --image  %s", info.Image),
 					},
 					ImagePullPolicy: core.PullIfNotPresent,
 				},
 			})
-			ensureVolumeMounts(pod)
+			ensureVolumeMounts(&job.Spec.Template)
 		}
-		pod.Spec.RestartPolicy = core.RestartPolicyNever
-		pod.Spec.ImagePullSecrets = info.ImagePullSecrets
-		return pod
+		job.Spec.Template.Spec.RestartPolicy = core.RestartPolicyNever
+		job.Spec.Template.Spec.ImagePullSecrets = info.ImagePullSecrets
+		job.Spec.TTLSecondsAfterFinished = pointer.Int32(100)
+		return job
 	})
 	if err != nil {
 		return err
 	}
 	if vt == kutil.VerbCreated {
-		klog.Infof("Scanner pod %v/%v created", obj.GetNamespace(), obj.GetName())
+		klog.Infof("Scanner job %v/%v created", obj.GetNamespace(), obj.GetName())
 	}
 	return nil
 }

@@ -38,14 +38,16 @@ import (
 // WorkloadReconciler reconciles a Workload object
 type WorkloadReconciler struct {
 	client.Client
-	nc *nats.Conn
+	nc           *nats.Conn
+	scannerImage string
 }
 
 var _ duck.Reconciler = &WorkloadReconciler{}
 
-func NewWorkloadReconciler(nc *nats.Conn) *WorkloadReconciler {
+func NewWorkloadReconciler(nc *nats.Conn, scannedImage string) *WorkloadReconciler {
 	return &WorkloadReconciler{
-		nc: nc,
+		nc:           nc,
+		scannerImage: scannedImage,
 	}
 }
 

@@ -116,6 +116,7 @@ func (o *LicenseProxyServerOptions) Config() (*apiserver.Config, error) {
 
 	extraConfig := apiserver.ExtraConfig{
 		ClientConfig: serverConfig.ClientConfig,
+		ScannerImage: o.ExtraOptions.ScannerImage,
 	}
 	if err := o.ExtraOptions.ApplyTo(&extraConfig); err != nil {
 		return nil, err

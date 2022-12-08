@@ -86,6 +86,7 @@ type ExtraConfig struct {
 	NATSCredFile         string
 	FileServerPathPrefix string
 	FileServerFilesDir   string
+	ScannerImage         string
 }
 
 // Config defines the config for the apiserver
@@ -163,7 +164,7 @@ func (c completedConfig) New(ctx context.Context) (*LicenseProxyServer, error) {
 		return nil, err
 	}
 
-	if err = (scannerctrl.NewWorkloadReconciler(nc)).SetupWithManager(mgr); err != nil {
+	if err = (scannerctrl.NewWorkloadReconciler(nc, c.ExtraConfig.ScannerImage)).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Workload")
 		os.Exit(1)
 	}
