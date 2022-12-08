@@ -18,7 +18,9 @@ package request
 
 import (
 	"context"
+	"crypto/md5"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	api "kubeops.dev/scanner/apis/cves/v1alpha1"
@@ -88,7 +90,7 @@ func (r *ImageRequest) Create(ctx context.Context, obj runtime.Object, _ rest.Va
 			APIVersion: api.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: in.Request.ImageRef, // TODO: hash the name
+			Name: fmt.Sprintf("%x", md5.Sum([]byte(in.Request.ImageRef))),
 		},
 		Spec: api.ImageScanReportSpec{
 			Image: in.Request.ImageRef,
