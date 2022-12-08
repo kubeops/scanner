@@ -20,12 +20,14 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	"kubeops.dev/scanner/apis/cves"
 	"kubeops.dev/scanner/apis/cves/install"
 	api "kubeops.dev/scanner/apis/cves/v1alpha1"
 	"kubeops.dev/scanner/pkg/backend"
 	scannerctrl "kubeops.dev/scanner/pkg/controllers/scanner"
+	"kubeops.dev/scanner/pkg/fileserver"
 	"kubeops.dev/scanner/pkg/registry"
 	reportstorage "kubeops.dev/scanner/pkg/registry/cves/report"
 	requeststorage "kubeops.dev/scanner/pkg/registry/cves/request"
@@ -78,11 +80,13 @@ func init() {
 
 // ExtraConfig holds custom apiserver config
 type ExtraConfig struct {
-	ClientConfig *restclient.Config
-	LicenseFile  string
-	CacheDir     string
-	NATSAddr     string
-	NATSCredFile string
+	ClientConfig         *restclient.Config
+	LicenseFile          string
+	CacheDir             string
+	NATSAddr             string
+	NATSCredFile         string
+	FileServerPathPrefix string
+	FileServerFilesDir   string
 }
 
 // Config defines the config for the apiserver
@@ -188,6 +192,15 @@ func (c completedConfig) New(ctx context.Context) (*LicenseProxyServer, error) {
 			return nil, err
 		}
 	}
-
+	{
+		prefix := c.ExtraConfig.FileServerPathPrefix
+		if !strings.HasPrefix(prefix, "/") {
+			prefix = "/" + prefix
+		}
+		if !strings.HasSuffix(prefix, "/") {
+			prefix = prefix + "/"
+		}
+		genericServer.Handler.NonGoRestfulMux.HandlePrefix(prefix, fileserver.Router(prefix, c.ExtraConfig.FileServerFilesDir))
+	}
 	return s, nil
 }

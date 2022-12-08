@@ -3,6 +3,8 @@ module kubeops.dev/scanner
 go 1.18
 
 require (
+	github.com/dustin/go-humanize v1.0.0
+	github.com/go-chi/chi/v5 v5.0.8
 	github.com/google/go-containerregistry v0.11.0
 	github.com/google/gofuzz v1.2.0
 	github.com/nats-io/nats.go v1.17.0
@@ -11,6 +13,7 @@ require (
 	github.com/spf13/pflag v1.0.5
 	go.bytebuilders.dev/license-verifier v0.12.0
 	go.uber.org/automaxprocs v1.5.1
+	go.wandrs.dev/http v0.0.2
 	gocloud.dev v0.27.0
 	gomodules.xyz/blobfs v0.1.12-0.20220924052729-1b66a62602d2
 	gomodules.xyz/go-sh v0.1.0
@@ -128,6 +131,7 @@ require (
 	github.com/prometheus/procfs v0.8.0 // indirect
 	github.com/sergi/go-diff v1.2.0 // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
+	github.com/unrolled/render v1.4.1 // indirect
 	github.com/vbatts/tar-split v0.11.2 // indirect
 	github.com/xlab/treeprint v1.1.0 // indirect
 	github.com/yudai/gojsondiff v1.0.0 // indirect
