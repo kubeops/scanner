@@ -24,11 +24,10 @@ func Router(prefix, dir string) http.Handler {
 	fileServer := http.FileServer(http.Dir(dir))
 
 	r := chi.NewRouter()
-	// r.Use(middleware.Logger)
 
 	pattern := path.Join(prefix, "*")
-	r.Options(pattern, fileServer.ServeHTTP)
-	r.Get(pattern, fileServer.ServeHTTP)
+	r.Options(pattern, http.StripPrefix(prefix, fileServer).ServeHTTP)
+	r.Get(pattern, http.StripPrefix(prefix, fileServer).ServeHTTP)
 	r.Post(pattern, func(w http.ResponseWriter, r *http.Request) {
 		err := FileSave(prefix, dir, r)
 

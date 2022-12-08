@@ -42,7 +42,7 @@ func NewExtraOptions() *ExtraOptions {
 		Burst:                1e6,
 		NATSAddr:             "this-is-nats.appcode.ninja:4222",
 		FileServerPathPrefix: "files",
-		FileServerFilesDir:   "/var/pv/files",
+		FileServerFilesDir:   "/var/data/files",
 	}
 }
 
