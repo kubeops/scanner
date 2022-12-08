@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package imagescanreport
+package report
 
 import (
 	cves "kubeops.dev/scanner/apis/cves/v1alpha1"
@@ -47,5 +47,5 @@ func NewREST(scheme *runtime.Scheme, optsGetter generic.RESTOptionsGetter) (*reg
 	if err := store.CompleteWithOptions(options); err != nil {
 		return nil, err
 	}
-	return &registry.REST{store}, nil
+	return &registry.REST{Store: store}, nil
 }

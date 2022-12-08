@@ -18042,27 +18042,24 @@ func schema_scanner_apis_cves_v1alpha1_ImageScanReportSpec(ref common.ReferenceC
 				Properties: map[string]spec.Schema{
 					"image": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Type:   []string{"string"},
+							Format: "",
 						},
 					},
 					"tag": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Description: "Tag & Digest is optional field. One of these fields may not present",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 					"digest": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Type:   []string{"string"},
+							Format: "",
 						},
 					},
 				},
-				Required: []string{"image", "tag", "digest"},
 			},
 		},
 	}
@@ -18076,25 +18073,26 @@ func schema_scanner_apis_cves_v1alpha1_ImageScanReportStatus(ref common.Referenc
 				Properties: map[string]spec.Schema{
 					"lastChecked": {
 						SchemaProps: spec.SchemaProps{
-							Default: map[string]interface{}{},
-							Ref:     ref("kubeops.dev/scanner/apis/cves/v1alpha1.MyTime"),
+							Description: "When the referred image was checked for the last time",
+							Default:     map[string]interface{}{},
+							Ref:         ref("kubeops.dev/scanner/apis/cves/v1alpha1.MyTime"),
 						},
 					},
 					"trivyDBVersion": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Description: "which TrivyDBVersion was used when the last check",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 					"report": {
 						SchemaProps: spec.SchemaProps{
-							Default: map[string]interface{}{},
-							Ref:     ref("kubeops.dev/scanner/apis/cves/v1alpha1.SingleReport"),
+							Description: "This is the actual trivy Report",
+							Default:     map[string]interface{}{},
+							Ref:         ref("kubeops.dev/scanner/apis/cves/v1alpha1.SingleReport"),
 						},
 					},
 				},
-				Required: []string{"lastChecked", "trivyDBVersion", "report"},
 			},
 		},
 		Dependencies: []string{
@@ -18151,7 +18149,8 @@ func schema_scanner_apis_cves_v1alpha1_ImageScanRequestSpec(ref common.Reference
 					},
 					"pullSecrets": {
 						SchemaProps: spec.SchemaProps{
-							Type: []string{"array"},
+							Description: "If some private image is referred in ImageRef, this field will contain the ImagePullSecrets from the pod template.",
+							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
@@ -18165,13 +18164,13 @@ func schema_scanner_apis_cves_v1alpha1_ImageScanRequestSpec(ref common.Reference
 					},
 					"namespace": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Description: "Namespace tells where to look for the image pull secrets.",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 				},
-				Required: []string{"imageRef", "pullSecrets", "namespace"},
+				Required: []string{"imageRef"},
 			},
 		},
 	}

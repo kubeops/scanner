@@ -45,15 +45,27 @@ type ImageScanReport struct {
 }
 
 type ImageScanReportSpec struct {
-	Image  string `json:"image"`
-	Tag    string `json:"tag"`
-	Digest string `json:"digest"`
+	Image string `json:"image,omitempty"`
+
+	// Tag & Digest is optional field. One of these fields may not present
+	// +optional
+	Tag string `json:"tag,omitempty"`
+	// +optional
+	Digest string `json:"digest,omitempty"`
 }
 
 type ImageScanReportStatus struct {
-	LastChecked    MyTime       `json:"lastChecked"`
-	TrivyDBVersion string       `json:"trivyDBVersion"`
-	Report         SingleReport `json:"report"`
+	// When the referred image was checked for the last time
+	// +optional
+	LastChecked MyTime `json:"lastChecked,omitempty"`
+
+	// which TrivyDBVersion was used when the last check
+	// +optional
+	TrivyDBVersion string `json:"trivyDBVersion,omitempty"`
+
+	// This is the actual trivy Report
+	// +optional
+	Report SingleReport `json:"report,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

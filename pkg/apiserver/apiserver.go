@@ -27,8 +27,8 @@ import (
 	"kubeops.dev/scanner/pkg/backend"
 	scannerctrl "kubeops.dev/scanner/pkg/controllers/scanner"
 	"kubeops.dev/scanner/pkg/registry"
-	cvesregistry "kubeops.dev/scanner/pkg/registry/cves"
-	imagescanreportstorage "kubeops.dev/scanner/pkg/registry/cves/imagescanreport"
+	reportstorage "kubeops.dev/scanner/pkg/registry/cves/report"
+	requeststorage "kubeops.dev/scanner/pkg/registry/cves/request"
 
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -174,8 +174,8 @@ func (c completedConfig) New(ctx context.Context) (*LicenseProxyServer, error) {
 		apiGroupInfo := genericapiserver.NewDefaultAPIGroupInfo(cves.GroupName, Scheme, metav1.ParameterCodec, Codecs)
 
 		v1alpha1storage := map[string]rest.Storage{}
-		v1alpha1storage[api.ResourceImageScanRequests] = cvesregistry.NewScanReportStorage(cid, nc)
-		v1alpha1storage[api.ResourceImageScanReports] = registry.RESTInPeace(imagescanreportstorage.NewREST(Scheme, c.GenericConfig.RESTOptionsGetter))
+		v1alpha1storage[api.ResourceImageScanRequests] = requeststorage.NewScanReportStorage(cid, nc)
+		v1alpha1storage[api.ResourceImageScanReports] = registry.RESTInPeace(reportstorage.NewREST(Scheme, c.GenericConfig.RESTOptionsGetter))
 
 		apiGroupInfo.VersionedResourcesStorageMap["v1alpha1"] = v1alpha1storage
 
