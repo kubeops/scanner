@@ -42,9 +42,9 @@ type defaultTableConvertor struct {
 	defaultQualifiedResource schema.GroupResource
 }
 
-// NewDefaultTableConvertor creates a default convertor; the provided resource is used for error messages
+// NewTableConvertor creates a default convertor; the provided resource is used for error messages
 // if no resource info can be determined from the context passed to ConvertToTable.
-func NewDefaultTableConvertor(defaultQualifiedResource schema.GroupResource) rest.TableConvertor {
+func NewTableConvertor(defaultQualifiedResource schema.GroupResource) rest.TableConvertor {
 	return defaultTableConvertor{defaultQualifiedResource: defaultQualifiedResource}
 }
 

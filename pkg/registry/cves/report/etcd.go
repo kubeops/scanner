@@ -40,7 +40,7 @@ func NewREST(scheme *runtime.Scheme, optsGetter generic.RESTOptionsGetter) (*reg
 		DeleteStrategy: strategy,
 
 		// TODO: define table converter that exposes more than name/creation timestamp
-		TableConvertor: NewDefaultTableConvertor(cves.Resource(cves.ResourceImageScanReports)),
+		TableConvertor: NewTableConvertor(cves.Resource(cves.ResourceImageScanReports)),
 	}
 	options := &generic.StoreOptions{RESTOptions: optsGetter, AttrFunc: GetAttrs}
 	if err := store.CompleteWithOptions(options); err != nil {
