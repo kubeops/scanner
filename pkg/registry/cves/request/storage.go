@@ -19,6 +19,7 @@ package request
 import (
 	"context"
 	"encoding/json"
+	"time"
 
 	api "kubeops.dev/scanner/apis/cves/v1alpha1"
 	"kubeops.dev/scanner/pkg/backend"
@@ -28,11 +29,13 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apiserver/pkg/registry/rest"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type ImageRequest struct {
 	cid string
 	nc  *nats.Conn
+	cl  client.Client
 }
 
 var (
@@ -42,10 +45,11 @@ var (
 	_ rest.Storage                  = &ImageRequest{}
 )
 
-func NewScanReportStorage(cid string, nc *nats.Conn) *ImageRequest {
+func NewScanReportStorage(cid string, nc *nats.Conn, cl client.Client) *ImageRequest {
 	s := &ImageRequest{
 		cid: cid,
 		nc:  nc,
+		cl:  cl,
 	}
 	return s
 }
@@ -64,7 +68,7 @@ func (r *ImageRequest) New() runtime.Object {
 
 func (r *ImageRequest) Destroy() {}
 
-func (r *ImageRequest) Create(ctx context.Context, obj runtime.Object, _ rest.ValidateObjectFunc, _ *metav1.CreateOptions) (runtime.Object, error) {
+func (r *ImageRequest) Create(ctx context.Context, obj runtime.Object, _ rest.ValidateObjectFunc, createOpts *metav1.CreateOptions) (runtime.Object, error) {
 	in := obj.(*api.ImageScanRequest)
 
 	msg, err := r.nc.Request("scanner.report", []byte(in.Request.ImageRef), backend.NatsRequestTimeout)
@@ -78,6 +82,26 @@ func (r *ImageRequest) Create(ctx context.Context, obj runtime.Object, _ rest.Va
 		return nil, err
 	}
 
-	// TODO : kubectl apply ImageScanReport
-	return obj, nil
+	isrep := api.ImageScanReport{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       api.ResourceKindImageScanReport,
+			APIVersion: api.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: in.Request.ImageRef, // TODO: hash the name
+		},
+		Spec: api.ImageScanReportSpec{
+			Image: in.Request.ImageRef,
+			// TODO: How can we modify the tag & digest field ?
+		},
+		Status: api.ImageScanReportStatus{
+			LastChecked: api.MyTime(metav1.Time{Time: time.Now()}),
+			Report:      report,
+		},
+	}
+
+	err = r.cl.Create(context.TODO(), &isrep, &client.CreateOptions{
+		Raw: createOpts,
+	})
+	return obj, err
 }

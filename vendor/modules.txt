@@ -201,6 +201,15 @@ github.com/beorn7/perks/quantile
 # github.com/blang/semver/v4 v4.0.0
 ## explicit; go 1.14
 github.com/blang/semver/v4
+# github.com/cert-manager/cert-manager v1.9.1
+## explicit; go 1.18
+github.com/cert-manager/cert-manager/pkg/apis/acme
+github.com/cert-manager/cert-manager/pkg/apis/acme/v1
+github.com/cert-manager/cert-manager/pkg/apis/certmanager
+github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1
+github.com/cert-manager/cert-manager/pkg/apis/meta
+github.com/cert-manager/cert-manager/pkg/apis/meta/v1
+github.com/cert-manager/cert-manager/pkg/client/clientset/versioned/scheme
 # github.com/cespare/xxhash/v2 v2.1.2
 ## explicit; go 1.11
 github.com/cespare/xxhash/v2
@@ -449,6 +458,15 @@ github.com/peterbourgon/diskv
 # github.com/pkg/errors v0.9.1
 ## explicit
 github.com/pkg/errors
+# github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.59.1
+## explicit; go 1.17
+github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring
+github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1
+github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1alpha1
+github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1beta1
+# github.com/prometheus-operator/prometheus-operator/pkg/client v0.59.1
+## explicit; go 1.17
+github.com/prometheus-operator/prometheus-operator/pkg/client/versioned/scheme
 # github.com/prometheus/client_golang v1.13.0
 ## explicit; go 1.17
 github.com/prometheus/client_golang/prometheus
@@ -724,6 +742,7 @@ gomodules.xyz/clock
 # gomodules.xyz/encoding v0.0.7
 ## explicit; go 1.17
 gomodules.xyz/encoding/json
+gomodules.xyz/encoding/json/types
 gomodules.xyz/encoding/yaml
 # gomodules.xyz/flags v0.1.3
 ## explicit; go 1.16
@@ -754,6 +773,7 @@ gomodules.xyz/testing
 gomodules.xyz/wait
 # gomodules.xyz/x v0.0.14
 ## explicit; go 1.17
+gomodules.xyz/x/arrays
 gomodules.xyz/x/version
 # google.golang.org/api v0.91.0
 ## explicit; go 1.15
@@ -1450,6 +1470,12 @@ k8s.io/klog/v2/internal/dbg
 k8s.io/klog/v2/internal/serialize
 k8s.io/klog/v2/internal/severity
 k8s.io/klog/v2/klogr
+# k8s.io/kube-aggregator v0.25.1
+## explicit; go 1.19
+k8s.io/kube-aggregator/pkg/apis/apiregistration
+k8s.io/kube-aggregator/pkg/apis/apiregistration/v1
+k8s.io/kube-aggregator/pkg/apis/apiregistration/v1beta1
+k8s.io/kube-aggregator/pkg/client/clientset_generated/clientset/scheme
 # k8s.io/kube-openapi v0.0.0-20220928191237-829ce0c27909
 ## explicit; go 1.18
 k8s.io/kube-openapi/pkg/builder
@@ -1467,6 +1493,12 @@ k8s.io/kube-openapi/pkg/spec3
 k8s.io/kube-openapi/pkg/util
 k8s.io/kube-openapi/pkg/util/proto
 k8s.io/kube-openapi/pkg/validation/spec
+# k8s.io/metrics v0.25.1
+## explicit; go 1.19
+k8s.io/metrics/pkg/apis/metrics
+k8s.io/metrics/pkg/apis/metrics/v1alpha1
+k8s.io/metrics/pkg/apis/metrics/v1beta1
+k8s.io/metrics/pkg/client/clientset/versioned/scheme
 # k8s.io/utils v0.0.0-20220823124924-e9cbc92d1a73
 ## explicit; go 1.12
 k8s.io/utils/buffer
@@ -1487,6 +1519,7 @@ kmodules.xyz/client-go
 kmodules.xyz/client-go/api/v1
 kmodules.xyz/client-go/apiextensions
 kmodules.xyz/client-go/apiextensions/v1
+kmodules.xyz/client-go/apps/v1
 kmodules.xyz/client-go/client
 kmodules.xyz/client-go/client/apiutil
 kmodules.xyz/client-go/client/duck
@@ -1500,13 +1533,49 @@ kmodules.xyz/client-go/tools/parser
 ## explicit; go 1.18
 kmodules.xyz/custom-resources/apis/appcatalog
 kmodules.xyz/custom-resources/apis/appcatalog/v1alpha1
+kmodules.xyz/custom-resources/apis/auditor
+kmodules.xyz/custom-resources/apis/auditor/v1alpha1
+kmodules.xyz/custom-resources/apis/metrics
+kmodules.xyz/custom-resources/apis/metrics/v1alpha1
+kmodules.xyz/custom-resources/client/clientset/versioned/scheme
 kmodules.xyz/custom-resources/crds
+# kmodules.xyz/monitoring-agent-api v0.25.0
+## explicit; go 1.18
+kmodules.xyz/monitoring-agent-api/api/v1
+kmodules.xyz/monitoring-agent-api/api/v1alpha1
+# kmodules.xyz/objectstore-api v0.25.0
+## explicit; go 1.18
+kmodules.xyz/objectstore-api/api/v1
+# kmodules.xyz/offshoot-api v0.25.0
+## explicit; go 1.18
+kmodules.xyz/offshoot-api/api/v1
+# kmodules.xyz/prober v0.25.0
+## explicit; go 1.18
+kmodules.xyz/prober/api/v1
 # kubedb.dev/apimachinery v0.28.4-0.20221010094511-7d01a527ae60
 ## explicit; go 1.18
 kubedb.dev/apimachinery/apis
+kubedb.dev/apimachinery/apis/autoscaling
+kubedb.dev/apimachinery/apis/autoscaling/v1alpha1
 kubedb.dev/apimachinery/apis/catalog
 kubedb.dev/apimachinery/apis/catalog/v1alpha1
+kubedb.dev/apimachinery/apis/config
+kubedb.dev/apimachinery/apis/config/v1alpha1
+kubedb.dev/apimachinery/apis/dashboard/v1alpha1
+kubedb.dev/apimachinery/apis/kubedb
+kubedb.dev/apimachinery/apis/kubedb/v1alpha1
+kubedb.dev/apimachinery/apis/kubedb/v1alpha2
+kubedb.dev/apimachinery/apis/ops
+kubedb.dev/apimachinery/apis/ops/v1alpha1
+kubedb.dev/apimachinery/apis/postgres
+kubedb.dev/apimachinery/apis/postgres/v1alpha1
+kubedb.dev/apimachinery/apis/schema/v1alpha1
+kubedb.dev/apimachinery/apis/ui
+kubedb.dev/apimachinery/apis/ui/v1alpha1
+kubedb.dev/apimachinery/client/clientset/versioned/scheme
 kubedb.dev/apimachinery/crds
+kubedb.dev/apimachinery/pkg/factory
+kubedb.dev/apimachinery/pkg/validator
 # sigs.k8s.io/apiserver-network-proxy/konnectivity-client v0.0.32
 ## explicit; go 1.17
 sigs.k8s.io/apiserver-network-proxy/konnectivity-client/pkg/client
@@ -1554,6 +1623,9 @@ sigs.k8s.io/controller-runtime/pkg/webhook
 sigs.k8s.io/controller-runtime/pkg/webhook/admission
 sigs.k8s.io/controller-runtime/pkg/webhook/conversion
 sigs.k8s.io/controller-runtime/pkg/webhook/internal/metrics
+# sigs.k8s.io/gateway-api v0.4.3
+## explicit; go 1.15
+sigs.k8s.io/gateway-api/apis/v1alpha2
 # sigs.k8s.io/json v0.0.0-20220713155537-f223a00ba0e2
 ## explicit; go 1.18
 sigs.k8s.io/json
@@ -1651,6 +1723,17 @@ sigs.k8s.io/structured-merge-diff/v4/value
 # sigs.k8s.io/yaml v1.3.0
 ## explicit; go 1.12
 sigs.k8s.io/yaml
+# stash.appscode.dev/apimachinery v0.23.0
+## explicit; go 1.18
+stash.appscode.dev/apimachinery/apis/repositories
+stash.appscode.dev/apimachinery/apis/repositories/v1alpha1
+stash.appscode.dev/apimachinery/apis/stash
+stash.appscode.dev/apimachinery/apis/stash/v1alpha1
+stash.appscode.dev/apimachinery/apis/stash/v1beta1
+stash.appscode.dev/apimachinery/apis/ui
+stash.appscode.dev/apimachinery/apis/ui/v1alpha1
+stash.appscode.dev/apimachinery/client/clientset/versioned/scheme
+stash.appscode.dev/apimachinery/crds
 # github.com/imdario/mergo => github.com/imdario/mergo v0.3.6
 # k8s.io/apiserver => github.com/kmodules/apiserver v0.25.2-0.20220917044909-4ac5fceca518
 # k8s.io/kubernetes => github.com/kmodules/kubernetes v1.26.0-alpha.0.0.20220917022409-54ac9f3f1315

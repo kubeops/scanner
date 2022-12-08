@@ -43,6 +43,7 @@ import (
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/klog/v2/klogr"
 	cu "kmodules.xyz/client-go/client"
+	"kubedb.dev/apimachinery/pkg/factory"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -148,6 +149,10 @@ func (c completedConfig) New(ctx context.Context) (*LicenseProxyServer, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unable to start manager, reason: %v", err)
 	}
+	uncachedClient, err := factory.NewUncachedClient(mgr.GetConfig())
+	if err != nil {
+		return nil, err
+	}
 
 	cid, err := cu.ClusterUID(mgr.GetAPIReader())
 	if err != nil {
@@ -174,7 +179,7 @@ func (c completedConfig) New(ctx context.Context) (*LicenseProxyServer, error) {
 		apiGroupInfo := genericapiserver.NewDefaultAPIGroupInfo(cves.GroupName, Scheme, metav1.ParameterCodec, Codecs)
 
 		v1alpha1storage := map[string]rest.Storage{}
-		v1alpha1storage[api.ResourceImageScanRequests] = requeststorage.NewScanReportStorage(cid, nc)
+		v1alpha1storage[api.ResourceImageScanRequests] = requeststorage.NewScanReportStorage(cid, nc, uncachedClient)
 		v1alpha1storage[api.ResourceImageScanReports] = registry.RESTInPeace(reportstorage.NewREST(Scheme, c.GenericConfig.RESTOptionsGetter))
 
 		apiGroupInfo.VersionedResourcesStorageMap["v1alpha1"] = v1alpha1storage
