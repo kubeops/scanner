@@ -34,14 +34,14 @@ func NewREST(scheme *runtime.Scheme, optsGetter generic.RESTOptionsGetter) (*reg
 		NewFunc:                  func() runtime.Object { return &cves.ImageScanReport{} },
 		NewListFunc:              func() runtime.Object { return &cves.ImageScanReportList{} },
 		PredicateFunc:            MatchImageScanReport,
-		DefaultQualifiedResource: cves.Resource("fischers"),
+		DefaultQualifiedResource: cves.Resource(cves.ResourceImageScanReports),
 
 		CreateStrategy: strategy,
 		UpdateStrategy: strategy,
 		DeleteStrategy: strategy,
 
 		// TODO: define table converter that exposes more than name/creation timestamp
-		TableConvertor: rest.NewDefaultTableConvertor(cves.Resource("fischers")),
+		TableConvertor: rest.NewDefaultTableConvertor(cves.Resource(cves.ResourceImageScanReports)),
 	}
 	options := &generic.StoreOptions{RESTOptions: optsGetter, AttrFunc: GetAttrs}
 	if err := store.CompleteWithOptions(options); err != nil {
