@@ -154,7 +154,10 @@ func (r *WorkloadReconciler) scanForSingleImage(ref string, extraInfo ImageMeta)
 			Kind:       api.ResourceKindImageScanRequest,
 			APIVersion: api.SchemeGroupVersion.String(),
 		},
-		Request: &api.ImageScanRequestSpec{
+		ObjectMeta: metav1.ObjectMeta{
+			GenerateName: "scanreq-", // TODO: use image name
+		},
+		Spec: api.ImageScanRequestSpec{
 			ImageRef:    ref,
 			PullSecrets: extraInfo.ImagePullSecrets,
 			Namespace:   extraInfo.Namespace,
