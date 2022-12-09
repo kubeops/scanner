@@ -28,9 +28,9 @@ import (
 	"kubeops.dev/scanner/pkg/backend"
 	"kubeops.dev/scanner/pkg/fileserver"
 	"kubeops.dev/scanner/pkg/registry"
+	"kubeops.dev/scanner/pkg/registry/cves/controllers"
 	reportstorage "kubeops.dev/scanner/pkg/registry/cves/report"
 	requeststorage "kubeops.dev/scanner/pkg/registry/cves/request"
-	requestCtrl "kubeops.dev/scanner/pkg/registry/cves/request-ctrl"
 
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -95,8 +95,8 @@ type Config struct {
 	ExtraConfig   ExtraConfig
 }
 
-// LicenseProxyServer contains state for a Kubernetes cluster master/api server.
-type LicenseProxyServer struct {
+// ScannerServer contains state for a Kubernetes cluster master/api server.
+type ScannerServer struct {
 	GenericAPIServer *genericapiserver.GenericAPIServer
 	Manager          manager.Manager
 }
@@ -126,8 +126,8 @@ func (cfg *Config) Complete() CompletedConfig {
 	return CompletedConfig{&c}
 }
 
-// New returns a new instance of LicenseProxyServer from the given config.
-func (c completedConfig) New(ctx context.Context) (*LicenseProxyServer, error) {
+// New returns a new instance of ScannerServer from the given config.
+func (c completedConfig) New(ctx context.Context) (*ScannerServer, error) {
 	genericServer, err := c.GenericConfig.New("scanner", genericapiserver.NewEmptyDelegate())
 	if err != nil {
 		return nil, err
@@ -159,14 +159,14 @@ func (c completedConfig) New(ctx context.Context) (*LicenseProxyServer, error) {
 		return nil, err
 	}
 
-	if err = (requestCtrl.NewImaeScanRequestReconciler(nc, c.ExtraConfig.ScannerImage)).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "Workload")
+	if err = (controllers.NewImageScanRequestReconciler(mgr.GetClient(), nc, c.ExtraConfig.ScannerImage)).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "ImageScanRequest")
 		os.Exit(1)
 	}
 
 	setupLog.Info("setup done!")
 
-	s := &LicenseProxyServer{
+	s := &ScannerServer{
 		GenericAPIServer: genericServer,
 		Manager:          mgr,
 	}

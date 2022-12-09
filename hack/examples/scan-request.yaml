@@ -1,4 +1,6 @@
 apiVersion: cves.scanner.appscode.com/v1alpha1
 kind: ImageScanRequest
-request:
+metadata:
+  name: hello
+spec:
   imageRef: 'ghcr.io/arnobkumarsaha/hello-melange-apko/go'

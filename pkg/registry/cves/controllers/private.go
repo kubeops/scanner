@@ -14,11 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package request_ctrl
+package controllers
 
 import (
 	"context"
 	"fmt"
+
+	api "kubeops.dev/scanner/apis/cves/v1alpha1"
 
 	batch "k8s.io/api/batch/v1"
 	core "k8s.io/api/core/v1"
@@ -30,23 +32,6 @@ import (
 	core_util "kmodules.xyz/client-go/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
-
-type ImageInfo struct {
-	Image string `json:"image"`
-	ImageMeta
-}
-
-type ImageMeta struct {
-	Namespace        string                      `json:"namespace"`
-	ImagePullSecrets []core.LocalObjectReference `json:"imagePullSecrets"`
-}
-
-func NewImageInfo(img string, meta ImageMeta) ImageInfo {
-	return ImageInfo{
-		Image:     img,
-		ImageMeta: meta,
-	}
-}
 
 const (
 	ScannerJobName   = "scan-image"
@@ -61,7 +46,7 @@ const (
 	UploaderImageName = "uploader"
 )
 
-func (r *Reconciler) ScanForPrivateImage(info ImageInfo) error {
+func (r *Reconciler) ScanForPrivateImage(isr api.ImageScanRequest) error {
 	ensureVolumeMounts := func(pt *core.PodTemplateSpec) {
 		mount := core.VolumeMount{
 			MountPath: WorkDir,
@@ -78,7 +63,7 @@ func (r *Reconciler) ScanForPrivateImage(info ImageInfo) error {
 	obj, vt, err := cu.CreateOrPatch(context.TODO(), r.Client, &batch.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      ScannerJobName,
-			Namespace: info.Namespace,
+			Namespace: isr.Namespace,
 		},
 	}, func(obj client.Object, createOp bool) client.Object {
 		job := obj.(*batch.Job)
@@ -111,7 +96,7 @@ func (r *Reconciler) ScanForPrivateImage(info ImageInfo) error {
 				},
 				{
 					Name:       UserImageName,
-					Image:      info.Image,
+					Image:      isr.Spec.ImageRef,
 					WorkingDir: WorkDir,
 					Command: []string{
 						"sh",
@@ -127,7 +112,7 @@ func (r *Reconciler) ScanForPrivateImage(info ImageInfo) error {
 					Image:      r.scannerImage,
 					WorkingDir: WorkDir,
 					Command: []string{
-						fmt.Sprintf("scanner upload-report --report-file report.json --trivy-file trivy.json --image  %s", info.Image),
+						fmt.Sprintf("scanner upload-report --report-file report.json --trivy-file trivy.json --image  %s", isr.Spec.ImageRef),
 					},
 					ImagePullPolicy: core.PullIfNotPresent,
 				},
@@ -135,7 +120,7 @@ func (r *Reconciler) ScanForPrivateImage(info ImageInfo) error {
 			ensureVolumeMounts(&job.Spec.Template)
 		}
 		job.Spec.Template.Spec.RestartPolicy = core.RestartPolicyNever
-		job.Spec.Template.Spec.ImagePullSecrets = info.ImagePullSecrets
+		job.Spec.Template.Spec.ImagePullSecrets = isr.Spec.PullSecrets
 		job.Spec.TTLSecondsAfterFinished = pointer.Int32(100)
 		return job
 	})
