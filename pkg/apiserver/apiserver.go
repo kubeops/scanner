@@ -155,11 +155,6 @@ func (c completedConfig) New(ctx context.Context) (*LicenseProxyServer, error) {
 		return nil, fmt.Errorf("unable to start manager, reason: %v", err)
 	}
 
-	cid, err := cu.ClusterUID(mgr.GetAPIReader())
-	if err != nil {
-		return nil, err
-	}
-
 	nc, err := backend.NewConnection(c.ExtraConfig.NATSAddr, c.ExtraConfig.NATSCredFile)
 	if err != nil {
 		return nil, err
@@ -185,7 +180,7 @@ func (c completedConfig) New(ctx context.Context) (*LicenseProxyServer, error) {
 		apiGroupInfo := genericapiserver.NewDefaultAPIGroupInfo(cves.GroupName, Scheme, metav1.ParameterCodec, Codecs)
 
 		v1alpha1storage := map[string]rest.Storage{}
-		v1alpha1storage[api.ResourceImageScanRequests] = requeststorage.NewScanReportStorage(cid, nc, mgr.GetClient())
+		v1alpha1storage[api.ResourceImageScanRequests] = registry.RESTInPeace(requeststorage.NewREST(Scheme, c.GenericConfig.RESTOptionsGetter))
 		v1alpha1storage[api.ResourceImageScanReports] = registry.RESTInPeace(reportstorage.NewREST(Scheme, c.GenericConfig.RESTOptionsGetter))
 
 		apiGroupInfo.VersionedResourcesStorageMap["v1alpha1"] = v1alpha1storage

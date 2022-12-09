@@ -18,16 +18,18 @@ package request
 
 import (
 	"context"
+	"fmt"
+	"net/http"
 	"time"
-
-	"kubeops.dev/scanner/apis/cves/v1alpha1"
 
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/duration"
+	genericapirequest "k8s.io/apiserver/pkg/endpoints/request"
 	"k8s.io/apiserver/pkg/registry/rest"
+	"kubeops.dev/scanner/apis/cves/v1alpha1"
 )
 
 /*
@@ -52,40 +54,41 @@ func (c defaultTableConvertor) ConvertToTable(ctx context.Context, object runtim
 	var table metav1.Table
 	fn := func(obj runtime.Object) error {
 		var (
-			image                string
-			critical             int
-			high                 int
-			medium               int
-			lastScannedTimestamp string
+			image      string
+			reportName string
+			status     string
 		)
 		if o, ok := obj.(*v1alpha1.ImageScanRequest); ok {
-			if o.Spec.Digest != "" {
-				image = o.Spec.Image + "@" + o.Spec.Digest
-			} else if o.Spec.Tag != "" {
-				image = o.Spec.Image + ":" + o.Spec.Tag
-			} else {
-				image = o.Spec.Image
-			}
-
-			stats := map[string]int{}
-			for _, r := range o.Status.Report.Results {
-				for _, vul := range r.Vulnerabilities {
-					stats[vul.Severity] = stats[vul.Severity] + 1
+			if o.Status.Image != nil {
+				if o.Status.Image.Digest != "" {
+					image = o.Status.Image.Image + "@" + o.Status.Image.Digest
+				} else if o.Status.Image.Tag != "" {
+					image = o.Status.Image.Image + ":" + o.Status.Image.Tag
+				} else {
+					image = o.Status.Image.Image
 				}
 			}
-			critical = stats["CRITICAL"]
-			high = stats["HIGH"]
-			medium = stats["MEDIUM"]
-			lastScannedTimestamp = convertToHumanReadableDateType(o.Status.LastChecked.Time)
+			if o.Status.ReportRef != nil {
+				reportName = o.Status.ReportRef.Name
+			}
+			status = o.Status.Phase
+		}
+
+		m, err := meta.Accessor(obj)
+		if err != nil {
+			resource := c.defaultQualifiedResource
+			if info, ok := genericapirequest.RequestInfoFrom(ctx); ok {
+				resource = schema.GroupResource{Group: info.APIGroup, Resource: info.Resource}
+			}
+			return errNotAcceptable{resource: resource}
 		}
 
 		table.Rows = append(table.Rows, metav1.TableRow{
 			Cells: []interface{}{
+				m.GetName(),
 				image,
-				critical,
-				high,
-				medium,
-				lastScannedTimestamp,
+				reportName,
+				status,
 			},
 			Object: runtime.RawExtension{Object: obj},
 		})
@@ -112,14 +115,31 @@ func (c defaultTableConvertor) ConvertToTable(ctx context.Context, object runtim
 	}
 	if opt, ok := tableOptions.(*metav1.TableOptions); !ok || !opt.NoHeaders {
 		table.ColumnDefinitions = []metav1.TableColumnDefinition{
-			{Name: "Image", Type: "string", Format: "name", Description: swaggerMetadataDescriptions["name"]},
-			{Name: "Critical", Type: "string", Description: ""},
-			{Name: "High", Type: "string", Description: ""},
-			{Name: "Medium", Type: "string", Description: ""},
-			{Name: "Last Scanned", Type: "string", Description: ""},
+			{Name: "Name", Type: "string", Format: "name", Description: swaggerMetadataDescriptions["name"]},
+			{Name: "Image", Type: "string", Description: ""},
+			{Name: "Report Name", Type: "string", Description: ""},
+			{Name: "Status", Type: "string", Description: ""},
 		}
 	}
 	return &table, nil
+}
+
+// errNotAcceptable indicates the resource doesn't support Table conversion
+type errNotAcceptable struct {
+	resource schema.GroupResource
+}
+
+func (e errNotAcceptable) Error() string {
+	return fmt.Sprintf("the resource %s does not support being converted to a Table", e.resource)
+}
+
+func (e errNotAcceptable) Status() metav1.Status {
+	return metav1.Status{
+		Status:  metav1.StatusFailure,
+		Code:    http.StatusNotAcceptable,
+		Reason:  metav1.StatusReason("NotAcceptable"),
+		Message: e.Error(),
+	}
 }
 
 // convertToHumanReadableDateType returns the elapsed time since timestamp in
