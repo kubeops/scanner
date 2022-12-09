@@ -18,17 +18,12 @@ package controllers
 
 import (
 	"context"
-	"crypto/md5"
-	"encoding/json"
-	"fmt"
-	"time"
 
 	api "kubeops.dev/scanner/apis/cves/v1alpha1"
 	"kubeops.dev/scanner/pkg/backend"
 
 	"github.com/google/go-containerregistry/pkg/name"
 	"github.com/nats-io/nats.go"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/klog/v2"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -37,6 +32,7 @@ import (
 
 type Reconciler struct {
 	client.Client
+	ctx          context.Context
 	nc           *nats.Conn
 	scannerImage string
 }
@@ -50,6 +46,7 @@ func NewImageScanRequestReconciler(kc client.Client, nc *nats.Conn, scannedImage
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	r.ctx = ctx
 	wlog := log.FromContext(ctx)
 
 	wlog.Info("Reconciling for ", "req", req)
@@ -97,39 +94,6 @@ func (r *Reconciler) scanForSingleImage(isr api.ImageScanRequest) error {
 		klog.Errorf("error on Submitting ScanRequest ", err)
 	}
 	return err
-}
-
-func (r *Reconciler) createImageScanReport(isr api.ImageScanRequest) error {
-	msg, err := r.nc.Request("scanner.report", []byte(isr.Spec.ImageRef), backend.NatsRequestTimeout)
-	if err != nil {
-		return err
-	}
-
-	var report api.SingleReport
-	err = json.Unmarshal(msg.Data, &report)
-	if err != nil {
-		return err
-	}
-
-	isrep := api.ImageScanReport{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       api.ResourceKindImageScanReport,
-			APIVersion: api.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name: fmt.Sprintf("%x", md5.Sum([]byte(isr.Spec.ImageRef))),
-		},
-		Spec: api.ImageScanReportSpec{
-			Image: isr.Spec.ImageRef,
-			// TODO: Need to modify the tag & digest field
-		},
-		Status: api.ImageScanReportStatus{
-			LastChecked: api.MyTime(metav1.Time{Time: time.Now()}),
-			Report:      report,
-		},
-	}
-
-	return r.Client.Create(context.TODO(), &isrep, &client.CreateOptions{})
 }
 
 // SetupWithManager sets up the controller with the Manager.

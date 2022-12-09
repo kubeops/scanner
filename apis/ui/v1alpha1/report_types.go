@@ -52,11 +52,12 @@ type ReportResponse struct {
 }
 
 type ImageReport struct {
-	Name               string              `json:"name"` // Name + (Tag if any)
-	Digest             string              `json:"digest"`
-	VulnerabilityInfos []VulnerabilityInfo `json:"vulnerabilityInfos,omitempty"`
-	Pods               []string            `json:"pods"`
-	Containers         []string            `json:"containers"`
+	Name               string                    `json:"name"` // Name + (Tag if any)
+	Digest             string                    `json:"digest"`
+	VulnerabilityInfos []VulnerabilityInfo       `json:"vulnerabilityInfos,omitempty"`
+	Pods               []string                  `json:"pods"`
+	Containers         []string                  `json:"containers"`
+	Lineage            [][]metav1.OwnerReference `json:"lineage,omitempty"`
 }
 
 type VulnerabilityInfo struct {

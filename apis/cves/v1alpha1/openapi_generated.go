@@ -17682,7 +17682,7 @@ func schema_scanner_apis_cves_v1alpha1_ImageDetails(ref common.ReferenceCallback
 			SchemaProps: spec.SchemaProps{
 				Type: []string{"object"},
 				Properties: map[string]spec.Schema{
-					"image": {
+					"name": {
 						SchemaProps: spec.SchemaProps{
 							Type:   []string{"string"},
 							Format: "",
@@ -18313,7 +18313,7 @@ func schema_scanner_apis_cves_v1alpha1_ImageScanRequestStatus(ref common.Referen
 					},
 					"reason": {
 						SchemaProps: spec.SchemaProps{
-							Description: "A brief CamelCase message indicating details about why the request is in this state. e.g. 'Evicted'",
+							Description: "A brief CamelCase message indicating details about why the request is in this state.",
 							Type:        []string{"string"},
 							Format:      "",
 						},

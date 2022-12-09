@@ -61,9 +61,13 @@ func (r *Reconciler) ScanForPrivateImage(isr api.ImageScanRequest) error {
 	}
 
 	obj, vt, err := cu.CreateOrPatch(context.TODO(), r.Client, &batch.Job{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Job",
+			APIVersion: batch.SchemeGroupVersion.String(),
+		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      ScannerJobName,
-			Namespace: isr.Namespace,
+			Namespace: isr.Spec.Namespace,
 		},
 	}, func(obj client.Object, createOp bool) client.Object {
 		job := obj.(*batch.Job)

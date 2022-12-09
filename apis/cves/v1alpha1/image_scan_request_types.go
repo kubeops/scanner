@@ -60,11 +60,11 @@ type ImageScanRequestStatus struct {
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 	// Specifies the current phase of the database
 	// +optional
-	Phase     string         `json:"phase,omitempty"`
-	Image     *ImageDetails  `json:"image,omitempty"`
-	ReportRef *ScanReportRef `json:"reportRef,omitempty"`
+	Phase     ImageScanRequestPhase `json:"phase,omitempty"`
+	Image     *ImageDetails         `json:"image,omitempty"`
+	ReportRef *ScanReportRef        `json:"reportRef,omitempty"`
+
 	// A brief CamelCase message indicating details about why the request is in this state.
-	// e.g. 'Evicted'
 	// +optional
 	Reason string `json:"reason,omitempty"`
 }
@@ -77,8 +77,19 @@ const (
 	ImagePrivate ImageVisibility = "Private"
 )
 
+// +kubebuilder:validation:Enum=Pending;InProgress;Current;Failed;Outdated
+type ImageScanRequestPhase string
+
+const (
+	ImageScanRequestPhasePending    ImageScanRequestPhase = "Pending"
+	ImageScanRequestPhaseInProgress ImageScanRequestPhase = "InProgress"
+	ImageScanRequestPhaseCurrent    ImageScanRequestPhase = "Current"
+	ImageScanRequestPhaseFailed     ImageScanRequestPhase = "Failed"
+	ImageScanRequestPhaseOutdated   ImageScanRequestPhase = "Outdated"
+)
+
 type ImageDetails struct {
-	Image      string          `json:"image,omitempty"`
+	Name       string          `json:"name,omitempty"`
 	Visibility ImageVisibility `json:"visibility,omitempty"`
 	// Tag & Digest is optional field. One of these fields may not present
 	// +optional

@@ -1,0 +1,10 @@
+apiVersion: cves.scanner.appscode.com/v1alpha1
+kind: ImageScanRequest
+metadata:
+  name: hello-pri
+  namespace: demo
+spec:
+  imageRef: 'arnobkumarsaha/private-test:01'
+  namespace: default
+  pullSecrets:
+  - name: pull-secret

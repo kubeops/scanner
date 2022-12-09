@@ -64,7 +64,7 @@ func EnsureCronJobToRefreshTrivyDB(c client.Client) error {
 	}, func(obj client.Object, createOp bool) client.Object {
 		cj := obj.(*batch.CronJob)
 
-		cj.Spec.Schedule = "0 */6 * * *" // every 6 hours
+		cj.Spec.Schedule = "* */6 * * *" // every 6 hours
 		cj.Spec.JobTemplate.Spec.BackoffLimit = pointer.Int32(2)
 		cj.Spec.JobTemplate.Spec.Selector = nil
 		cj.Spec.JobTemplate.Spec.Template.Spec.Containers = core_util.UpsertContainers(cj.Spec.JobTemplate.Spec.Template.Spec.Containers, []core.Container{

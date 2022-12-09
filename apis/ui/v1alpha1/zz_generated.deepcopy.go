@@ -22,6 +22,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -42,6 +43,19 @@ func (in *ImageReport) DeepCopyInto(out *ImageReport) {
 		in, out := &in.Containers, &out.Containers
 		*out = make([]string, len(*in))
 		copy(*out, *in)
+	}
+	if in.Lineage != nil {
+		in, out := &in.Lineage, &out.Lineage
+		*out = make([][]v1.OwnerReference, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = make([]v1.OwnerReference, len(*in))
+				for i := range *in {
+					(*in)[i].DeepCopyInto(&(*out)[i])
+				}
+			}
+		}
 	}
 	return
 }

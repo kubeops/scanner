@@ -17541,12 +17541,32 @@ func schema_scanner_apis_ui_v1alpha1_ImageReport(ref common.ReferenceCallback) c
 							},
 						},
 					},
+					"lineage": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type: []string{"array"},
+										Items: &spec.SchemaOrArray{
+											Schema: &spec.Schema{
+												SchemaProps: spec.SchemaProps{
+													Default: map[string]interface{}{},
+													Ref:     ref("k8s.io/apimachinery/pkg/apis/meta/v1.OwnerReference"),
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
 				},
 				Required: []string{"name", "digest", "pods", "containers"},
 			},
 		},
 		Dependencies: []string{
-			"kubeops.dev/scanner/apis/ui/v1alpha1.VulnerabilityInfo"},
+			"k8s.io/apimachinery/pkg/apis/meta/v1.OwnerReference", "kubeops.dev/scanner/apis/ui/v1alpha1.VulnerabilityInfo"},
 	}
 }
 
