@@ -22,6 +22,8 @@ import (
 	"net/http"
 	"time"
 
+	"kubeops.dev/scanner/apis/cves/v1alpha1"
+
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -29,7 +31,6 @@ import (
 	"k8s.io/apimachinery/pkg/util/duration"
 	genericapirequest "k8s.io/apiserver/pkg/endpoints/request"
 	"k8s.io/apiserver/pkg/registry/rest"
-	"kubeops.dev/scanner/apis/cves/v1alpha1"
 )
 
 /*
