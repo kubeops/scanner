@@ -73,7 +73,7 @@ func (r *ImageRequest) Destroy() {}
 func (r *ImageRequest) Create(ctx context.Context, obj runtime.Object, _ rest.ValidateObjectFunc, createOpts *metav1.CreateOptions) (runtime.Object, error) {
 	in := obj.(*api.ImageScanRequest)
 
-	msg, err := r.nc.Request("scanner.report", []byte(in.Request.ImageRef), backend.NatsRequestTimeout)
+	msg, err := r.nc.Request("scanner.report", []byte(in.Spec.ImageRef), backend.NatsRequestTimeout)
 	if err != nil {
 		return nil, err
 	}
@@ -90,10 +90,10 @@ func (r *ImageRequest) Create(ctx context.Context, obj runtime.Object, _ rest.Va
 			APIVersion: api.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: fmt.Sprintf("%x", md5.Sum([]byte(in.Request.ImageRef))),
+			Name: fmt.Sprintf("%x", md5.Sum([]byte(in.Spec.ImageRef))),
 		},
 		Spec: api.ImageScanReportSpec{
-			Image: in.Request.ImageRef,
+			Image: in.Spec.ImageRef,
 			// TODO: How can we modify the tag & digest field ?
 		},
 		Status: api.ImageScanReportStatus{

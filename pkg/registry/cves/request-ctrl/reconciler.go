@@ -14,19 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package scanner
+package request_ctrl
 
 import (
 	"context"
 
 	api "kubeops.dev/scanner/apis/cves/v1alpha1"
-	"kubeops.dev/scanner/client/clientset/versioned"
 	"kubeops.dev/scanner/pkg/backend"
 
 	"github.com/google/go-containerregistry/pkg/name"
 	"github.com/nats-io/nats.go"
-	apps "k8s.io/api/apps/v1"
-	batch "k8s.io/api/batch/v1"
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/klog/v2"
@@ -36,25 +33,23 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-// WorkloadReconciler reconciles a Workload object
-type WorkloadReconciler struct {
+// Reconciler reconciles a Workload object
+type Reconciler struct {
 	client.Client
 	nc           *nats.Conn
-	client_set   *versioned.Clientset
 	scannerImage string
 }
 
-var _ duck.Reconciler = &WorkloadReconciler{}
+var _ duck.Reconciler = &Reconciler{}
 
-func NewWorkloadReconciler(nc *nats.Conn, client_set *versioned.Clientset, scannedImage string) *WorkloadReconciler {
-	return &WorkloadReconciler{
+func NewImaeScanRequestReconciler(nc *nats.Conn, scannedImage string) *Reconciler {
+	return &Reconciler{
 		nc:           nc,
-		client_set:   client_set,
 		scannerImage: scannedImage,
 	}
 }
 
-func (r *WorkloadReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	wlog := log.FromContext(ctx)
 
 	wlog.Info("Reconciling for ", "req", req)
@@ -108,7 +103,7 @@ func (r *WorkloadReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	return ctrl.Result{}, nil
 }
 
-func (r *WorkloadReconciler) calcForSinglePod(pod *core.Pod) ([]string, error) {
+func (r *Reconciler) calcForSinglePod(pod *core.Pod) ([]string, error) {
 	fnRef := func(c core.ContainerStatus) (string, error) {
 		imageRef, err := name.ParseReference(c.Image)
 		if err != nil {
@@ -148,7 +143,7 @@ func (r *WorkloadReconciler) calcForSinglePod(pod *core.Pod) ([]string, error) {
 	return toInsert, nil
 }
 
-func (r *WorkloadReconciler) scanForSingleImage(ref string, extraInfo ImageMeta) error {
+func (r *Reconciler) scanForSingleImage(ref string, extraInfo ImageMeta) error {
 	isreq := api.ImageScanRequest{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       api.ResourceKindImageScanRequest,
@@ -165,7 +160,7 @@ func (r *WorkloadReconciler) scanForSingleImage(ref string, extraInfo ImageMeta)
 	}
 
 	// API call to handle all the other things from ui-server repo
-	_, err := r.client_set.CvesV1alpha1().ImageScanRequests().Create(context.TODO(), &isreq, metav1.CreateOptions{})
+	err := r.Client.Create(context.TODO(), &isreq, &client.CreateOptions{})
 	if err != nil {
 		return err
 	}
@@ -193,28 +188,14 @@ func (r *WorkloadReconciler) scanForSingleImage(ref string, extraInfo ImageMeta)
 	return err
 }
 
-func (r *WorkloadReconciler) InjectClient(c client.Client) error {
+func (r *Reconciler) InjectClient(c client.Client) error {
 	r.Client = c
 	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
-func (r *WorkloadReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	return duck.ControllerManagedBy(mgr).
-		For(&api.Workload{}).
-		WithUnderlyingTypes(
-			core.SchemeGroupVersion.WithKind("ReplicationController"),
-			apps.SchemeGroupVersion.WithKind("Deployment"),
-			apps.SchemeGroupVersion.WithKind("StatefulSet"),
-			apps.SchemeGroupVersion.WithKind("DaemonSet"),
-			batch.SchemeGroupVersion.WithKind("Job"),
-			batch.SchemeGroupVersion.WithKind("CronJob"),
-		).
-		Complete(func() duck.Reconciler {
-			wr := new(WorkloadReconciler)
-			wr.nc = r.nc
-			wr.scannerImage = r.scannerImage
-			wr.client_set = r.client_set
-			return wr
-		})
+func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
+	return ctrl.NewControllerManagedBy(mgr).
+		For(&api.ImageScanRequest{}).
+		Complete(r)
 }

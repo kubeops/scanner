@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"time"
 
 	"kubeops.dev/scanner/apis/cves/v1alpha1"
 
@@ -28,7 +27,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/util/duration"
 	genericapirequest "k8s.io/apiserver/pkg/endpoints/request"
 	"k8s.io/apiserver/pkg/registry/rest"
 )
@@ -141,22 +139,4 @@ func (e errNotAcceptable) Status() metav1.Status {
 		Reason:  metav1.StatusReason("NotAcceptable"),
 		Message: e.Error(),
 	}
-}
-
-// convertToHumanReadableDateType returns the elapsed time since timestamp in
-// human-readable approximation.
-// ref: https://github.com/kubernetes/apimachinery/blob/v0.21.1/pkg/api/meta/table/table.go#L63-L70
-// But works for timestamp before or after now.
-func convertToHumanReadableDateType(timestamp time.Time) string {
-	if timestamp.IsZero() {
-		return "<unknown>"
-	}
-	var d time.Duration
-	now := time.Now()
-	if now.After(timestamp) {
-		d = now.Sub(timestamp)
-	} else {
-		d = timestamp.Sub(now)
-	}
-	return duration.HumanDuration(d)
 }

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package scanner
+package request_ctrl
 
 import (
 	"context"
@@ -61,7 +61,7 @@ const (
 	UploaderImageName = "uploader"
 )
 
-func (r *WorkloadReconciler) ScanForPrivateImage(info ImageInfo) error {
+func (r *Reconciler) ScanForPrivateImage(info ImageInfo) error {
 	ensureVolumeMounts := func(pt *core.PodTemplateSpec) {
 		mount := core.VolumeMount{
 			MountPath: WorkDir,

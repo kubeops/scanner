@@ -25,13 +25,12 @@ import (
 	"kubeops.dev/scanner/apis/cves"
 	"kubeops.dev/scanner/apis/cves/install"
 	api "kubeops.dev/scanner/apis/cves/v1alpha1"
-	"kubeops.dev/scanner/client/clientset/versioned"
 	"kubeops.dev/scanner/pkg/backend"
-	scannerctrl "kubeops.dev/scanner/pkg/controllers/scanner"
 	"kubeops.dev/scanner/pkg/fileserver"
 	"kubeops.dev/scanner/pkg/registry"
 	reportstorage "kubeops.dev/scanner/pkg/registry/cves/report"
 	requeststorage "kubeops.dev/scanner/pkg/registry/cves/request"
+	requestCtrl "kubeops.dev/scanner/pkg/registry/cves/request-ctrl"
 
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -160,12 +159,7 @@ func (c completedConfig) New(ctx context.Context) (*LicenseProxyServer, error) {
 		return nil, err
 	}
 
-	client_set, err := versioned.NewForConfig(cfg)
-	if err != nil {
-		return nil, err
-	}
-
-	if err = (scannerctrl.NewWorkloadReconciler(nc, client_set, c.ExtraConfig.ScannerImage)).SetupWithManager(mgr); err != nil {
+	if err = (requestCtrl.NewImaeScanRequestReconciler(nc, c.ExtraConfig.ScannerImage)).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Workload")
 		os.Exit(1)
 	}
