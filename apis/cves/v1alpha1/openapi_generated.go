@@ -18154,9 +18154,8 @@ func schema_scanner_apis_cves_v1alpha1_ImageScanRequestSpec(ref common.Reference
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Default: "",
-										Type:    []string{"string"},
-										Format:  "",
+										Default: map[string]interface{}{},
+										Ref:     ref("k8s.io/api/core/v1.LocalObjectReference"),
 									},
 								},
 							},
@@ -18173,6 +18172,8 @@ func schema_scanner_apis_cves_v1alpha1_ImageScanRequestSpec(ref common.Reference
 				Required: []string{"imageRef"},
 			},
 		},
+		Dependencies: []string{
+			"k8s.io/api/core/v1.LocalObjectReference"},
 	}
 }
 

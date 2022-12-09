@@ -20,6 +20,7 @@ import (
 	"context"
 
 	api "kubeops.dev/scanner/apis/cves/v1alpha1"
+	"kubeops.dev/scanner/client/clientset/versioned"
 	"kubeops.dev/scanner/pkg/backend"
 
 	"github.com/google/go-containerregistry/pkg/name"
@@ -39,14 +40,16 @@ import (
 type WorkloadReconciler struct {
 	client.Client
 	nc           *nats.Conn
+	client_set   *versioned.Clientset
 	scannerImage string
 }
 
 var _ duck.Reconciler = &WorkloadReconciler{}
 
-func NewWorkloadReconciler(nc *nats.Conn, scannedImage string) *WorkloadReconciler {
+func NewWorkloadReconciler(nc *nats.Conn, client_set *versioned.Clientset, scannedImage string) *WorkloadReconciler {
 	return &WorkloadReconciler{
 		nc:           nc,
+		client_set:   client_set,
 		scannerImage: scannedImage,
 	}
 }
@@ -146,6 +149,24 @@ func (r *WorkloadReconciler) calcForSinglePod(pod *core.Pod) ([]string, error) {
 }
 
 func (r *WorkloadReconciler) scanForSingleImage(ref string, extraInfo ImageMeta) error {
+	isreq := api.ImageScanRequest{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       api.ResourceKindImageScanRequest,
+			APIVersion: api.SchemeGroupVersion.String(),
+		},
+		Request: &api.ImageScanRequestSpec{
+			ImageRef:    ref,
+			PullSecrets: extraInfo.ImagePullSecrets,
+			Namespace:   extraInfo.Namespace,
+		},
+	}
+
+	// API call to handle all the other things from ui-server repo
+	_, err := r.client_set.CvesV1alpha1().ImageScanRequests().Create(context.TODO(), &isreq, metav1.CreateOptions{})
+	if err != nil {
+		return err
+	}
+
 	imageRef, err := name.ParseReference(ref)
 	if err != nil {
 		return err
@@ -157,6 +178,7 @@ func (r *WorkloadReconciler) scanForSingleImage(ref string, extraInfo ImageMeta)
 		return err
 	}
 	info := NewImageInfo(ref, extraInfo)
+
 	if isPrivate {
 		return r.ScanForPrivateImage(info)
 	}
@@ -188,6 +210,8 @@ func (r *WorkloadReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(func() duck.Reconciler {
 			wr := new(WorkloadReconciler)
 			wr.nc = r.nc
+			wr.scannerImage = r.scannerImage
+			wr.client_set = r.client_set
 			return wr
 		})
 }

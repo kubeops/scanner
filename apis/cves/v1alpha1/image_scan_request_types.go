@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -42,7 +43,7 @@ type ImageScanRequestSpec struct {
 	ImageRef string `json:"imageRef"`
 	// If some private image is referred in ImageRef, this field will contain the ImagePullSecrets from the pod template.
 	// +optional
-	PullSecrets []string `json:"pullSecrets,omitempty"`
+	PullSecrets []core.LocalObjectReference `json:"pullSecrets,omitempty"`
 	// Namespace tells where to look for the image pull secrets.
 	// +optional
 	Namespace string `json:"namespace,omitempty"`

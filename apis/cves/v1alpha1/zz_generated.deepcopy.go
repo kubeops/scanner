@@ -22,7 +22,8 @@ limitations under the License.
 package v1alpha1
 
 import (
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -365,7 +366,7 @@ func (in *ImageScanRequestSpec) DeepCopyInto(out *ImageScanRequestSpec) {
 	*out = *in
 	if in.PullSecrets != nil {
 		in, out := &in.PullSecrets, &out.PullSecrets
-		*out = make([]string, len(*in))
+		*out = make([]v1.LocalObjectReference, len(*in))
 		copy(*out, *in)
 	}
 	return
@@ -572,7 +573,7 @@ func (in *WorkloadSpec) DeepCopyInto(out *WorkloadSpec) {
 	*out = *in
 	if in.Selector != nil {
 		in, out := &in.Selector, &out.Selector
-		*out = new(v1.LabelSelector)
+		*out = new(metav1.LabelSelector)
 		(*in).DeepCopyInto(*out)
 	}
 	in.Template.DeepCopyInto(&out.Template)
