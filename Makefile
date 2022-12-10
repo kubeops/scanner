@@ -25,7 +25,7 @@ COMPRESS ?= no
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS          ?= "crd:crdVersions={v1},allowDangerousTypes=true"
 CODE_GENERATOR_IMAGE ?= appscode/gengo:release-1.25
-API_GROUPS           ?= cves:v1alpha1 ui:v1alpha1
+API_GROUPS           ?= scanner:v1alpha1 reports:v1alpha1
 
 # Where to push the docker image.
 REGISTRY ?= appscode
@@ -155,25 +155,41 @@ clientset:
 		--env HTTP_PROXY=$(HTTP_PROXY)                            \
 		--env HTTPS_PROXY=$(HTTPS_PROXY)                          \
 		$(CODE_GENERATOR_IMAGE)                                   \
+		/go/src/k8s.io/code-generator/generate-internal-groups.sh \
+			"defaulter,conversion"                         \
+			$(GO_PKG)/$(REPO)/client                                \
+			$(GO_PKG)/$(REPO)/apis                                  \
+			$(GO_PKG)/$(REPO)/apis                                  \
+			"$(API_GROUPS)"                                         \
+			--go-header-file "./hack/license/go.txt"
+	@docker run --rm                                            \
+		-u $$(id -u):$$(id -g)                                    \
+		-v /tmp:/.cache                                           \
+		-v $$(pwd):$(DOCKER_REPO_ROOT)                            \
+		-w $(DOCKER_REPO_ROOT)                                    \
+		--env HTTP_PROXY=$(HTTP_PROXY)                            \
+		--env HTTPS_PROXY=$(HTTPS_PROXY)                          \
+		$(CODE_GENERATOR_IMAGE)                                   \
 		/go/src/k8s.io/code-generator/generate-groups.sh          \
 			"deepcopy,client"                                       \
 			$(GO_PKG)/$(REPO)/client                                \
 			$(GO_PKG)/$(REPO)/apis                                  \
 			"$(API_GROUPS)"                                         \
 			--go-header-file "./hack/license/go.txt"
-# 	rm -rf ./apis/scanner/v1beta1/zz_generated.conversion.go
-# 	@docker run --rm                                            \
-# 		-u $$(id -u):$$(id -g)                                    \
-# 		-v /tmp:/.cache                                           \
-# 		-v $$(pwd):$(DOCKER_REPO_ROOT)                            \
-# 		-w $(DOCKER_REPO_ROOT)                                    \
-# 		--env HTTP_PROXY=$(HTTP_PROXY)                            \
-# 		--env HTTPS_PROXY=$(HTTPS_PROXY)                          \
-# 		$(CODE_GENERATOR_IMAGE)                                   \
-# 		/go/bin/conversion-gen --go-header-file ./hack/license/go.txt \
-# 			--input-dirs $(GO_PKG)/$(REPO)/apis/scanner/v1beta1 \
-# 			-O zz_generated.conversion
-
+	@docker run --rm                                            \
+		-u $$(id -u):$$(id -g)                                    \
+		-v /tmp:/.cache                                           \
+		-v $$(pwd):$(DOCKER_REPO_ROOT)                            \
+		-w $(DOCKER_REPO_ROOT)                                    \
+		--env HTTP_PROXY=$(HTTP_PROXY)                            \
+		--env HTTPS_PROXY=$(HTTPS_PROXY)                          \
+		$(CODE_GENERATOR_IMAGE)                                   \
+		/go/src/k8s.io/code-generator/generate-groups.sh          \
+			"lister,informer"                                       \
+			$(GO_PKG)/$(REPO)/client                                \
+			$(GO_PKG)/$(REPO)/apis                                  \
+			"scanner:v1alpha1"                                      \
+			--go-header-file "./hack/license/go.txt"
 
 # Generate openapi schema
 .PHONY: openapi
@@ -200,17 +216,17 @@ openapi-%:
 .PHONY: gen-crds
 gen-crds:
 	@echo "Generating CRD manifests"
-	@docker run --rm	                    \
-		-u $$(id -u):$$(id -g)              \
-		-v /tmp:/.cache                     \
-		-v $$(pwd):$(DOCKER_REPO_ROOT)      \
-		-w $(DOCKER_REPO_ROOT)              \
+	@docker run --rm	                      \
+		-u $$(id -u):$$(id -g)                \
+		-v /tmp:/.cache                       \
+		-v $$(pwd):$(DOCKER_REPO_ROOT)        \
+		-w $(DOCKER_REPO_ROOT)                \
 	    --env HTTP_PROXY=$(HTTP_PROXY)      \
 	    --env HTTPS_PROXY=$(HTTPS_PROXY)    \
-		$(CODE_GENERATOR_IMAGE)             \
-		controller-gen                      \
-			$(CRD_OPTIONS)                  \
-			paths="./apis/..."              \
+		$(CODE_GENERATOR_IMAGE)               \
+		controller-gen                        \
+			$(CRD_OPTIONS)                      \
+			paths="./apis/scanner/v1alpha1/..." \
 			output:crd:artifacts:config=crds
 
 .PHONY: manifests

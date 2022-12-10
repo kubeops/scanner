@@ -19,7 +19,7 @@ package apiserver
 import (
 	"testing"
 
-	"kubeops.dev/scanner/apis/cves/fuzzer"
+	"kubeops.dev/scanner/apis/scanner/fuzzer"
 
 	"k8s.io/apimachinery/pkg/api/apitesting/roundtrip"
 )

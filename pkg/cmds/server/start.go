@@ -22,7 +22,7 @@ import (
 	"io"
 	"net"
 
-	api "kubeops.dev/scanner/apis/cves/v1alpha1"
+	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
 	"kubeops.dev/scanner/pkg/apiserver"
 
 	"github.com/spf13/pflag"

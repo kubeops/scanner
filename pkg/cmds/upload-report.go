@@ -24,7 +24,8 @@ import (
 	"os"
 	"time"
 
-	api "kubeops.dev/scanner/apis/cves/v1alpha1"
+	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
+	"kubeops.dev/scanner/apis/shared"
 
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -113,7 +114,7 @@ func uploadReport(imageRef, trivyFile, reportFile string) error {
 			Image: imageRef,
 		},
 		Status: api.ImageScanReportStatus{
-			LastChecked:    api.MyTime(metav1.Time{Time: time.Now()}),
+			LastChecked:    shared.Time(metav1.Time{Time: time.Now()}),
 			TrivyDBVersion: ver.VulnerabilityDB.Version,
 			Report:         actualReport,
 		},

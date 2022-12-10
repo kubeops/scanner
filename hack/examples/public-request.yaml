@@ -1,4 +1,4 @@
-apiVersion: cves.scanner.appscode.com/v1alpha1
+apiVersion: scanner.appscode.com/v1alpha1
 kind: ImageScanRequest
 metadata:
   name: hello-pub

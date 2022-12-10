@@ -22,15 +22,15 @@ import (
 	"os"
 	"strings"
 
-	"kubeops.dev/scanner/apis/cves"
-	"kubeops.dev/scanner/apis/cves/install"
-	api "kubeops.dev/scanner/apis/cves/v1alpha1"
+	"kubeops.dev/scanner/apis/scanner"
+	"kubeops.dev/scanner/apis/scanner/install"
+	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
 	"kubeops.dev/scanner/pkg/backend"
+	"kubeops.dev/scanner/pkg/controllers"
 	"kubeops.dev/scanner/pkg/fileserver"
 	"kubeops.dev/scanner/pkg/registry"
-	"kubeops.dev/scanner/pkg/registry/cves/controllers"
-	reportstorage "kubeops.dev/scanner/pkg/registry/cves/report"
-	requeststorage "kubeops.dev/scanner/pkg/registry/cves/request"
+	reportstorage "kubeops.dev/scanner/pkg/registry/scanner/report"
+	requeststorage "kubeops.dev/scanner/pkg/registry/scanner/request"
 
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -171,7 +171,7 @@ func (c completedConfig) New(ctx context.Context) (*ScannerServer, error) {
 		Manager:          mgr,
 	}
 	{
-		apiGroupInfo := genericapiserver.NewDefaultAPIGroupInfo(cves.GroupName, Scheme, metav1.ParameterCodec, Codecs)
+		apiGroupInfo := genericapiserver.NewDefaultAPIGroupInfo(scanner.GroupName, Scheme, metav1.ParameterCodec, Codecs)
 
 		v1alpha1storage := map[string]rest.Storage{}
 		v1alpha1storage[api.ResourceImageScanRequests] = registry.RESTInPeace(requeststorage.NewREST(Scheme, c.GenericConfig.RESTOptionsGetter))
