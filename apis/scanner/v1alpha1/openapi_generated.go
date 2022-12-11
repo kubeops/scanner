@@ -358,8 +358,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"kmodules.xyz/client-go/api/v1.X509Subject":                          schema_kmodulesxyz_client_go_api_v1_X509Subject(ref),
 		"kmodules.xyz/client-go/api/v1.stringSetMerger":                      schema_kmodulesxyz_client_go_api_v1_stringSetMerger(ref),
 		"kubeops.dev/scanner/apis/scanner/v1alpha1.CVSS":                     schema_scanner_apis_scanner_v1alpha1_CVSS(ref),
-		"kubeops.dev/scanner/apis/scanner/v1alpha1.CVSSNvd":                  schema_scanner_apis_scanner_v1alpha1_CVSSNvd(ref),
-		"kubeops.dev/scanner/apis/scanner/v1alpha1.CVSSRedhat":               schema_scanner_apis_scanner_v1alpha1_CVSSRedhat(ref),
+		"kubeops.dev/scanner/apis/scanner/v1alpha1.CVSSScore":                schema_scanner_apis_scanner_v1alpha1_CVSSScore(ref),
 		"kubeops.dev/scanner/apis/scanner/v1alpha1.ImageConfig":              schema_scanner_apis_scanner_v1alpha1_ImageConfig(ref),
 		"kubeops.dev/scanner/apis/scanner/v1alpha1.ImageDetails":             schema_scanner_apis_scanner_v1alpha1_ImageDetails(ref),
 		"kubeops.dev/scanner/apis/scanner/v1alpha1.ImageHistory":             schema_scanner_apis_scanner_v1alpha1_ImageHistory(ref),
@@ -17620,59 +17619,23 @@ func schema_scanner_apis_scanner_v1alpha1_CVSS(ref common.ReferenceCallback) com
 				Properties: map[string]spec.Schema{
 					"nvd": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("kubeops.dev/scanner/apis/scanner/v1alpha1.CVSSNvd"),
+							Ref: ref("kubeops.dev/scanner/apis/scanner/v1alpha1.CVSSScore"),
 						},
 					},
 					"redhat": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("kubeops.dev/scanner/apis/scanner/v1alpha1.CVSSRedhat"),
+							Ref: ref("kubeops.dev/scanner/apis/scanner/v1alpha1.CVSSScore"),
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"kubeops.dev/scanner/apis/scanner/v1alpha1.CVSSNvd", "kubeops.dev/scanner/apis/scanner/v1alpha1.CVSSRedhat"},
+			"kubeops.dev/scanner/apis/scanner/v1alpha1.CVSSScore"},
 	}
 }
 
-func schema_scanner_apis_scanner_v1alpha1_CVSSNvd(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Type: []string{"object"},
-				Properties: map[string]spec.Schema{
-					"V2Vector": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
-						},
-					},
-					"V3Vector": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
-						},
-					},
-					"V2Score": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"number"},
-							Format: "double",
-						},
-					},
-					"V3Score": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"number"},
-							Format: "double",
-						},
-					},
-				},
-			},
-		},
-	}
-}
-
-func schema_scanner_apis_scanner_v1alpha1_CVSSRedhat(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_scanner_apis_scanner_v1alpha1_CVSSScore(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{

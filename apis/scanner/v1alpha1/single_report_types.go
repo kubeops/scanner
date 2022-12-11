@@ -85,14 +85,7 @@ type VulnerabilityDataSource struct {
 	URL  string `json:"URL"`
 }
 
-type CVSSNvd struct {
-	V2Vector string  `json:"V2Vector,omitempty"`
-	V3Vector string  `json:"V3Vector,omitempty"`
-	V2Score  float64 `json:"V2Score,omitempty"`
-	V3Score  float64 `json:"V3Score,omitempty"`
-}
-
-type CVSSRedhat struct {
+type CVSSScore struct {
 	V2Vector string  `json:"V2Vector,omitempty"`
 	V3Vector string  `json:"V3Vector,omitempty"`
 	V2Score  float64 `json:"V2Score,omitempty"`
@@ -100,8 +93,8 @@ type CVSSRedhat struct {
 }
 
 type CVSS struct {
-	Nvd    *CVSSNvd    `json:"nvd,omitempty"`
-	Redhat *CVSSRedhat `json:"redhat,omitempty"`
+	Nvd    *CVSSScore `json:"nvd,omitempty"`
+	Redhat *CVSSScore `json:"redhat,omitempty"`
 }
 
 type Vulnerability struct {

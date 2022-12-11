@@ -28,7 +28,6 @@ import (
 	"kubeops.dev/scanner/pkg/backend"
 	"kubeops.dev/scanner/pkg/controllers"
 	"kubeops.dev/scanner/pkg/fileserver"
-	"kubeops.dev/scanner/pkg/registry"
 	reportstorage "kubeops.dev/scanner/pkg/registry/scanner/report"
 	requeststorage "kubeops.dev/scanner/pkg/registry/scanner/request"
 
@@ -174,9 +173,22 @@ func (c completedConfig) New(ctx context.Context) (*ScannerServer, error) {
 		apiGroupInfo := genericapiserver.NewDefaultAPIGroupInfo(scanner.GroupName, Scheme, metav1.ParameterCodec, Codecs)
 
 		v1alpha1storage := map[string]rest.Storage{}
-		v1alpha1storage[api.ResourceImageScanRequests] = registry.RESTInPeace(requeststorage.NewREST(Scheme, c.GenericConfig.RESTOptionsGetter))
-		v1alpha1storage[api.ResourceImageScanReports] = registry.RESTInPeace(reportstorage.NewREST(Scheme, c.GenericConfig.RESTOptionsGetter))
-
+		{
+			storage, err := requeststorage.NewStorage(Scheme, c.GenericConfig.RESTOptionsGetter)
+			if err != nil {
+				return nil, err
+			}
+			v1alpha1storage[api.ResourceImageScanRequests] = storage.Controller
+			v1alpha1storage[api.ResourceImageScanRequests+"/status"] = storage.Status
+		}
+		{
+			storage, err := reportstorage.NewStorage(Scheme, c.GenericConfig.RESTOptionsGetter)
+			if err != nil {
+				return nil, err
+			}
+			v1alpha1storage[api.ResourceImageScanReports] = storage.Controller
+			v1alpha1storage[api.ResourceImageScanReports+"/status"] = storage.Status
+		}
 		apiGroupInfo.VersionedResourcesStorageMap["v1alpha1"] = v1alpha1storage
 
 		if err := s.GenericAPIServer.InstallAPIGroup(&apiGroupInfo); err != nil {

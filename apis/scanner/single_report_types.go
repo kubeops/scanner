@@ -85,14 +85,7 @@ type VulnerabilityDataSource struct {
 	URL  string
 }
 
-type CVSSNvd struct {
-	V2Vector string
-	V3Vector string
-	V2Score  float64
-	V3Score  float64
-}
-
-type CVSSRedhat struct {
+type CVSSScore struct {
 	V2Vector string
 	V3Vector string
 	V2Score  float64
@@ -100,8 +93,8 @@ type CVSSRedhat struct {
 }
 
 type CVSS struct {
-	Nvd    *CVSSNvd
-	Redhat *CVSSRedhat
+	Nvd    *CVSSScore
+	Redhat *CVSSScore
 }
 
 type Vulnerability struct {
