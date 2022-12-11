@@ -16,7 +16,9 @@ limitations under the License.
 
 package v1
 
-import core "k8s.io/api/core/v1"
+import (
+	core "k8s.io/api/core/v1"
+)
 
 type Lineage struct {
 	Chain      []ObjectInfo `json:"chain,omitempty" protobuf:"bytes,1,rep,name=chain"`

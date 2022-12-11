@@ -29,7 +29,7 @@ require (
 	k8s.io/klog/v2 v2.80.1
 	k8s.io/kube-openapi v0.0.0-20220928191237-829ce0c27909
 	k8s.io/utils v0.0.0-20220823124924-e9cbc92d1a73
-	kmodules.xyz/client-go v0.25.13-0.20221210125051-340bd562f66e
+	kmodules.xyz/client-go v0.25.13-0.20221211100237-2c990599fc9e
 	kubedb.dev/apimachinery v0.29.2-0.20221208220920-b95282830fee
 	sigs.k8s.io/controller-runtime v0.13.1
 )

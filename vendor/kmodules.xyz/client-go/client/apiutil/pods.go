@@ -18,12 +18,12 @@ package apiutil
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	kmapi "kmodules.xyz/client-go/api/v1"
 
 	"github.com/google/go-containerregistry/pkg/name"
+	"github.com/pkg/errors"
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -35,33 +35,31 @@ type Container struct {
 	Image string
 }
 
-func CollectImageInfo(kc client.Client, pod *core.Pod, images map[string]kmapi.ImageInfo) error {
-	objKey := client.ObjectKeyFromObject(pod).String()
-
+func CollectImageInfo(kc client.Client, pod *core.Pod, images map[string]kmapi.ImageInfo) (map[string]kmapi.ImageInfo, error) {
 	lineage, err := DetectLineage(context.TODO(), kc, pod)
 	if err != nil {
-		return err
+		return images, err
 	}
 
 	refs := map[string][]string{}
 	for _, c := range pod.Spec.Containers {
-		ref, err := GetImageRef(objKey, Container{Name: c.Name, Image: c.Image}, FindContainerStatus(c.Name, pod.Status.ContainerStatuses))
+		ref, err := GetImageRef(Container{Name: c.Name, Image: c.Image}, FindContainerStatus(c.Name, pod.Status.ContainerStatuses))
 		if err != nil {
-			return err
+			return images, err
 		}
 		refs[ref] = append(refs[ref], c.Name)
 	}
 	for _, c := range pod.Spec.InitContainers {
-		ref, err := GetImageRef(objKey, Container{Name: c.Name, Image: c.Image}, FindContainerStatus(c.Name, pod.Status.InitContainerStatuses))
+		ref, err := GetImageRef(Container{Name: c.Name, Image: c.Image}, FindContainerStatus(c.Name, pod.Status.InitContainerStatuses))
 		if err != nil {
-			return err
+			return images, err
 		}
 		refs[ref] = append(refs[ref], c.Name)
 	}
 	for _, c := range pod.Spec.EphemeralContainers {
-		ref, err := GetImageRef(objKey, Container{Name: c.Name, Image: c.Image}, nil)
+		ref, err := GetImageRef(Container{Name: c.Name, Image: c.Image}, nil)
 		if err != nil {
-			return err
+			return images, err
 		}
 		refs[ref] = append(refs[ref], c.Name)
 	}
@@ -77,23 +75,22 @@ func CollectImageInfo(kc client.Client, pod *core.Pod, images map[string]kmapi.I
 					Refs:      pod.Spec.ImagePullSecrets,
 				},
 			}
-			images[ref] = iu
 		}
 		iu.Lineages = append(iu.Lineages, kmapi.Lineage{
 			Chain:      lineage,
 			Containers: containers,
 		})
+		images[ref] = iu
 	}
 
-	return nil
+	return images, nil
 }
 
-func CollectPullSecrets(pod *core.Pod, refs map[string]kmapi.PullSecrets) error {
-	objKey := client.ObjectKeyFromObject(pod).String()
+func CollectPullSecrets(pod *core.Pod, refs map[string]kmapi.PullSecrets) (map[string]kmapi.PullSecrets, error) {
 	for _, c := range pod.Status.ContainerStatuses {
-		ref, err := GetImageRef(objKey, Container{Name: c.Name, Image: c.ImageID}, FindContainerStatus(c.Name, pod.Status.ContainerStatuses))
+		ref, err := GetImageRef(Container{Name: c.Name, Image: c.ImageID}, FindContainerStatus(c.Name, pod.Status.ContainerStatuses))
 		if err != nil {
-			return err
+			return refs, err
 		}
 		refs[ref] = kmapi.PullSecrets{
 			Namespace: pod.Namespace,
@@ -101,9 +98,9 @@ func CollectPullSecrets(pod *core.Pod, refs map[string]kmapi.PullSecrets) error 
 		}
 	}
 	for _, c := range pod.Status.InitContainerStatuses {
-		ref, err := GetImageRef(objKey, Container{Name: c.Name, Image: c.ImageID}, FindContainerStatus(c.Name, pod.Status.InitContainerStatuses))
+		ref, err := GetImageRef(Container{Name: c.Name, Image: c.ImageID}, FindContainerStatus(c.Name, pod.Status.InitContainerStatuses))
 		if err != nil {
-			return err
+			return refs, err
 		}
 		refs[ref] = kmapi.PullSecrets{
 			Namespace: pod.Namespace,
@@ -111,9 +108,9 @@ func CollectPullSecrets(pod *core.Pod, refs map[string]kmapi.PullSecrets) error 
 		}
 	}
 	for _, c := range pod.Status.EphemeralContainerStatuses {
-		ref, err := GetImageRef(objKey, Container{Name: c.Name, Image: c.ImageID}, nil)
+		ref, err := GetImageRef(Container{Name: c.Name, Image: c.ImageID}, nil)
 		if err != nil {
-			return err
+			return refs, err
 		}
 		refs[ref] = kmapi.PullSecrets{
 			Namespace: pod.Namespace,
@@ -121,30 +118,40 @@ func CollectPullSecrets(pod *core.Pod, refs map[string]kmapi.PullSecrets) error 
 		}
 	}
 
-	return nil
+	return refs, nil
 }
 
-func GetImageRef(pod string, c Container, status *core.ContainerStatus) (string, error) {
+func GetImageRef(c Container, status *core.ContainerStatus) (string, error) {
 	var img string
 
-	if strings.ContainsRune(c.Image, '@') || strings.HasPrefix(status.ImageID, "sha256:") {
+	if strings.ContainsRune(c.Image, '@') {
 		img = c.Image
 	} else if strings.ContainsRune(status.Image, '@') {
 		img = status.Image
-	} else if strings.Contains(status.ImageID, "://") {
-		img = status.ImageID[strings.Index(status.ImageID, "://")+3:] // docker-pullable://, Linode
 	} else {
-		_, digest, ok := strings.Cut(status.ImageID, "@")
-		if !ok {
-			return "", fmt.Errorf("missing digest in pod %s container %s imageID %s", pod, status.Name, status.ImageID)
+		// take the hash from status.ImageID and add to c.Image
+		imageID := status.ImageID
+		if strings.Contains(imageID, "://") {
+			imageID = imageID[strings.Index(imageID, "://")+3:] // remove docker-pullable://
 		}
-		img = c.Image + "@" + digest
+		_, digest, ok := strings.Cut(imageID, "@")
+		if !ok {
+			img = c.Image
+			// return "", fmt.Errorf("missing digest in pod %s container %s imageID %s", pod, status.Name, status.ImageID)
+		} else {
+			img = c.Image + "@" + digest
+		}
 	}
+
 	ref, err := name.ParseReference(img)
 	if err != nil {
-		return "", err
+		return "", errors.Wrapf(err, "ref=%s", img)
 	}
-	return ref.Context().String() + "@" + ref.Identifier(), nil
+	id := ref.Identifier()
+	if strings.HasPrefix(id, "sha256:") {
+		return ref.Context().String() + "@" + id, nil
+	}
+	return ref.Name(), nil
 }
 
 func FindContainerStatus(name string, statuses []core.ContainerStatus) *core.ContainerStatus {
@@ -157,40 +164,37 @@ func FindContainerStatus(name string, statuses []core.ContainerStatus) *core.Con
 }
 
 func DetectLineage(ctx context.Context, kc client.Client, obj client.Object) ([]kmapi.ObjectInfo, error) {
-	var result []kmapi.ObjectInfo
-	if err := findLineage(ctx, kc, obj, result); err != nil {
-		return nil, err
-	}
-	return result, nil
+	return findLineage(ctx, kc, obj, nil)
 }
 
-func findLineage(ctx context.Context, kc client.Client, obj client.Object, result []kmapi.ObjectInfo) error {
+func findLineage(ctx context.Context, kc client.Client, obj client.Object, result []kmapi.ObjectInfo) ([]kmapi.ObjectInfo, error) {
 	ref := metav1.GetControllerOfNoCopy(obj)
 	if ref != nil {
 		var owner unstructured.Unstructured
 		owner.SetAPIVersion(ref.APIVersion)
 		owner.SetKind(ref.Kind)
-		if err := kc.Get(ctx, client.ObjectKey{Namespace: obj.GetNamespace(), Name: ref.Name}, &owner); err != nil {
-			return err
-		}
-		if err := findLineage(ctx, kc, &owner, result); err != nil {
-			return err
+		if err := kc.Get(ctx, client.ObjectKey{Namespace: obj.GetNamespace(), Name: ref.Name}, &owner); client.IgnoreNotFound(err) != nil {
+			return result, err
+		} else if err == nil { // ignore not found error, owner might be already deleted
+			var err error
+			result, err = findLineage(ctx, kc, &owner, result)
+			if err != nil {
+				return result, err
+			}
 		}
 	}
 
 	gvk := obj.GetObjectKind().GroupVersionKind()
+	mapping, err := kc.RESTMapper().RESTMapping(gvk.GroupKind(), gvk.Version)
+	if err != nil {
+		return nil, err
+	}
 	result = append(result, kmapi.ObjectInfo{
-		Resource: kmapi.ResourceID{
-			Group:   gvk.Group,
-			Version: gvk.Version,
-			Name:    "",
-			Kind:    gvk.Kind,
-			Scope:   "",
-		},
+		Resource: *kmapi.NewResourceID(mapping),
 		Ref: kmapi.ObjectReference{
 			Namespace: obj.GetNamespace(),
 			Name:      obj.GetName(),
 		},
 	})
-	return nil
+	return result, nil
 }
