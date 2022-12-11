@@ -74,7 +74,7 @@ func ExistsReport(fs blobfs.Interface, img string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	return fs.Exists(context.TODO(), path.Join(repo, digest, "summary.json"))
+	return fs.Exists(context.TODO(), path.Join(repo, digest, "report.json"))
 }
 
 func uploadVersionInfo(fs blobfs.Interface, repo, digest string) error {

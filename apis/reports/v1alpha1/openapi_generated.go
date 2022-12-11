@@ -17344,15 +17344,13 @@ func schema_kmodulesxyz_client_go_api_v1_ResourceID(ref common.ReferenceCallback
 					},
 					"version": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Type:   []string{"string"},
+							Format: "",
 						},
 					},
 					"name": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Name is the plural name of the resource to serve.  It must match the name of the CustomResourceDefinition-registration too: plural.group and it must be all lowercase.",
-							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -17360,20 +17358,18 @@ func schema_kmodulesxyz_client_go_api_v1_ResourceID(ref common.ReferenceCallback
 					"kind": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Kind is the serialized kind of the resource.  It is normally CamelCase and singular.",
-							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 					"scope": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Type:   []string{"string"},
+							Format: "",
 						},
 					},
 				},
-				Required: []string{"group", "version", "name", "kind", "scope"},
+				Required: []string{"group"},
 			},
 		},
 	}
@@ -17733,13 +17729,13 @@ func schema_scanner_apis_reports_v1alpha1_Image(ref common.ReferenceCallback) co
 					},
 					"request": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Request describes the attributes for the graph request.",
+							Description: "1. Request equals nil means, we want the report in cluster scope 2. Group is set to \"\"(core) & Kind to Namespace means, we want the report in particular namespaced scope 3. For general cases, all the fields need to be set.",
 							Ref:         ref("kubeops.dev/scanner/apis/reports/v1alpha1.ImageRequest"),
 						},
 					},
 					"response": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Response describes the attributes for the graph response.",
+							Description: "Response lists the images used by the request object",
 							Ref:         ref("kubeops.dev/scanner/apis/reports/v1alpha1.ImageResponse"),
 						},
 					},

@@ -378,7 +378,9 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"kubeops.dev/scanner/apis/scanner/v1alpha1.Result":                   schema_scanner_apis_scanner_v1alpha1_Result(ref),
 		"kubeops.dev/scanner/apis/scanner/v1alpha1.ScanReportRef":            schema_scanner_apis_scanner_v1alpha1_ScanReportRef(ref),
 		"kubeops.dev/scanner/apis/scanner/v1alpha1.SingleReport":             schema_scanner_apis_scanner_v1alpha1_SingleReport(ref),
+		"kubeops.dev/scanner/apis/scanner/v1alpha1.TrivyVersion":             schema_scanner_apis_scanner_v1alpha1_TrivyVersion(ref),
 		"kubeops.dev/scanner/apis/scanner/v1alpha1.Vulnerability":            schema_scanner_apis_scanner_v1alpha1_Vulnerability(ref),
+		"kubeops.dev/scanner/apis/scanner/v1alpha1.VulnerabilityDBStruct":    schema_scanner_apis_scanner_v1alpha1_VulnerabilityDBStruct(ref),
 		"kubeops.dev/scanner/apis/scanner/v1alpha1.VulnerabilityDataSource":  schema_scanner_apis_scanner_v1alpha1_VulnerabilityDataSource(ref),
 		"kubeops.dev/scanner/apis/scanner/v1alpha1.VulnerabilityLayer":       schema_scanner_apis_scanner_v1alpha1_VulnerabilityLayer(ref),
 	}
@@ -17357,15 +17359,13 @@ func schema_kmodulesxyz_client_go_api_v1_ResourceID(ref common.ReferenceCallback
 					},
 					"version": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Type:   []string{"string"},
+							Format: "",
 						},
 					},
 					"name": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Name is the plural name of the resource to serve.  It must match the name of the CustomResourceDefinition-registration too: plural.group and it must be all lowercase.",
-							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -17373,20 +17373,18 @@ func schema_kmodulesxyz_client_go_api_v1_ResourceID(ref common.ReferenceCallback
 					"kind": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Kind is the serialized kind of the resource.  It is normally CamelCase and singular.",
-							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 					"scope": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Type:   []string{"string"},
+							Format: "",
 						},
 					},
 				},
-				Required: []string{"group", "version", "name", "kind", "scope"},
+				Required: []string{"group"},
 			},
 		},
 	}
@@ -18571,6 +18569,34 @@ func schema_scanner_apis_scanner_v1alpha1_SingleReport(ref common.ReferenceCallb
 	}
 }
 
+func schema_scanner_apis_scanner_v1alpha1_TrivyVersion(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"Version": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"VulnerabilityDB": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("kubeops.dev/scanner/apis/scanner/v1alpha1.VulnerabilityDBStruct"),
+						},
+					},
+				},
+				Required: []string{"Version", "VulnerabilityDB"},
+			},
+		},
+		Dependencies: []string{
+			"kubeops.dev/scanner/apis/scanner/v1alpha1.VulnerabilityDBStruct"},
+	}
+}
+
 func schema_scanner_apis_scanner_v1alpha1_Vulnerability(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -18706,6 +18732,46 @@ func schema_scanner_apis_scanner_v1alpha1_Vulnerability(ref common.ReferenceCall
 		},
 		Dependencies: []string{
 			"kubeops.dev/scanner/apis/scanner/v1alpha1.CVSS", "kubeops.dev/scanner/apis/scanner/v1alpha1.VulnerabilityDataSource", "kubeops.dev/scanner/apis/scanner/v1alpha1.VulnerabilityLayer", "kubeops.dev/scanner/apis/shared.Time"},
+	}
+}
+
+func schema_scanner_apis_scanner_v1alpha1_VulnerabilityDBStruct(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"Version": {
+						SchemaProps: spec.SchemaProps{
+							Default: 0,
+							Type:    []string{"integer"},
+							Format:  "int32",
+						},
+					},
+					"UpdatedAt": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("kubeops.dev/scanner/apis/shared.Time"),
+						},
+					},
+					"DownloadedAt": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("kubeops.dev/scanner/apis/shared.Time"),
+						},
+					},
+					"NextUpdate": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("kubeops.dev/scanner/apis/shared.Time"),
+						},
+					},
+				},
+				Required: []string{"Version", "UpdatedAt", "DownloadedAt", "NextUpdate"},
+			},
+		},
+		Dependencies: []string{
+			"kubeops.dev/scanner/apis/shared.Time"},
 	}
 }
 
