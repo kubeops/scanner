@@ -17,6 +17,7 @@ limitations under the License.
 package controllers
 
 import (
+	"context"
 	"crypto/md5"
 	"encoding/json"
 	"fmt"
@@ -34,7 +35,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func (r *Reconciler) createImageScanReport(isr api.ImageScanRequest) error {
+func (r *Reconciler) doReportRelatedStuffs(isr api.ImageScanRequest) error {
 	msg, err := r.nc.Request("scanner.report", []byte(isr.Spec.ImageRef), backend.NatsRequestTimeout)
 	if err != nil {
 		return err
@@ -45,16 +46,20 @@ func (r *Reconciler) createImageScanReport(isr api.ImageScanRequest) error {
 		return err
 	}
 
-	name := fmt.Sprintf("%x", md5.Sum([]byte(isr.Spec.ImageRef)))
-	tag, dig := getTagAndDigest(isr.Spec.ImageRef)
+	return EnsureScanReport(r.Client, isr.Spec.ImageRef, report)
+}
 
-	obj, vt, err := cu.CreateOrPatch(r.ctx, r.Client, &api.ImageScanReport{
+func EnsureScanReport(kc client.Client, imageRef string, singleReport api.SingleReport) error {
+	name := fmt.Sprintf("%x", md5.Sum([]byte(imageRef)))
+	tag, dig := getTagAndDigest(imageRef)
+
+	obj, vt, err := cu.CreateOrPatch(context.TODO(), kc, &api.ImageScanReport{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: name,
 		},
 	}, func(obj client.Object, createOp bool) client.Object {
 		rep := obj.(*api.ImageScanReport)
-		rep.Spec.Image = isr.Spec.ImageRef
+		rep.Spec.Image = imageRef
 		rep.Spec.Tag = tag
 		rep.Spec.Digest = dig
 		return rep
@@ -67,7 +72,7 @@ func (r *Reconciler) createImageScanReport(isr api.ImageScanRequest) error {
 	}
 
 	// TODO: Is a single CreateOrPatch is able to modify the status too ?
-	_, _, err = cu.PatchStatus(r.ctx, r.Client, &api.ImageScanReport{
+	_, _, err = cu.PatchStatus(context.TODO(), kc, &api.ImageScanReport{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: name,
 		},
@@ -75,7 +80,7 @@ func (r *Reconciler) createImageScanReport(isr api.ImageScanRequest) error {
 		rep := obj.(*api.ImageScanReport)
 		rep.Status.LastChecked = shared.Time(metav1.Time{Time: time.Now()})
 		// TODO: we need to set the TruvyDB version too
-		rep.Status.Report = report
+		rep.Status.Report = singleReport
 		return rep
 	})
 	return err

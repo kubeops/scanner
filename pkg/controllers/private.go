@@ -105,7 +105,7 @@ func (r *Reconciler) ScanForPrivateImage(isr api.ImageScanRequest) error {
 					Command: []string{
 						"sh",
 						"-c",
-						"./tv rootfs --skip-update --security-checks vuln --format json / > report.json && ./tv version -f json > trivy.json",
+						"./tv rootfs --skip-update --security-checks vuln --format json / > report.json && ./tv version --format json > trivy.json",
 					},
 					ImagePullPolicy: core.PullIfNotPresent,
 				},
@@ -116,7 +116,9 @@ func (r *Reconciler) ScanForPrivateImage(isr api.ImageScanRequest) error {
 					Image:      r.scannerImage,
 					WorkingDir: WorkDir,
 					Command: []string{
-						fmt.Sprintf("scanner upload-report --report-file report.json --trivy-file trivy.json --image  %s", isr.Spec.ImageRef),
+						"sh",
+						"-c",
+						fmt.Sprintf("/scanner upload-report --report-file report.json --trivy-file trivy.json --image %s > output.txt && cat output.txt", isr.Spec.ImageRef),
 					},
 					ImagePullPolicy: core.PullIfNotPresent,
 				},
@@ -125,7 +127,7 @@ func (r *Reconciler) ScanForPrivateImage(isr api.ImageScanRequest) error {
 		}
 		job.Spec.Template.Spec.RestartPolicy = core.RestartPolicyNever
 		job.Spec.Template.Spec.ImagePullSecrets = isr.Spec.PullSecrets
-		job.Spec.TTLSecondsAfterFinished = pointer.Int32(100)
+		job.Spec.TTLSecondsAfterFinished = pointer.Int32(600)
 		return job
 	})
 	if err != nil {

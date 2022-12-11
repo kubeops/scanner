@@ -25,6 +25,7 @@ import (
 	"github.com/google/go-containerregistry/pkg/name"
 	"github.com/nats-io/nats.go"
 	"k8s.io/klog/v2"
+	cu "kmodules.xyz/client-go/client"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -59,18 +60,31 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	err := backend.EnsureCronJobToRefreshTrivyDB(r.Client)
+	if isr.Status.Phase == "" {
+		if err := r.setDefaultStatus(isr); err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+
+	err := r.scanForSingleImage(isr)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
 
-	err = r.scanForSingleImage(isr)
-	if err != nil {
-		return ctrl.Result{}, err
-	}
-
-	err = r.createImageScanReport(isr)
+	err = r.doReportRelatedStuffs(isr)
 	return ctrl.Result{}, err
+}
+
+func (r *Reconciler) setDefaultStatus(isr api.ImageScanRequest) error {
+	_, _, err := cu.PatchStatus(r.ctx, r.Client, &isr, func(obj client.Object) client.Object {
+		in := obj.(*api.ImageScanRequest)
+		in.Status.Image = &api.ImageDetails{
+			Name: isr.Spec.ImageRef,
+		}
+		in.Status.Phase = api.ImageScanRequestPhaseInProgress
+		return in
+	})
+	return err
 }
 
 func (r *Reconciler) scanForSingleImage(isr api.ImageScanRequest) error {

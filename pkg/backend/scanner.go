@@ -77,6 +77,33 @@ func ExistsReport(fs blobfs.Interface, img string) (bool, error) {
 	return fs.Exists(context.TODO(), path.Join(repo, digest, "summary.json"))
 }
 
+func uploadVersionInfo(fs blobfs.Interface, repo, digest string) error {
+	sh := shell.NewSession()
+	sh.SetDir("/tmp")
+
+	sh.ShowCMD = true
+	sh.Stdout = os.Stdout
+	sh.Stderr = os.Stderr
+
+	args := []any{
+		"image",
+		"version",
+		"--format", "json",
+	}
+	out, err := sh.Command("trivy", args...).Output()
+	if err != nil {
+		return err
+	}
+
+	var r api.TrivyVersion
+	err = json.Unmarshal(out, &r)
+	if err != nil {
+		return err
+	}
+
+	return fs.WriteFile(context.TODO(), path.Join(repo, digest, "trivy.json"), out)
+}
+
 func UploadReport(fs blobfs.Interface, img string) error {
 	_, reportBytes, err := scan(img)
 	if err != nil {
@@ -122,7 +149,7 @@ func UploadReport(fs blobfs.Interface, img string) error {
 	//	return err
 	//}
 
-	return nil
+	return uploadVersionInfo(fs, repo, digest)
 }
 
 // trivy image ubuntu --security-checks vuln --format json --quiet

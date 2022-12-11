@@ -26,6 +26,7 @@ import (
 
 	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
 	"kubeops.dev/scanner/apis/shared"
+	"kubeops.dev/scanner/pkg/controllers"
 
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -59,18 +60,6 @@ func NewCmdUploadReport() *cobra.Command {
 	return cmd
 }
 
-type TrivyVersion struct {
-	Version         string                `json:"Version"`
-	VulnerabilityDB VulnerabilityDBStruct `json:"VulnerabilityDB"`
-}
-
-type VulnerabilityDBStruct struct {
-	Version      string    `json:"Version"`
-	UpdatedAt    time.Time `json:"UpdatedAt"`
-	DownloadedAt time.Time `json:"DownloadedAt"`
-	NextUpdate   time.Time `json:"NextUpdate"`
-}
-
 func uploadReport(imageRef, trivyFile, reportFile string) error {
 	kc, err := NewClient()
 	if err != nil {
@@ -95,8 +84,13 @@ func uploadReport(imageRef, trivyFile, reportFile string) error {
 		return err
 	}
 
-	var ver TrivyVersion
+	var ver api.TrivyVersion
 	err = json.Unmarshal(trivyInfo, &ver)
+	if err != nil {
+		return err
+	}
+
+	err = controllers.EnsureScanReport(kc, imageRef, actualReport)
 	if err != nil {
 		return err
 	}
@@ -115,7 +109,7 @@ func uploadReport(imageRef, trivyFile, reportFile string) error {
 		},
 		Status: api.ImageScanReportStatus{
 			LastChecked:    shared.Time(metav1.Time{Time: time.Now()}),
-			TrivyDBVersion: ver.VulnerabilityDB.Version,
+			TrivyDBVersion: string(ver.VulnerabilityDB.Version),
 			Report:         actualReport,
 		},
 	}, &client.CreateOptions{})
