@@ -18,9 +18,9 @@ package controllers
 
 import (
 	"context"
-	"crypto/md5"
+	"crypto/sha1"
+	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"strings"
 	"time"
 
@@ -36,6 +36,7 @@ import (
 )
 
 func (r *Reconciler) doReportRelatedStuffs(isr api.ImageScanRequest) error {
+	// Getting the report.json file
 	msg, err := r.nc.Request("scanner.report", []byte(isr.Spec.ImageRef), backend.NatsRequestTimeout)
 	if err != nil {
 		return err
@@ -46,11 +47,27 @@ func (r *Reconciler) doReportRelatedStuffs(isr api.ImageScanRequest) error {
 		return err
 	}
 
-	return EnsureScanReport(r.Client, isr.Spec.ImageRef, report)
+	// Getting the trivy.json file
+	msg, err = r.nc.Request("scanner.version", []byte(isr.Spec.ImageRef), backend.NatsRequestTimeout)
+	if err != nil {
+		return err
+	}
+	var ver trivy.Version
+	err = json.Unmarshal(msg.Data, &ver)
+	if err != nil {
+		return err
+	}
+
+	name, err := EnsureScanReport(r.Client, isr.Spec.ImageRef, report, ver)
+	if err != nil {
+		return err
+	}
+	return setReportNameInImageScanRequest(r.Client, isr, name)
 }
 
-func EnsureScanReport(kc client.Client, imageRef string, singleReport trivy.SingleReport) error {
-	name := fmt.Sprintf("%x", md5.Sum([]byte(imageRef)))
+func EnsureScanReport(kc client.Client, imageRef string, singleReport trivy.SingleReport, versionInfo trivy.Version) (string, error) {
+	// name := fmt.Sprintf("%x", md5.Sum([]byte(imageRef)))
+	name := getName(imageRef)
 	tag, dig := getTagAndDigest(imageRef)
 
 	obj, vt, err := cu.CreateOrPatch(context.TODO(), kc, &api.ImageScanReport{
@@ -65,10 +82,10 @@ func EnsureScanReport(kc client.Client, imageRef string, singleReport trivy.Sing
 		return rep
 	})
 	if err != nil {
-		return err
+		return "", err
 	}
 	if vt == kutil.VerbCreated {
-		klog.Infof("$v ImageScanReport has been created", obj.GetName())
+		klog.Infof("%v ImageScanReport has been created\n", obj.GetName())
 	}
 
 	// TODO: Is a single CreateOrPatch is able to modify the status too ?
@@ -79,11 +96,31 @@ func EnsureScanReport(kc client.Client, imageRef string, singleReport trivy.Sing
 	}, func(obj client.Object) client.Object {
 		rep := obj.(*api.ImageScanReport)
 		rep.Status.LastChecked = trivy.Time(metav1.Time{Time: time.Now()})
-		// TODO: we need to set the TruvyDB version too
+		rep.Status.TrivyDBVersion = versionInfo.Version
 		rep.Status.Report = singleReport
 		return rep
 	})
+	if err != nil {
+		return "", err
+	}
+	return name, nil
+}
+
+func setReportNameInImageScanRequest(kc client.Client, isr api.ImageScanRequest, repName string) error {
+	_, _, err := cu.PatchStatus(context.TODO(), kc, &isr, func(obj client.Object) client.Object {
+		in := obj.(*api.ImageScanRequest)
+		in.Status.ReportRef = &api.ScanReportRef{
+			Name: repName,
+		}
+		return in
+	})
 	return err
+}
+
+func getName(s string) string {
+	h := sha1.New()
+	h.Write([]byte(s))
+	return hex.EncodeToString(h.Sum(nil))
 }
 
 func getTagAndDigest(img string) (string, string) {

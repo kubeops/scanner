@@ -17,19 +17,14 @@ limitations under the License.
 package cmds
 
 import (
-	"context"
-	"crypto/md5"
 	"encoding/json"
-	"fmt"
 	"os"
-	"time"
 
 	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
 	"kubeops.dev/scanner/apis/trivy"
 	"kubeops.dev/scanner/pkg/controllers"
 
 	"github.com/spf13/cobra"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/klog/v2"
@@ -84,36 +79,13 @@ func uploadReport(imageRef, trivyFile, reportFile string) error {
 		return err
 	}
 
-	var ver api.TrivyVersion
+	var ver trivy.Version
 	err = json.Unmarshal(trivyInfo, &ver)
 	if err != nil {
 		return err
 	}
 
-	err = controllers.EnsureScanReport(kc, imageRef, actualReport)
-	if err != nil {
-		return err
-	}
-
-	// upload
-	err = kc.Create(context.TODO(), &api.ImageScanReport{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       api.ResourceKindImageScanReport,
-			APIVersion: api.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name: fmt.Sprintf("%x", md5.Sum([]byte(imageRef))),
-		},
-		Spec: api.ImageScanReportSpec{
-			Image: imageRef,
-		},
-		Status: api.ImageScanReportStatus{
-			LastChecked:    trivy.Time(metav1.Time{Time: time.Now()}),
-			TrivyDBVersion: string(ver.VulnerabilityDB.Version),
-			Report:         actualReport,
-		},
-	}, &client.CreateOptions{})
-
+	_, err = controllers.EnsureScanReport(kc, imageRef, actualReport, ver)
 	return err
 }
 

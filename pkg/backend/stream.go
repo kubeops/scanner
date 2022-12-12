@@ -96,18 +96,23 @@ func New(nc *nats.Conn, opts Options) *Manager {
 	}
 }
 
+const (
+	RespondTypeReport  = "report"
+	RespondTypeVersion = "version"
+)
+
 func (mgr *Manager) Start(ctx context.Context, jsmOpts ...nats.JSOpt) error {
-	queueSubscribeMsgHandler := func(isReport bool) nats.MsgHandler {
+	queueSubscribeMsgHandler := func(resType string) nats.MsgHandler {
 		return func(msg *nats.Msg) {
 			img := string(msg.Data)
 			klog.InfoS(msg.Subject, "image", img)
 
 			var data []byte
 			var err error
-			if isReport {
+			if resType == RespondTypeReport {
 				data, err = DownloadReport(mgr.fs, img)
-			} else {
-				data, err = DownloadSummary(mgr.fs, img)
+			} else if resType == RespondTypeVersion {
+				data, err = DownloadVersionInfo(mgr.fs, img)
 			}
 			if err != nil {
 				s := ErrorToAPIStatus(err)
@@ -135,12 +140,12 @@ func (mgr *Manager) Start(ctx context.Context, jsmOpts ...nats.JSOpt) error {
 		}
 	}
 
-	_, err := mgr.nc.QueueSubscribe(fmt.Sprintf("%s.report", mgr.stream), "scanner-backend", queueSubscribeMsgHandler(true))
+	_, err := mgr.nc.QueueSubscribe(fmt.Sprintf("%s.report", mgr.stream), "scanner-backend", queueSubscribeMsgHandler(RespondTypeReport))
 	if err != nil {
 		return err
 	}
 
-	_, err = mgr.nc.QueueSubscribe(fmt.Sprintf("%s.summary", mgr.stream), "scanner-backend", queueSubscribeMsgHandler(false))
+	_, err = mgr.nc.QueueSubscribe(fmt.Sprintf("%s.version", mgr.stream), "scanner-backend", queueSubscribeMsgHandler(RespondTypeVersion))
 	if err != nil {
 		return err
 	}

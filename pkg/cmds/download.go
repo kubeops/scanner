@@ -34,7 +34,7 @@ func NewCmdDownload() *cobra.Command {
 	)
 	cmd := &cobra.Command{
 		Use:               "download",
-		Short:             "Download scan summary",
+		Short:             "Download scan Report",
 		DisableAutoGenTag: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			nc, err := backend.NewConnection(addr, "")
@@ -42,7 +42,7 @@ func NewCmdDownload() *cobra.Command {
 				return err
 			}
 
-			data, err := backend.DownloadSummary(backend.NewBlobFS(), img)
+			data, err := backend.DownloadReport(backend.NewBlobFS(), img)
 			// gocloud.dev/gcerrors.NotFound (2)
 			if err != nil {
 				if gcerrors.Code(err) == gcerrors.NotFound {

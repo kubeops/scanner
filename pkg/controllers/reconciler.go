@@ -95,7 +95,7 @@ func (r *Reconciler) scanForSingleImage(isr api.ImageScanRequest) error {
 
 	isPrivate, err := backend.CheckPrivateImage(imageRef)
 	if err != nil {
-		klog.Errorf("Its not a simple unauthorized error. Some serious error occurred: %v \n", err)
+		klog.Errorf("Some serious error occurred when checking if the image is Private: %v \n", err)
 		return err
 	}
 

@@ -23,7 +23,6 @@ import (
 	"path"
 	"strings"
 
-	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
 	"kubeops.dev/scanner/apis/trivy"
 
 	"github.com/google/go-containerregistry/pkg/crane"
@@ -55,19 +54,19 @@ func NewBlobFS() blobfs.Interface {
 }
 
 func DownloadReport(fs blobfs.Interface, img string) ([]byte, error) {
-	repo, digest, err := ParseReference(img)
-	if err != nil {
-		return nil, err
-	}
-	return fs.ReadFile(context.TODO(), path.Join(repo, digest, "report.json"))
+	return download(fs, img, "report.json")
 }
 
-func DownloadSummary(fs blobfs.Interface, img string) ([]byte, error) {
+func DownloadVersionInfo(fs blobfs.Interface, img string) ([]byte, error) {
+	return download(fs, img, "trivy.json")
+}
+
+func download(fs blobfs.Interface, img, fileName string) ([]byte, error) {
 	repo, digest, err := ParseReference(img)
 	if err != nil {
 		return nil, err
 	}
-	return fs.ReadFile(context.TODO(), path.Join(repo, digest, "summary.json"))
+	return fs.ReadFile(context.TODO(), path.Join(repo, digest, fileName))
 }
 
 func ExistsReport(fs blobfs.Interface, img string) (bool, error) {
@@ -87,7 +86,6 @@ func uploadVersionInfo(fs blobfs.Interface, repo, digest string) error {
 	sh.Stderr = os.Stderr
 
 	args := []any{
-		"image",
 		"version",
 		"--format", "json",
 	}
@@ -96,7 +94,7 @@ func uploadVersionInfo(fs blobfs.Interface, repo, digest string) error {
 		return err
 	}
 
-	var r api.TrivyVersion
+	var r trivy.Version
 	err = json.Unmarshal(out, &r)
 	if err != nil {
 		return err
@@ -120,35 +118,6 @@ func UploadReport(fs blobfs.Interface, img string) error {
 	if err != nil {
 		return err
 	}
-
-	//summary := api.Summary{
-	//	SchemaVersion: report.SchemaVersion,
-	//	ArtifactName:  report.ArtifactName,
-	//	ArtifactType:  report.ArtifactType,
-	//	Metadata:      report.Metadata,
-	//	Results:       make([]api.SummaryResult, 0, len(report.Results)),
-	//}
-	//for _, r := range report.Results {
-	//	stats := map[string]int{}
-	//	for _, vul := range r.Vulnerabilities {
-	//		stats[vul.Severity] = stats[vul.Severity] + 1
-	//	}
-	//	sr := api.SummaryResult{
-	//		Target:          r.Target,
-	//		Class:           r.Class,
-	//		Type:            r.Type,
-	//		Vulnerabilities: stats,
-	//	}
-	//	summary.Results = append(summary.Results, sr)
-	//}
-	//sBytes, err := json.Marshal(summary)
-	//if err != nil {
-	//	return err
-	//}
-	//err = fs.WriteFile(context.TODO(), path.Join(repo, digest, "summary.json"), sBytes)
-	//if err != nil {
-	//	return err
-	//}
 
 	return uploadVersionInfo(fs, repo, digest)
 }
