@@ -147,6 +147,18 @@ version:
 # Generate code for Kubernetes types
 .PHONY: clientset
 clientset:
+	@docker run --rm	                                 \
+		-u $$(id -u):$$(id -g)                           \
+		-v /tmp:/.cache                                  \
+		-v $$(pwd):$(DOCKER_REPO_ROOT)                   \
+		-w $(DOCKER_REPO_ROOT)                           \
+		--env HTTP_PROXY=$(HTTP_PROXY)                   \
+		--env HTTPS_PROXY=$(HTTPS_PROXY)                 \
+		$(CODE_GENERATOR_IMAGE)                          \
+		deepcopy-gen                                     \
+			--go-header-file "./hack/license/go.txt"       \
+			--input-dirs "$(GO_PKG)/$(REPO)/apis/trivy"    \
+			--output-file-base zz_generated.deepcopy
 	@docker run --rm                                            \
 		-u $$(id -u):$$(id -g)                                    \
 		-v /tmp:/.cache                                           \

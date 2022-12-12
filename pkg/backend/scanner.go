@@ -24,6 +24,7 @@ import (
 	"strings"
 
 	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
+	"kubeops.dev/scanner/apis/trivy"
 
 	"github.com/google/go-containerregistry/pkg/crane"
 	"github.com/google/go-containerregistry/pkg/name"
@@ -153,7 +154,7 @@ func UploadReport(fs blobfs.Interface, img string) error {
 }
 
 // trivy image ubuntu --security-checks vuln --format json --quiet
-func scan(img string) (*api.SingleReport, []byte, error) {
+func scan(img string) (*trivy.SingleReport, []byte, error) {
 	sh := shell.NewSession()
 	// sh.SetEnv("BUILD_ID", "123")
 	sh.SetDir("/tmp")
@@ -174,7 +175,7 @@ func scan(img string) (*api.SingleReport, []byte, error) {
 		return nil, nil, err
 	}
 
-	var r api.SingleReport
+	var r trivy.SingleReport
 	err = json.Unmarshal(out, &r)
 	if err != nil {
 		return nil, nil, err

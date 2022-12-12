@@ -25,7 +25,7 @@ import (
 	"time"
 
 	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
-	"kubeops.dev/scanner/apis/shared"
+	"kubeops.dev/scanner/apis/trivy"
 	"kubeops.dev/scanner/pkg/backend"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -40,7 +40,7 @@ func (r *Reconciler) doReportRelatedStuffs(isr api.ImageScanRequest) error {
 	if err != nil {
 		return err
 	}
-	var report api.SingleReport
+	var report trivy.SingleReport
 	err = json.Unmarshal(msg.Data, &report)
 	if err != nil {
 		return err
@@ -49,7 +49,7 @@ func (r *Reconciler) doReportRelatedStuffs(isr api.ImageScanRequest) error {
 	return EnsureScanReport(r.Client, isr.Spec.ImageRef, report)
 }
 
-func EnsureScanReport(kc client.Client, imageRef string, singleReport api.SingleReport) error {
+func EnsureScanReport(kc client.Client, imageRef string, singleReport trivy.SingleReport) error {
 	name := fmt.Sprintf("%x", md5.Sum([]byte(imageRef)))
 	tag, dig := getTagAndDigest(imageRef)
 
@@ -78,7 +78,7 @@ func EnsureScanReport(kc client.Client, imageRef string, singleReport api.Single
 		},
 	}, func(obj client.Object) client.Object {
 		rep := obj.(*api.ImageScanReport)
-		rep.Status.LastChecked = shared.Time(metav1.Time{Time: time.Now()})
+		rep.Status.LastChecked = trivy.Time(metav1.Time{Time: time.Now()})
 		// TODO: we need to set the TruvyDB version too
 		rep.Status.Report = singleReport
 		return rep
