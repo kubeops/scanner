@@ -58,14 +58,14 @@ func (r *Reconciler) doReportRelatedStuffs(isr api.ImageScanRequest) error {
 		return err
 	}
 
-	name, err := EnsureScanReport(r.Client, isr.Spec.ImageRef, report, ver)
+	rep, err := EnsureScanReport(r.Client, isr.Spec.ImageRef, report, ver)
 	if err != nil {
 		return err
 	}
-	return setReportNameInImageScanRequest(r.Client, isr, name)
+	return updateStatusAsReportEnsured(r.Client, isr, rep)
 }
 
-func EnsureScanReport(kc client.Client, imageRef string, singleReport trivy.SingleReport, versionInfo trivy.Version) (string, error) {
+func EnsureScanReport(kc client.Client, imageRef string, singleReport trivy.SingleReport, versionInfo trivy.Version) (*api.ImageScanReport, error) {
 	// name := fmt.Sprintf("%x", md5.Sum([]byte(imageRef)))
 	name := getName(imageRef)
 	tag, dig := getTagAndDigest(imageRef)
@@ -82,7 +82,7 @@ func EnsureScanReport(kc client.Client, imageRef string, singleReport trivy.Sing
 		return rep
 	})
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	if vt == kutil.VerbCreated {
 		klog.Infof("%v ImageScanReport has been created\n", obj.GetName())
@@ -101,17 +101,19 @@ func EnsureScanReport(kc client.Client, imageRef string, singleReport trivy.Sing
 		return rep
 	})
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return name, nil
+	return obj.(*api.ImageScanReport), nil
 }
 
-func setReportNameInImageScanRequest(kc client.Client, isr api.ImageScanRequest, repName string) error {
+func updateStatusAsReportEnsured(kc client.Client, isr api.ImageScanRequest, rep *api.ImageScanReport) error {
 	_, _, err := cu.PatchStatus(context.TODO(), kc, &isr, func(obj client.Object) client.Object {
 		in := obj.(*api.ImageScanRequest)
 		in.Status.ReportRef = &api.ScanReportRef{
-			Name: repName,
+			Name:        rep.GetName(),
+			LastChecked: trivy.Time(rep.CreationTimestamp),
 		}
+		in.Status.Phase = api.ImageScanRequestPhaseCurrent
 		return in
 	})
 	return err

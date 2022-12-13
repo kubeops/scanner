@@ -99,6 +99,11 @@ func (r *Reconciler) scanForSingleImage(isr api.ImageScanRequest) error {
 		return err
 	}
 
+	err = r.updateImageDetails(isr, isPrivate)
+	if err != nil {
+		return err
+	}
+
 	if isPrivate {
 		return r.ScanForPrivateImage(isr)
 	}
@@ -108,6 +113,43 @@ func (r *Reconciler) scanForSingleImage(isr api.ImageScanRequest) error {
 		klog.Errorf("error on Submitting ScanRequest ", err)
 	}
 	return err
+}
+
+func (r *Reconciler) updateImageDetails(isr api.ImageScanRequest, isPrivate bool) error {
+	tag, dig, err := tagAndDigest(isr.Spec.ImageRef)
+	if err != nil {
+		return err
+	}
+
+	_, _, err = cu.PatchStatus(r.ctx, r.Client, &isr, func(obj client.Object) client.Object {
+		in := obj.(*api.ImageScanRequest)
+		in.Status.Image.Visibility = func() api.ImageVisibility {
+			if isPrivate {
+				return api.ImagePrivate
+			}
+			return api.ImagePublic
+		}()
+		in.Status.Image.Tag = tag
+		in.Status.Image.Digest = dig
+		return in
+	})
+	return err
+}
+
+func tagAndDigest(img string) (string, string, error) {
+	var (
+		tag name.Tag
+		dig name.Digest
+		err error
+	)
+	tag, err = name.NewTag(img)
+	if err != nil {
+		dig, err = name.NewDigest(img)
+		if err != nil {
+			return "", "", err
+		}
+	}
+	return tag.TagStr(), dig.DigestStr(), nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
