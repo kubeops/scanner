@@ -82,6 +82,7 @@ spec:
                 format: int64
                 type: integer
               phase:
+                default: Pending
                 description: Specifies the current phase of the database
                 enum:
                 - Pending
