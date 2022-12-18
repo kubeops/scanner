@@ -52,6 +52,7 @@ func (c defaultTableConvertor) ConvertToTable(ctx context.Context, object runtim
 	var table metav1.Table
 	fn := func(obj runtime.Object) error {
 		var (
+			name                 string
 			image                string
 			critical             int
 			high                 int
@@ -59,6 +60,7 @@ func (c defaultTableConvertor) ConvertToTable(ctx context.Context, object runtim
 			lastScannedTimestamp string
 		)
 		if o, ok := obj.(*scanner.ImageScanReport); ok {
+			name = o.GetName()
 			image = o.Spec.Image
 			//if o.Spec.Digest != "" {
 			//	image = o.Spec.Image + "@" + o.Spec.Digest
@@ -82,6 +84,7 @@ func (c defaultTableConvertor) ConvertToTable(ctx context.Context, object runtim
 
 		table.Rows = append(table.Rows, metav1.TableRow{
 			Cells: []interface{}{
+				name,
 				image,
 				critical,
 				high,
@@ -113,7 +116,8 @@ func (c defaultTableConvertor) ConvertToTable(ctx context.Context, object runtim
 	}
 	if opt, ok := tableOptions.(*metav1.TableOptions); !ok || !opt.NoHeaders {
 		table.ColumnDefinitions = []metav1.TableColumnDefinition{
-			{Name: "Image", Type: "string", Format: "name", Description: swaggerMetadataDescriptions["name"]},
+			{Name: "Name", Type: "string", Format: "name", Description: swaggerMetadataDescriptions["name"]},
+			{Name: "Image", Type: "string", Description: ""},
 			{Name: "Critical", Type: "string", Description: ""},
 			{Name: "High", Type: "string", Description: ""},
 			{Name: "Medium", Type: "string", Description: ""},
