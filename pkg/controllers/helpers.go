@@ -18,9 +18,9 @@ package controllers
 
 import (
 	"context"
-	"crypto/sha1"
-	"encoding/hex"
+	"crypto/md5"
 	"encoding/json"
+	"fmt"
 	"strings"
 	"time"
 
@@ -66,8 +66,7 @@ func (r *Reconciler) doReportRelatedStuffs(isr api.ImageScanRequest) error {
 }
 
 func EnsureScanReport(kc client.Client, imageRef string, singleReport trivy.SingleReport, versionInfo trivy.Version) (*api.ImageScanReport, error) {
-	// name := fmt.Sprintf("%x", md5.Sum([]byte(imageRef)))
-	name := getName(imageRef)
+	name := fmt.Sprintf("%x", md5.Sum([]byte(imageRef)))
 	tag, dig := getTagAndDigest(imageRef)
 
 	obj, vt, err := cu.CreateOrPatch(context.TODO(), kc, &api.ImageScanReport{
@@ -117,12 +116,6 @@ func updateStatusAsReportEnsured(kc client.Client, isr api.ImageScanRequest, rep
 		return in
 	})
 	return err
-}
-
-func getName(s string) string {
-	h := sha1.New()
-	h.Write([]byte(s))
-	return hex.EncodeToString(h.Sum(nil))
 }
 
 func getTagAndDigest(img string) (string, string) {
