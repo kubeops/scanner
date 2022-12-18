@@ -59,13 +59,14 @@ func (c defaultTableConvertor) ConvertToTable(ctx context.Context, object runtim
 		)
 		if o, ok := obj.(*scanner.ImageScanRequest); ok {
 			if o.Status.Image != nil {
-				if o.Status.Image.Digest != "" {
-					image = o.Status.Image.Name + "@" + o.Status.Image.Digest
-				} else if o.Status.Image.Tag != "" {
-					image = o.Status.Image.Name + ":" + o.Status.Image.Tag
-				} else {
-					image = o.Status.Image.Name
-				}
+				image = o.Status.Image.Name
+				//if o.Status.Image.Digest != "" {
+				//	image = o.Status.Image.Name + "@" + o.Status.Image.Digest
+				//} else if o.Status.Image.Tag != "" {
+				//	image = o.Status.Image.Name + ":" + o.Status.Image.Tag
+				//} else {
+				//	image = o.Status.Image.Name
+				//}
 			}
 			if o.Status.ReportRef != nil {
 				reportName = o.Status.ReportRef.Name
