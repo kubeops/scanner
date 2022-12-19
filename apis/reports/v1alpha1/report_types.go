@@ -78,7 +78,7 @@ const (
 
 type ImageScanStatus struct {
 	Result ScanResult `json:"result"`
-	// A human readable message indicating details about scan result.
+	// A human-readable message indicating details about scan result.
 	// +optional
 	Message string `json:"message,omitempty"`
 

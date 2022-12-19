@@ -92,7 +92,8 @@ const (
 )
 
 type ImageDetails struct {
-	Name       string          `json:"name,omitempty"`
+	Name string `json:"name,omitempty"`
+	// +kubebuilder:default="Public"
 	Visibility ImageVisibility `json:"visibility,omitempty"`
 	// Tag & Digest is optional field. One of these fields may not present
 	// +optional

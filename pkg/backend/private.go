@@ -32,5 +32,8 @@ func CheckPrivateImage(imageRef name.Reference) (bool, error) {
 	if strings.Contains(err.Error(), "UNAUTHORIZED") {
 		return true, nil
 	}
+	if strings.Contains(err.Error(), "MANIFEST_UNKNOWN") { // If the image is kind loaded (not available online)
+		return true, nil
+	}
 	return true, err
 }

@@ -70,6 +70,7 @@ spec:
                       may not present
                     type: string
                   visibility:
+                    default: Public
                     enum:
                     - Public
                     - Private

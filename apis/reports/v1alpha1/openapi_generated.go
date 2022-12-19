@@ -17992,7 +17992,7 @@ func schema_scanner_apis_reports_v1alpha1_ImageScanStatus(ref common.ReferenceCa
 					},
 					"message": {
 						SchemaProps: spec.SchemaProps{
-							Description: "A human readable message indicating details about scan result.",
+							Description: "A human-readable message indicating details about scan result.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
