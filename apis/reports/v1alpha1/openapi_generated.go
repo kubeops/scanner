@@ -17749,9 +17749,8 @@ func schema_scanner_apis_reports_v1alpha1_ImageConfig(ref common.ReferenceCallba
 				Properties: map[string]spec.Schema{
 					"architecture": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Type:   []string{"string"},
+							Format: "",
 						},
 					},
 					"author": {
@@ -17768,13 +17767,11 @@ func schema_scanner_apis_reports_v1alpha1_ImageConfig(ref common.ReferenceCallba
 					},
 					"os": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Type:   []string{"string"},
+							Format: "",
 						},
 					},
 				},
-				Required: []string{"architecture", "os"},
 			},
 		},
 	}
@@ -17794,8 +17791,7 @@ func schema_scanner_apis_reports_v1alpha1_ImageInfo(ref common.ReferenceCallback
 					},
 					"metadata": {
 						SchemaProps: spec.SchemaProps{
-							Default: map[string]interface{}{},
-							Ref:     ref("kubeops.dev/scanner/apis/reports/v1alpha1.ImageMetadata"),
+							Ref: ref("kubeops.dev/scanner/apis/reports/v1alpha1.ImageMetadata"),
 						},
 					},
 					"lineages": {
@@ -17818,7 +17814,7 @@ func schema_scanner_apis_reports_v1alpha1_ImageInfo(ref common.ReferenceCallback
 						},
 					},
 				},
-				Required: []string{"image", "metadata", "lineages", "scanStatus"},
+				Required: []string{"image", "scanStatus"},
 			},
 		},
 		Dependencies: []string{
@@ -17834,18 +17830,15 @@ func schema_scanner_apis_reports_v1alpha1_ImageMetadata(ref common.ReferenceCall
 				Properties: map[string]spec.Schema{
 					"os": {
 						SchemaProps: spec.SchemaProps{
-							Default: map[string]interface{}{},
-							Ref:     ref("kubeops.dev/scanner/apis/trivy.ImageOS"),
+							Ref: ref("kubeops.dev/scanner/apis/trivy.ImageOS"),
 						},
 					},
 					"imageConfig": {
 						SchemaProps: spec.SchemaProps{
-							Default: map[string]interface{}{},
-							Ref:     ref("kubeops.dev/scanner/apis/reports/v1alpha1.ImageConfig"),
+							Ref: ref("kubeops.dev/scanner/apis/reports/v1alpha1.ImageConfig"),
 						},
 					},
 				},
-				Required: []string{"os", "imageConfig"},
 			},
 		},
 		Dependencies: []string{
@@ -17967,7 +17960,6 @@ func schema_scanner_apis_reports_v1alpha1_ImageScanStatus(ref common.ReferenceCa
 					"lastChecked": {
 						SchemaProps: spec.SchemaProps{
 							Description: "When the referred image was checked for the last time",
-							Default:     map[string]interface{}{},
 							Ref:         ref("kubeops.dev/scanner/apis/trivy.Time"),
 						},
 					},

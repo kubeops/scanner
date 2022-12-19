@@ -79,7 +79,7 @@ func (r *Reconciler) setDefaultStatus(isr api.ImageScanRequest) error {
 	_, _, err := cu.PatchStatus(r.ctx, r.Client, &isr, func(obj client.Object) client.Object {
 		in := obj.(*api.ImageScanRequest)
 		in.Status.Image = &api.ImageDetails{
-			Name: isr.Spec.ImageRef,
+			Name: isr.Spec.Image,
 		}
 		in.Status.Phase = api.ImageScanRequestPhaseInProgress
 		return in
@@ -88,7 +88,7 @@ func (r *Reconciler) setDefaultStatus(isr api.ImageScanRequest) error {
 }
 
 func (r *Reconciler) scanForSingleImage(isr api.ImageScanRequest) error {
-	imageRef, err := name.ParseReference(isr.Spec.ImageRef)
+	imageRef, err := name.ParseReference(isr.Spec.Image)
 	if err != nil {
 		return err
 	}
@@ -108,7 +108,7 @@ func (r *Reconciler) scanForSingleImage(isr api.ImageScanRequest) error {
 		return r.ScanForPrivateImage(isr)
 	}
 	// Call SubmitScanRequest only for public image
-	err = backend.SubmitScanRequest(r.nc, "scanner.queue.scan", isr.Spec.ImageRef)
+	err = backend.SubmitScanRequest(r.nc, "scanner.queue.scan", isr.Spec.Image)
 	if err != nil {
 		klog.Errorf("error on Submitting ScanRequest ", err)
 	}
@@ -116,7 +116,7 @@ func (r *Reconciler) scanForSingleImage(isr api.ImageScanRequest) error {
 }
 
 func (r *Reconciler) updateImageDetails(isr api.ImageScanRequest, isPrivate bool) error {
-	tag, dig, err := tagAndDigest(isr.Spec.ImageRef)
+	tag, dig, err := tagAndDigest(isr.Spec.Image)
 	if err != nil {
 		return err
 	}

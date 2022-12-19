@@ -33,13 +33,13 @@ spec:
           spec:
             description: Spec describes the attributes for the Image Scan SingleReport
             properties:
-              imageRef:
+              image:
                 type: string
               namespace:
                 description: Namespace tells where to look for the image pull secrets.
                 type: string
               pullSecrets:
-                description: If some private image is referred in ImageRef, this field
+                description: If some private image is referred in Image, this field
                   will contain the ImagePullSecrets from the pod template.
                 items:
                   description: LocalObjectReference contains enough information to
@@ -53,7 +53,7 @@ spec:
                   x-kubernetes-map-type: atomic
                 type: array
             required:
-            - imageRef
+            - image
             type: object
           status:
             description: Status holds all the SingleReport-related details of the

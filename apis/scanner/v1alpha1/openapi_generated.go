@@ -17922,7 +17922,7 @@ func schema_scanner_apis_scanner_v1alpha1_ImageScanRequestSpec(ref common.Refere
 			SchemaProps: spec.SchemaProps{
 				Type: []string{"object"},
 				Properties: map[string]spec.Schema{
-					"imageRef": {
+					"image": {
 						SchemaProps: spec.SchemaProps{
 							Default: "",
 							Type:    []string{"string"},
@@ -17931,7 +17931,7 @@ func schema_scanner_apis_scanner_v1alpha1_ImageScanRequestSpec(ref common.Refere
 					},
 					"pullSecrets": {
 						SchemaProps: spec.SchemaProps{
-							Description: "If some private image is referred in ImageRef, this field will contain the ImagePullSecrets from the pod template.",
+							Description: "If some private image is referred in Image, this field will contain the ImagePullSecrets from the pod template.",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -17951,7 +17951,7 @@ func schema_scanner_apis_scanner_v1alpha1_ImageScanRequestSpec(ref common.Refere
 						},
 					},
 				},
-				Required: []string{"imageRef"},
+				Required: []string{"image"},
 			},
 		},
 		Dependencies: []string{

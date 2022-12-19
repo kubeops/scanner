@@ -124,11 +124,11 @@ type ImageResult struct {
 }
 
 type Target struct {
-	Layer            VulnerabilityLayer `json:"layer"`
-	InstalledVersion string             `json:"installedVersion"`
-	Target           string             `json:"target"`
-	Class            string             `json:"class"`
-	Type             string             `json:"type"`
+	Layer            *VulnerabilityLayer `json:"layer,omitempty"`
+	InstalledVersion string              `json:"installedVersion,omitempty"`
+	Target           string              `json:"target"`
+	Class            string              `json:"class"`
+	Type             string              `json:"type"`
 }
 
 type Result struct {

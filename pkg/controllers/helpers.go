@@ -37,7 +37,7 @@ import (
 
 func (r *Reconciler) doReportRelatedStuffs(isr api.ImageScanRequest) error {
 	// Getting the report.json file
-	msg, err := r.nc.Request("scanner.report", []byte(isr.Spec.ImageRef), backend.NatsRequestTimeout)
+	msg, err := r.nc.Request("scanner.report", []byte(isr.Spec.Image), backend.NatsRequestTimeout)
 	if err != nil {
 		return err
 	}
@@ -48,7 +48,7 @@ func (r *Reconciler) doReportRelatedStuffs(isr api.ImageScanRequest) error {
 	}
 
 	// Getting the trivy.json file
-	msg, err = r.nc.Request("scanner.version", []byte(isr.Spec.ImageRef), backend.NatsRequestTimeout)
+	msg, err = r.nc.Request("scanner.version", []byte(isr.Spec.Image), backend.NatsRequestTimeout)
 	if err != nil {
 		return err
 	}
@@ -58,7 +58,7 @@ func (r *Reconciler) doReportRelatedStuffs(isr api.ImageScanRequest) error {
 		return err
 	}
 
-	rep, err := EnsureScanReport(r.Client, isr.Spec.ImageRef, report, ver)
+	rep, err := EnsureScanReport(r.Client, isr.Spec.Image, report, ver)
 	if err != nil {
 		return err
 	}

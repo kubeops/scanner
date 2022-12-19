@@ -358,7 +358,7 @@ func Convert_scanner_ImageScanRequestList_To_v1alpha1_ImageScanRequestList(in *s
 }
 
 func autoConvert_v1alpha1_ImageScanRequestSpec_To_scanner_ImageScanRequestSpec(in *ImageScanRequestSpec, out *scanner.ImageScanRequestSpec, s conversion.Scope) error {
-	out.ImageRef = in.ImageRef
+	out.Image = in.Image
 	out.PullSecrets = *(*[]v1.LocalObjectReference)(unsafe.Pointer(&in.PullSecrets))
 	out.Namespace = in.Namespace
 	return nil
@@ -370,7 +370,7 @@ func Convert_v1alpha1_ImageScanRequestSpec_To_scanner_ImageScanRequestSpec(in *I
 }
 
 func autoConvert_scanner_ImageScanRequestSpec_To_v1alpha1_ImageScanRequestSpec(in *scanner.ImageScanRequestSpec, out *ImageScanRequestSpec, s conversion.Scope) error {
-	out.ImageRef = in.ImageRef
+	out.Image = in.Image
 	out.PullSecrets = *(*[]v1.LocalObjectReference)(unsafe.Pointer(&in.PullSecrets))
 	out.Namespace = in.Namespace
 	return nil

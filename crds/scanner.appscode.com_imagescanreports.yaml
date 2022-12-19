@@ -280,8 +280,6 @@ spec:
                                             type: string
                                         required:
                                         - class
-                                        - installedVersion
-                                        - layer
                                         - target
                                         - type
                                         type: object

@@ -46,8 +46,8 @@ type ImageScanRequest struct {
 }
 
 type ImageScanRequestSpec struct {
-	ImageRef string `json:"imageRef"`
-	// If some private image is referred in ImageRef, this field will contain the ImagePullSecrets from the pod template.
+	Image string `json:"image"`
+	// If some private image is referred in Image, this field will contain the ImagePullSecrets from the pod template.
 	// +optional
 	PullSecrets []core.LocalObjectReference `json:"pullSecrets,omitempty"`
 	// Namespace tells where to look for the image pull secrets.

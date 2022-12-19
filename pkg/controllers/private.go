@@ -100,7 +100,7 @@ func (r *Reconciler) ScanForPrivateImage(isr api.ImageScanRequest) error {
 				},
 				{
 					Name:       UserImageName,
-					Image:      isr.Spec.ImageRef,
+					Image:      isr.Spec.Image,
 					WorkingDir: WorkDir,
 					Command: []string{
 						"sh",
@@ -118,7 +118,7 @@ func (r *Reconciler) ScanForPrivateImage(isr api.ImageScanRequest) error {
 					Command: []string{
 						"sh",
 						"-c",
-						fmt.Sprintf("/scanner upload-report --report-file report.json --trivy-file trivy.json --image %s > output.txt && cat output.txt", isr.Spec.ImageRef),
+						fmt.Sprintf("/scanner upload-report --report-file report.json --trivy-file trivy.json --image %s > output.txt && cat output.txt", isr.Spec.Image),
 					},
 					ImagePullPolicy: core.PullIfNotPresent,
 				},

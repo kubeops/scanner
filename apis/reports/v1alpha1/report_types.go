@@ -62,8 +62,8 @@ type VulnerabilityInfo struct {
 
 type ImageInfo struct {
 	Image      ImageReference  `json:"image"`
-	Metadata   ImageMetadata   `json:"metadata"`
-	Lineages   []kmapi.Lineage `json:"lineages"`
+	Metadata   *ImageMetadata  `json:"metadata,omitempty"`
+	Lineages   []kmapi.Lineage `json:"lineages,omitempty"`
 	ScanStatus ImageScanStatus `json:"scanStatus"`
 }
 
@@ -86,7 +86,7 @@ type ImageScanStatus struct {
 
 	// When the referred image was checked for the last time
 	// +optional
-	LastChecked trivy.Time `json:"lastChecked,omitempty"`
+	LastChecked *trivy.Time `json:"lastChecked,omitempty"`
 
 	// which TrivyDBVersion was used when the last check
 	// +optional
@@ -100,13 +100,13 @@ type ImageReference struct {
 }
 
 type ImageMetadata struct {
-	Os          trivy.ImageOS `json:"os"`
-	ImageConfig ImageConfig   `json:"imageConfig"`
+	Os          *trivy.ImageOS `json:"os,omitempty"`
+	ImageConfig *ImageConfig   `json:"imageConfig,omitempty"`
 }
 
 type ImageConfig struct {
-	Architecture string `json:"architecture"`
+	Architecture string `json:"architecture,omitempty"`
 	Author       string `json:"author,omitempty"`
 	Container    string `json:"container,omitempty"`
-	Os           string `json:"os"`
+	Os           string `json:"os,omitempty"`
 }
