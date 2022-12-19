@@ -18,6 +18,7 @@ limitations under the License.
 
 // +k8s:openapi-gen=true
 // +k8s:deepcopy-gen=package
+// +k8s:conversion-gen=kubeops.dev/scanner/apis/scanner
 // +k8s:defaulter-gen=TypeMeta
 // +groupName=scanner.appscode.com
 package v1alpha1 // import "kubeops.dev/scanner/apis/scanner/v1alpha1"

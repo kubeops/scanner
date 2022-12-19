@@ -17,6 +17,7 @@ limitations under the License.
 package install
 
 import (
+	"kubeops.dev/scanner/apis/scanner"
 	"kubeops.dev/scanner/apis/scanner/v1alpha1"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -25,5 +26,6 @@ import (
 
 // Install registers the API group and adds types to a scheme
 func Install(scheme *runtime.Scheme) {
+	utilruntime.Must(scanner.AddToScheme(scheme))
 	utilruntime.Must(v1alpha1.AddToScheme(scheme))
 }

@@ -18,12 +18,11 @@ package backend
 
 import (
 	"context"
-	"encoding/json"
 	"os"
 	"path"
 	"strings"
 
-	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
+	"kubeops.dev/scanner/apis/trivy"
 
 	"github.com/google/go-containerregistry/pkg/crane"
 	"github.com/google/go-containerregistry/pkg/name"
@@ -54,19 +53,19 @@ func NewBlobFS() blobfs.Interface {
 }
 
 func DownloadReport(fs blobfs.Interface, img string) ([]byte, error) {
-	repo, digest, err := ParseReference(img)
-	if err != nil {
-		return nil, err
-	}
-	return fs.ReadFile(context.TODO(), path.Join(repo, digest, "report.json"))
+	return download(fs, img, "report.json")
 }
 
-func DownloadSummary(fs blobfs.Interface, img string) ([]byte, error) {
+func DownloadVersionInfo(fs blobfs.Interface, img string) ([]byte, error) {
+	return download(fs, img, "trivy.json")
+}
+
+func download(fs blobfs.Interface, img, fileName string) ([]byte, error) {
 	repo, digest, err := ParseReference(img)
 	if err != nil {
 		return nil, err
 	}
-	return fs.ReadFile(context.TODO(), path.Join(repo, digest, "summary.json"))
+	return fs.ReadFile(context.TODO(), path.Join(repo, digest, fileName))
 }
 
 func ExistsReport(fs blobfs.Interface, img string) (bool, error) {
@@ -74,11 +73,37 @@ func ExistsReport(fs blobfs.Interface, img string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	return fs.Exists(context.TODO(), path.Join(repo, digest, "summary.json"))
+	return fs.Exists(context.TODO(), path.Join(repo, digest, "report.json"))
+}
+
+func uploadVersionInfo(fs blobfs.Interface, repo, digest string) error {
+	sh := shell.NewSession()
+	sh.SetDir("/tmp")
+
+	sh.ShowCMD = true
+	sh.Stdout = os.Stdout
+	sh.Stderr = os.Stderr
+
+	args := []any{
+		"version",
+		"--format", "json",
+	}
+	out, err := sh.Command("trivy", args...).Output()
+	if err != nil {
+		return err
+	}
+
+	var r trivy.Version
+	err = trivy.JSON.Unmarshal(out, &r)
+	if err != nil {
+		return err
+	}
+
+	return fs.WriteFile(context.TODO(), path.Join(repo, digest, "trivy.json"), out)
 }
 
 func UploadReport(fs blobfs.Interface, img string) error {
-	report, reportBytes, err := scan(img)
+	_, reportBytes, err := scan(img)
 	if err != nil {
 		return err
 	}
@@ -93,40 +118,11 @@ func UploadReport(fs blobfs.Interface, img string) error {
 		return err
 	}
 
-	summary := api.Summary{
-		SchemaVersion: report.SchemaVersion,
-		ArtifactName:  report.ArtifactName,
-		ArtifactType:  report.ArtifactType,
-		Metadata:      report.Metadata,
-		Results:       make([]api.SummaryResult, 0, len(report.Results)),
-	}
-	for _, r := range report.Results {
-		stats := map[string]int{}
-		for _, vul := range r.Vulnerabilities {
-			stats[vul.Severity] = stats[vul.Severity] + 1
-		}
-		sr := api.SummaryResult{
-			Target:          r.Target,
-			Class:           r.Class,
-			Type:            r.Type,
-			Vulnerabilities: stats,
-		}
-		summary.Results = append(summary.Results, sr)
-	}
-	sBytes, err := json.Marshal(summary)
-	if err != nil {
-		return err
-	}
-	err = fs.WriteFile(context.TODO(), path.Join(repo, digest, "summary.json"), sBytes)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return uploadVersionInfo(fs, repo, digest)
 }
 
 // trivy image ubuntu --security-checks vuln --format json --quiet
-func scan(img string) (*api.Report, []byte, error) {
+func scan(img string) (*trivy.SingleReport, []byte, error) {
 	sh := shell.NewSession()
 	// sh.SetEnv("BUILD_ID", "123")
 	sh.SetDir("/tmp")
@@ -147,8 +143,8 @@ func scan(img string) (*api.Report, []byte, error) {
 		return nil, nil, err
 	}
 
-	var r api.Report
-	err = json.Unmarshal(out, &r)
+	var r trivy.SingleReport
+	err = trivy.JSON.Unmarshal(out, &r)
 	if err != nil {
 		return nil, nil, err
 	}

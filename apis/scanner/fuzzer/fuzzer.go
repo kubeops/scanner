@@ -17,7 +17,7 @@ limitations under the License.
 package fuzzer
 
 import (
-	"kubeops.dev/scanner/apis/scanner/v1alpha1"
+	"kubeops.dev/scanner/apis/scanner"
 
 	fuzz "github.com/google/gofuzz"
 	runtimeserializer "k8s.io/apimachinery/pkg/runtime/serializer"
@@ -27,10 +27,10 @@ import (
 var Funcs = func(codecs runtimeserializer.CodecFactory) []interface{} {
 	return []interface{}{
 		// v1alpha1
-		func(s *v1alpha1.ScanReport, c fuzz.Continue) {
+		func(s *scanner.ImageScanRequest, c fuzz.Continue) {
 			c.FuzzNoCustom(s) // fuzz self without calling this function again
 		},
-		func(s *v1alpha1.ScanSummary, c fuzz.Continue) {
+		func(s *scanner.ImageScanReport, c fuzz.Continue) {
 			c.FuzzNoCustom(s) // fuzz self without calling this function again
 		},
 	}

@@ -20,14 +20,16 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	"kubeops.dev/scanner/apis/scanner"
 	"kubeops.dev/scanner/apis/scanner/install"
 	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
 	"kubeops.dev/scanner/pkg/backend"
-	scannerctrl "kubeops.dev/scanner/pkg/controllers/scanner"
-	"kubeops.dev/scanner/pkg/registry/scanner/scanreport"
-	"kubeops.dev/scanner/pkg/registry/scanner/scansummary"
+	"kubeops.dev/scanner/pkg/controllers"
+	"kubeops.dev/scanner/pkg/fileserver"
+	reportstorage "kubeops.dev/scanner/pkg/registry/scanner/report"
+	requeststorage "kubeops.dev/scanner/pkg/registry/scanner/request"
 
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -76,11 +78,14 @@ func init() {
 
 // ExtraConfig holds custom apiserver config
 type ExtraConfig struct {
-	ClientConfig *restclient.Config
-	LicenseFile  string
-	CacheDir     string
-	NATSAddr     string
-	NATSCredFile string
+	ClientConfig         *restclient.Config
+	LicenseFile          string
+	CacheDir             string
+	NATSAddr             string
+	NATSCredFile         string
+	FileServerPathPrefix string
+	FileServerFilesDir   string
+	ScannerImage         string
 }
 
 // Config defines the config for the apiserver
@@ -89,8 +94,8 @@ type Config struct {
 	ExtraConfig   ExtraConfig
 }
 
-// LicenseProxyServer contains state for a Kubernetes cluster master/api server.
-type LicenseProxyServer struct {
+// ScannerServer contains state for a Kubernetes cluster master/api server.
+type ScannerServer struct {
 	GenericAPIServer *genericapiserver.GenericAPIServer
 	Manager          manager.Manager
 }
@@ -120,8 +125,8 @@ func (cfg *Config) Complete() CompletedConfig {
 	return CompletedConfig{&c}
 }
 
-// New returns a new instance of LicenseProxyServer from the given config.
-func (c completedConfig) New(ctx context.Context) (*LicenseProxyServer, error) {
+// New returns a new instance of ScannerServer from the given config.
+func (c completedConfig) New(ctx context.Context) (*ScannerServer, error) {
 	genericServer, err := c.GenericConfig.New("scanner", genericapiserver.NewEmptyDelegate())
 	if err != nil {
 		return nil, err
@@ -148,24 +153,19 @@ func (c completedConfig) New(ctx context.Context) (*LicenseProxyServer, error) {
 		return nil, fmt.Errorf("unable to start manager, reason: %v", err)
 	}
 
-	cid, err := cu.ClusterUID(mgr.GetAPIReader())
-	if err != nil {
-		return nil, err
-	}
-
 	nc, err := backend.NewConnection(c.ExtraConfig.NATSAddr, c.ExtraConfig.NATSCredFile)
 	if err != nil {
 		return nil, err
 	}
 
-	if err = (scannerctrl.NewWorkloadReconciler(nc)).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "Workload")
+	if err = (controllers.NewImageScanRequestReconciler(mgr.GetClient(), nc, c.ExtraConfig.ScannerImage)).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "ImageScanRequest")
 		os.Exit(1)
 	}
 
 	setupLog.Info("setup done!")
 
-	s := &LicenseProxyServer{
+	s := &ScannerServer{
 		GenericAPIServer: genericServer,
 		Manager:          mgr,
 	}
@@ -173,14 +173,37 @@ func (c completedConfig) New(ctx context.Context) (*LicenseProxyServer, error) {
 		apiGroupInfo := genericapiserver.NewDefaultAPIGroupInfo(scanner.GroupName, Scheme, metav1.ParameterCodec, Codecs)
 
 		v1alpha1storage := map[string]rest.Storage{}
-		v1alpha1storage[api.ResourceScanReports] = scanreport.NewStorage(cid, nc)
-		v1alpha1storage[api.ResourceScanSummaries] = scansummary.NewStorage(cid, nc)
+		{
+			storage, err := requeststorage.NewStorage(Scheme, c.GenericConfig.RESTOptionsGetter)
+			if err != nil {
+				return nil, err
+			}
+			v1alpha1storage[api.ResourceImageScanRequests] = storage.Controller
+			v1alpha1storage[api.ResourceImageScanRequests+"/status"] = storage.Status
+		}
+		{
+			storage, err := reportstorage.NewStorage(Scheme, c.GenericConfig.RESTOptionsGetter)
+			if err != nil {
+				return nil, err
+			}
+			v1alpha1storage[api.ResourceImageScanReports] = storage.Controller
+			v1alpha1storage[api.ResourceImageScanReports+"/status"] = storage.Status
+		}
 		apiGroupInfo.VersionedResourcesStorageMap["v1alpha1"] = v1alpha1storage
 
 		if err := s.GenericAPIServer.InstallAPIGroup(&apiGroupInfo); err != nil {
 			return nil, err
 		}
 	}
-
+	{
+		prefix := c.ExtraConfig.FileServerPathPrefix
+		if !strings.HasPrefix(prefix, "/") {
+			prefix = "/" + prefix
+		}
+		if !strings.HasSuffix(prefix, "/") {
+			prefix = prefix + "/"
+		}
+		genericServer.Handler.NonGoRestfulMux.HandlePrefix(prefix, fileserver.Router(prefix, c.ExtraConfig.FileServerFilesDir))
+	}
 	return s, nil
 }

@@ -25,6 +25,8 @@ import (
 	fakediscovery "k8s.io/client-go/discovery/fake"
 	"k8s.io/client-go/testing"
 	clientset "kubeops.dev/scanner/client/clientset/versioned"
+	reportsv1alpha1 "kubeops.dev/scanner/client/clientset/versioned/typed/reports/v1alpha1"
+	fakereportsv1alpha1 "kubeops.dev/scanner/client/clientset/versioned/typed/reports/v1alpha1/fake"
 	scannerv1alpha1 "kubeops.dev/scanner/client/clientset/versioned/typed/scanner/v1alpha1"
 	fakescannerv1alpha1 "kubeops.dev/scanner/client/clientset/versioned/typed/scanner/v1alpha1/fake"
 )
@@ -78,6 +80,11 @@ var (
 	_ clientset.Interface = &Clientset{}
 	_ testing.FakeClient  = &Clientset{}
 )
+
+// ReportsV1alpha1 retrieves the ReportsV1alpha1Client
+func (c *Clientset) ReportsV1alpha1() reportsv1alpha1.ReportsV1alpha1Interface {
+	return &fakereportsv1alpha1.FakeReportsV1alpha1{Fake: &c.Fake}
+}
 
 // ScannerV1alpha1 retrieves the ScannerV1alpha1Client
 func (c *Clientset) ScannerV1alpha1() scannerv1alpha1.ScannerV1alpha1Interface {

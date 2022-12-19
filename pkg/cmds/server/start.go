@@ -41,8 +41,8 @@ import (
 
 const defaultEtcdPathPrefix = "/registry/scanner.appscode.com"
 
-// LicenseProxyServerOptions contains state for master/api server
-type LicenseProxyServerOptions struct {
+// ScannerServerOptions contains state for master/api server
+type ScannerServerOptions struct {
 	RecommendedOptions *genericoptions.RecommendedOptions
 	ExtraOptions       *ExtraOptions
 
@@ -50,10 +50,10 @@ type LicenseProxyServerOptions struct {
 	StdErr io.Writer
 }
 
-// NewUIServerOptions returns a new LicenseProxyServerOptions
-func NewUIServerOptions(out, errOut io.Writer) *LicenseProxyServerOptions {
+// NewUIServerOptions returns a new ScannerServerOptions
+func NewUIServerOptions(out, errOut io.Writer) *ScannerServerOptions {
 	_ = feature.DefaultMutableFeatureGate.Set(fmt.Sprintf("%s=false", features.APIPriorityAndFairness))
-	o := &LicenseProxyServerOptions{
+	o := &ScannerServerOptions{
 		RecommendedOptions: genericoptions.NewRecommendedOptions(
 			defaultEtcdPathPrefix,
 			apiserver.Codecs.LegacyCodec(
@@ -64,18 +64,18 @@ func NewUIServerOptions(out, errOut io.Writer) *LicenseProxyServerOptions {
 		StdOut:       out,
 		StdErr:       errOut,
 	}
-	o.RecommendedOptions.Etcd = nil
+	// o.RecommendedOptions.Etcd = nil
 	o.RecommendedOptions.Admission = nil
 	return o
 }
 
-func (o LicenseProxyServerOptions) AddFlags(fs *pflag.FlagSet) {
+func (o ScannerServerOptions) AddFlags(fs *pflag.FlagSet) {
 	o.RecommendedOptions.AddFlags(fs)
 	o.ExtraOptions.AddFlags(fs)
 }
 
-// Validate validates LicenseProxyServerOptions
-func (o LicenseProxyServerOptions) Validate(args []string) error {
+// Validate validates ScannerServerOptions
+func (o ScannerServerOptions) Validate(args []string) error {
 	var errors []error
 	errors = append(errors, o.RecommendedOptions.Validate()...)
 	errors = append(errors, o.ExtraOptions.Validate()...)
@@ -83,12 +83,12 @@ func (o LicenseProxyServerOptions) Validate(args []string) error {
 }
 
 // Complete fills in fields required to have valid data
-func (o *LicenseProxyServerOptions) Complete() error {
+func (o *ScannerServerOptions) Complete() error {
 	return nil
 }
 
-// Config returns config for the api server given LicenseProxyServerOptions
-func (o *LicenseProxyServerOptions) Config() (*apiserver.Config, error) {
+// Config returns config for the api server given ScannerServerOptions
+func (o *ScannerServerOptions) Config() (*apiserver.Config, error) {
 	// TODO have a "real" external address
 	if err := o.RecommendedOptions.SecureServing.MaybeDefaultWithSelfSignedCerts("localhost", nil, []net.IP{net.ParseIP("127.0.0.1")}); err != nil {
 		return nil, fmt.Errorf("error creating self-signed certificates: %v", err)
@@ -110,12 +110,13 @@ func (o *LicenseProxyServerOptions) Config() (*apiserver.Config, error) {
 	serverConfig.OpenAPIConfig.Info.Version = v.Version.Version
 	serverConfig.OpenAPIConfig.IgnorePrefixes = []string{
 		"/swaggerapi",
-		fmt.Sprintf("/apis/%s/%s", api.SchemeGroupVersion, api.ResourceScanReports),
-		fmt.Sprintf("/apis/%s/%s", api.SchemeGroupVersion, api.ResourceScanSummaries),
+		fmt.Sprintf("/apis/%s/%s", api.SchemeGroupVersion, api.ResourceImageScanRequests),
+		fmt.Sprintf("/apis/%s/%s", api.SchemeGroupVersion, api.ResourceImageScanReports),
 	}
 
 	extraConfig := apiserver.ExtraConfig{
 		ClientConfig: serverConfig.ClientConfig,
+		ScannerImage: o.ExtraOptions.ScannerImage,
 	}
 	if err := o.ExtraOptions.ApplyTo(&extraConfig); err != nil {
 		return nil, err
@@ -128,8 +129,8 @@ func (o *LicenseProxyServerOptions) Config() (*apiserver.Config, error) {
 	return config, nil
 }
 
-// Run starts a new LicenseProxyServer given LicenseProxyServerOptions
-func (o LicenseProxyServerOptions) Run(ctx context.Context) error {
+// Run starts a new ScannerServer given ScannerServerOptions
+func (o ScannerServerOptions) Run(ctx context.Context) error {
 	config, err := o.Config()
 	if err != nil {
 		return err

@@ -24,6 +24,7 @@ import (
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	serializer "k8s.io/apimachinery/pkg/runtime/serializer"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
+	reportsv1alpha1 "kubeops.dev/scanner/apis/reports/v1alpha1"
 	scannerv1alpha1 "kubeops.dev/scanner/apis/scanner/v1alpha1"
 )
 
@@ -31,6 +32,7 @@ var scheme = runtime.NewScheme()
 var codecs = serializer.NewCodecFactory(scheme)
 
 var localSchemeBuilder = runtime.SchemeBuilder{
+	reportsv1alpha1.AddToScheme,
 	scannerv1alpha1.AddToScheme,
 }
 
