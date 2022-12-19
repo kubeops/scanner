@@ -61,7 +61,7 @@ func (c defaultTableConvertor) ConvertToTable(ctx context.Context, object runtim
 		)
 		if o, ok := obj.(*scanner.ImageScanReport); ok {
 			name = o.GetName()
-			image = o.Spec.Image
+			image = o.Spec.Image.Name
 			//if o.Spec.Digest != "" {
 			//	image = o.Spec.Image + "@" + o.Spec.Digest
 			//} else if o.Spec.Tag != "" {

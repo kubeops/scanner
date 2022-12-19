@@ -17,6 +17,8 @@ limitations under the License.
 package trivy
 
 import (
+	"fmt"
+	"reflect"
 	"testing"
 
 	tl "gomodules.xyz/testing"
@@ -38,11 +40,34 @@ func TestReport(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := tl.RoundTripFile(tt.name, &SingleReport{})
+			err := RoundTripFile(tt.name, &SingleReport{})
 			if (err != nil) != tt.wantErr {
 				t.Errorf("RoundTripFile() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 		})
 	}
+}
+
+func RoundTripFile(filename string, v any) error {
+	if reflect.TypeOf(v).Kind() != reflect.Pointer {
+		return fmt.Errorf("v is expected to be a pointer, found %T", v)
+	}
+
+	original, err := tl.ReadFile(filename)
+	if err != nil {
+		return err
+	}
+
+	json := JSON
+	err = json.Unmarshal(original, v)
+	if err != nil {
+		return err
+	}
+	nu, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	return tl.DiffJSON(original, nu)
 }

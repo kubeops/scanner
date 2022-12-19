@@ -17,7 +17,6 @@ limitations under the License.
 package cmds
 
 import (
-	"encoding/json"
 	"os"
 
 	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
@@ -74,13 +73,13 @@ func uploadReport(imageRef, trivyFile, reportFile string) error {
 	// convert
 
 	var actualReport trivy.SingleReport
-	err = json.Unmarshal(reportInfo, &actualReport)
+	err = trivy.JSON.Unmarshal(reportInfo, &actualReport)
 	if err != nil {
 		return err
 	}
 
 	var ver trivy.Version
-	err = json.Unmarshal(trivyInfo, &ver)
+	err = trivy.JSON.Unmarshal(trivyInfo, &ver)
 	if err != nil {
 		return err
 	}

@@ -18,7 +18,6 @@ package backend
 
 import (
 	"context"
-	"encoding/json"
 	"os"
 	"path"
 	"strings"
@@ -95,7 +94,7 @@ func uploadVersionInfo(fs blobfs.Interface, repo, digest string) error {
 	}
 
 	var r trivy.Version
-	err = json.Unmarshal(out, &r)
+	err = trivy.JSON.Unmarshal(out, &r)
 	if err != nil {
 		return err
 	}
@@ -145,7 +144,7 @@ func scan(img string) (*trivy.SingleReport, []byte, error) {
 	}
 
 	var r trivy.SingleReport
-	err = json.Unmarshal(out, &r)
+	err = trivy.JSON.Unmarshal(out, &r)
 	if err != nil {
 		return nil, nil, err
 	}

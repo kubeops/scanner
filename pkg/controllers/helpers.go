@@ -19,9 +19,7 @@ package controllers
 import (
 	"context"
 	"crypto/md5"
-	"encoding/json"
 	"fmt"
-	"strings"
 	"time"
 
 	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
@@ -32,6 +30,8 @@ import (
 	"k8s.io/klog/v2"
 	kutil "kmodules.xyz/client-go"
 	cu "kmodules.xyz/client-go/client"
+	"kmodules.xyz/go-containerregistry/name"
+	_ "kmodules.xyz/go-containerregistry/name"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -42,7 +42,7 @@ func (r *Reconciler) doReportRelatedStuffs(isr api.ImageScanRequest) error {
 		return err
 	}
 	var report trivy.SingleReport
-	err = json.Unmarshal(msg.Data, &report)
+	err = trivy.JSON.Unmarshal(msg.Data, &report)
 	if err != nil {
 		return err
 	}
@@ -53,7 +53,7 @@ func (r *Reconciler) doReportRelatedStuffs(isr api.ImageScanRequest) error {
 		return err
 	}
 	var ver trivy.Version
-	err = json.Unmarshal(msg.Data, &ver)
+	err = trivy.JSON.Unmarshal(msg.Data, &ver)
 	if err != nil {
 		return err
 	}
@@ -66,18 +66,23 @@ func (r *Reconciler) doReportRelatedStuffs(isr api.ImageScanRequest) error {
 }
 
 func EnsureScanReport(kc client.Client, imageRef string, singleReport trivy.SingleReport, versionInfo trivy.Version) (*api.ImageScanReport, error) {
-	name := fmt.Sprintf("%x", md5.Sum([]byte(imageRef)))
-	tag, dig := getTagAndDigest(imageRef)
+	img, err := name.ParseReference(imageRef)
+	if err != nil {
+		return nil, err
+	}
+	reportName := fmt.Sprintf("%x", md5.Sum([]byte(img.Name)))
 
 	obj, vt, err := cu.CreateOrPatch(context.TODO(), kc, &api.ImageScanReport{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: name,
+			Name: reportName,
 		},
 	}, func(obj client.Object, createOp bool) client.Object {
 		rep := obj.(*api.ImageScanReport)
-		rep.Spec.Image = imageRef
-		rep.Spec.Tag = tag
-		rep.Spec.Digest = dig
+		rep.Spec.Image = api.ImageReference{
+			Name:   img.Name,
+			Tag:    img.Tag,
+			Digest: img.Digest,
+		}
 		return rep
 	})
 	if err != nil {
@@ -90,7 +95,7 @@ func EnsureScanReport(kc client.Client, imageRef string, singleReport trivy.Sing
 	// TODO: Is a single CreateOrPatch is able to modify the status too ?
 	_, _, err = cu.PatchStatus(context.TODO(), kc, &api.ImageScanReport{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: name,
+			Name: reportName,
 		},
 	}, func(obj client.Object) client.Object {
 		rep := obj.(*api.ImageScanReport)
@@ -116,22 +121,4 @@ func updateStatusAsReportEnsured(kc client.Client, isr api.ImageScanRequest, rep
 		return in
 	})
 	return err
-}
-
-func getTagAndDigest(img string) (string, string) {
-	// TODO: is this ok ? Or Should we use `crane` pkg to do so ?
-	imgWithoutHash := img
-	hash := ""
-	tag := ""
-	if strings.Contains(img, "@") {
-		slice := strings.Split(img, "@")
-		imgWithoutHash = slice[0]
-		hash = slice[1]
-	}
-
-	if strings.Contains(imgWithoutHash, ":") {
-		slice := strings.Split(imgWithoutHash, ":")
-		tag = slice[1]
-	}
-	return tag, hash
 }
