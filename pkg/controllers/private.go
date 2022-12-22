@@ -41,7 +41,7 @@ const (
 	WorkDir          = "/root/.cache"
 
 	NatsCLIImageName  = "trivydb"
-	NatsCLIImage      = "arnobkumarsaha/natscli"
+	NatsCLIImage      = "appscode/trivydb:0.0.1"
 	UserImageName     = "scanner"
 	UploaderImageName = "uploader"
 )
