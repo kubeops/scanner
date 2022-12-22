@@ -1,4 +1,4 @@
 apiVersion: scanner.appscode.com/v1alpha1
-kind: ScanSummary
-request:
-  imageRef: ubuntu
+kind: ImageScanReport
+metadata:
+  name: my_report

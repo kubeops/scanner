@@ -1,6 +1,6 @@
 apiVersion: scanner.appscode.com/v1alpha1
 kind: ImageScanRequest
 metadata:
-  name: hello-pub
+  generateName: hello-melange-
 spec:
-  imageRef: 'ghcr.io/arnobkumarsaha/hello-melange-apko/go'
+  image: 'ghcr.io/arnobkumarsaha/hello-melange-apko/go'
