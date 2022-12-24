@@ -155,5 +155,14 @@ func (o ScannerServerOptions) Run(ctx context.Context) error {
 
 	setupLog := log.Log.WithName("setup")
 	setupLog.Info("starting manager")
-	return server.Manager.Start(ctx)
+	err = server.Manager.Start(ctx)
+	if err != nil {
+		return err
+	}
+
+	<-ctx.Done()
+	if server.NatsClient != nil {
+		server.NatsClient.Drain()
+	}
+	return nil
 }
