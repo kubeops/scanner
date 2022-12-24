@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"kubeops.dev/scanner/apis/scanner"
 	"kubeops.dev/scanner/apis/scanner/install"
@@ -31,6 +32,10 @@ import (
 	reportstorage "kubeops.dev/scanner/pkg/registry/scanner/report"
 	requeststorage "kubeops.dev/scanner/pkg/registry/scanner/request"
 
+	"github.com/nats-io/nats.go"
+	auditlib "go.bytebuilders.dev/audit/lib"
+	proxyserver "go.bytebuilders.dev/license-proxyserver/apis/proxyserver/v1alpha1"
+	"go.bytebuilders.dev/license-verifier/apis/licenses/v1alpha1"
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -40,10 +45,14 @@ import (
 	"k8s.io/apimachinery/pkg/version"
 	"k8s.io/apiserver/pkg/registry/rest"
 	genericapiserver "k8s.io/apiserver/pkg/server"
+	"k8s.io/client-go/informers"
+	"k8s.io/client-go/kubernetes"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/klog/v2/klogr"
 	cu "kmodules.xyz/client-go/client"
+	"kmodules.xyz/client-go/discovery"
+	"kmodules.xyz/client-go/tools/clusterid"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -79,13 +88,29 @@ func init() {
 // ExtraConfig holds custom apiserver config
 type ExtraConfig struct {
 	ClientConfig         *restclient.Config
+	KubeClient           kubernetes.Interface
+	KubeInformerFactory  informers.SharedInformerFactory
+	ResyncPeriod         time.Duration
 	LicenseFile          string
+	License              v1alpha1.License
 	CacheDir             string
 	NATSAddr             string
 	NATSCredFile         string
 	FileServerPathPrefix string
 	FileServerFilesDir   string
 	ScannerImage         string
+}
+
+func (c ExtraConfig) LicenseProvided() bool {
+	if c.LicenseFile != "" {
+		return true
+	}
+
+	ok, _ := discovery.HasGVK(
+		c.KubeClient.Discovery(),
+		proxyserver.SchemeGroupVersion.String(),
+		proxyserver.ResourceKindLicenseRequest)
+	return ok
 }
 
 // Config defines the config for the apiserver
@@ -98,6 +123,7 @@ type Config struct {
 type ScannerServer struct {
 	GenericAPIServer *genericapiserver.GenericAPIServer
 	Manager          manager.Manager
+	NatsClient       *nats.Conn
 }
 
 type completedConfig struct {
@@ -153,9 +179,44 @@ func (c completedConfig) New(ctx context.Context) (*ScannerServer, error) {
 		return nil, fmt.Errorf("unable to start manager, reason: %v", err)
 	}
 
-	nc, err := backend.NewConnection(c.ExtraConfig.NATSAddr, c.ExtraConfig.NATSCredFile)
+	var nc *nats.Conn
+
+	mapper, err := discovery.NewDynamicResourceMapper(c.ExtraConfig.ClientConfig)
 	if err != nil {
 		return nil, err
+	}
+
+	// audit event auditor
+	// WARNING: https://stackoverflow.com/a/46275411/244009
+	var auditor *auditlib.EventPublisher
+	if c.ExtraConfig.LicenseProvided() {
+		cmeta, err := clusterid.ClusterMetadata(c.ExtraConfig.KubeClient.CoreV1().Namespaces())
+		if err != nil {
+			return nil, fmt.Errorf("failed to extract cluster metadata, reason: %v", err)
+		}
+		fn := auditlib.BillingEventCreator{
+			Mapper:          mapper,
+			ClusterMetadata: cmeta,
+		}
+		auditor = auditlib.NewResilientEventPublisher(func() (*auditlib.NatsConfig, error) {
+			return auditlib.NewNatsConfig(c.ExtraConfig.ClientConfig, cmeta.UID, c.ExtraConfig.LicenseFile)
+		}, mapper, fn.CreateEvent)
+		nc, err = auditor.NatsClient()
+		if err != nil {
+			return nil, err
+		}
+
+		if !c.ExtraConfig.License.DisableAnalytics() {
+			err = auditor.SetupSiteInfoPublisher(c.ExtraConfig.ClientConfig, c.ExtraConfig.KubeClient, c.ExtraConfig.KubeInformerFactory)
+			if err != nil {
+				return nil, fmt.Errorf("failed to setup site info publisher, reason: %v", err)
+			}
+		}
+	} else {
+		nc, err = backend.NewConnection(c.ExtraConfig.NATSAddr, c.ExtraConfig.NATSCredFile)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	if err = (controllers.NewImageScanRequestReconciler(mgr.GetClient(), nc, c.ExtraConfig.ScannerImage)).SetupWithManager(mgr); err != nil {
@@ -168,6 +229,7 @@ func (c completedConfig) New(ctx context.Context) (*ScannerServer, error) {
 	s := &ScannerServer{
 		GenericAPIServer: genericServer,
 		Manager:          mgr,
+		NatsClient:       nc,
 	}
 	{
 		apiGroupInfo := genericapiserver.NewDefaultAPIGroupInfo(scanner.GroupName, Scheme, metav1.ParameterCodec, Codecs)

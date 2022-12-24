@@ -17,14 +17,23 @@ limitations under the License.
 package server
 
 import (
+	"fmt"
+	"time"
+
 	"kubeops.dev/scanner/pkg/apiserver"
 
 	"github.com/spf13/pflag"
+	licenseapi "go.bytebuilders.dev/license-verifier/apis/licenses/v1alpha1"
+	license "go.bytebuilders.dev/license-verifier/kubernetes"
+	"gomodules.xyz/sets"
+	"k8s.io/client-go/informers"
+	"k8s.io/client-go/kubernetes"
 )
 
 type ExtraOptions struct {
-	QPS   float64
-	Burst int
+	QPS          float64
+	Burst        int
+	ResyncPeriod time.Duration
 
 	LicenseFile string
 	CacheDir    string
@@ -40,6 +49,7 @@ type ExtraOptions struct {
 
 func NewExtraOptions() *ExtraOptions {
 	return &ExtraOptions{
+		ResyncPeriod:         10 * time.Minute,
 		QPS:                  1e6,
 		Burst:                1e6,
 		NATSAddr:             "this-is-nats.appcode.ninja:4222",
@@ -50,6 +60,7 @@ func NewExtraOptions() *ExtraOptions {
 }
 
 func (s *ExtraOptions) AddFlags(fs *pflag.FlagSet) {
+	fs.DurationVar(&s.ResyncPeriod, "resync-period", s.ResyncPeriod, "If non-zero, will re-list this often. Otherwise, re-list will be delayed aslong as possible (until the upstream source closes the watch or times out.")
 	fs.Float64Var(&s.QPS, "qps", s.QPS, "The maximum QPS to the master from this client")
 	fs.IntVar(&s.Burst, "burst", s.Burst, "The maximum burst for throttle")
 	fs.StringVar(&s.LicenseFile, "license-file", s.LicenseFile, "Path to license file")
@@ -73,6 +84,24 @@ func (s *ExtraOptions) ApplyTo(cfg *apiserver.ExtraConfig) error {
 	cfg.ScannerImage = s.ScannerImage
 	cfg.ClientConfig.QPS = float32(s.QPS)
 	cfg.ClientConfig.Burst = s.Burst
+	cfg.ResyncPeriod = s.ResyncPeriod
+
+	var err error
+	if cfg.KubeClient, err = kubernetes.NewForConfig(cfg.ClientConfig); err != nil {
+		return err
+	}
+	cfg.KubeInformerFactory = informers.NewSharedInformerFactory(cfg.KubeClient, cfg.ResyncPeriod)
+	if cfg.LicenseProvided() {
+		info := license.MustLicenseEnforcer(cfg.ClientConfig, cfg.LicenseFile).LoadLicense()
+		if info.Status != licenseapi.LicenseActive {
+			return fmt.Errorf("license status %s, reason: %s", info.Status, info.Reason)
+		}
+		if sets.NewString(info.Features...).Has("scanner") {
+		} else if !sets.NewString(info.Features...).Has("scanner") {
+			return fmt.Errorf("not a valid license for this product")
+		}
+		cfg.License = info
+	}
 
 	return nil
 }

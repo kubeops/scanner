@@ -451,6 +451,7 @@ $(BUILD_DIRS):
 
 KUBE_NAMESPACE    ?= kubeops
 REGISTRY_SECRET   ?=
+LICENSE_FILE      ?=
 IMAGE_PULL_POLICY	?= IfNotPresent
 
 ifeq ($(strip $(REGISTRY_SECRET)),)
@@ -463,9 +464,6 @@ NATS_ADDR     ?= this-is-nats.appscode.ninja:4222
 NATS_USERNAME ?= $(THIS_IS_NATS_USERNAME)
 NATS_PASSWORD ?= $(THIS_IS_NATS_PASSWORD)
 
-AWS_ACCESS_KEY_ID     ?= $(LINODE_CLI_OBJ_ACCESS_KEY)
-AWS_SECRET_ACCESS_KEY ?= $(LINODE_CLI_OBJ_SECRET_KEY)
-
 .PHONY: install
 install:
 	@cd ../installer; \
@@ -474,11 +472,10 @@ install:
 		--set app.registry=$(REGISTRY) \
 		--set app.tag=$(TAG_PROD) \
 		--set imagePullPolicy=$(IMAGE_PULL_POLICY) \
+		--set-file license=$(LICENSE_FILE) \
 		--set nats.addr=$(NATS_ADDR) \
 		--set nats.auth.username=$(NATS_USERNAME) \
 		--set nats.auth.password=$(NATS_PASSWORD) \
-		--set objstore.credentials.AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) \
-		--set objstore.credentials.AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY) \
 		$(IMAGE_PULL_SECRETS); \
 
 .PHONY: uninstall
