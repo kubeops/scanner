@@ -162,7 +162,7 @@ func (o ScannerServerOptions) Run(ctx context.Context) error {
 
 	<-ctx.Done()
 	if server.NatsClient != nil {
-		server.NatsClient.Drain()
+		return server.NatsClient.Drain()
 	}
 	return nil
 }
