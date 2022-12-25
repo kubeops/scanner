@@ -35,8 +35,8 @@ require (
 	k8s.io/kube-openapi v0.0.0-20221012153701-172d655c2280
 	k8s.io/utils v0.0.0-20221012122500-cfd413dd9e85
 	kmodules.xyz/client-go v0.25.14
-	kmodules.xyz/go-containerregistry v0.0.2
-	kubedb.dev/apimachinery v0.29.2-0.20221208220920-b95282830fee
+	kmodules.xyz/go-containerregistry v0.0.3
+	kubedb.dev/apimachinery v0.30.0-rc.1
 	sigs.k8s.io/controller-runtime v0.13.1
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3
 )

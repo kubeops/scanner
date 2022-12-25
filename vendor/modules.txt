@@ -1597,7 +1597,7 @@ kmodules.xyz/custom-resources/apis/auditor
 kmodules.xyz/custom-resources/apis/auditor/v1alpha1
 kmodules.xyz/custom-resources/crds
 kmodules.xyz/custom-resources/util/siteinfo
-# kmodules.xyz/go-containerregistry v0.0.2
+# kmodules.xyz/go-containerregistry v0.0.3
 ## explicit; go 1.18
 kmodules.xyz/go-containerregistry/name
 # kmodules.xyz/offshoot-api v0.25.0
@@ -1616,7 +1616,7 @@ kmodules.xyz/resource-metrics/batch/v1
 kmodules.xyz/resource-metrics/batch/v1beta1
 kmodules.xyz/resource-metrics/core/v1
 kmodules.xyz/resource-metrics/kubedb.com/v1alpha2
-# kubedb.dev/apimachinery v0.29.2-0.20221208220920-b95282830fee
+# kubedb.dev/apimachinery v0.30.0-rc.1
 ## explicit; go 1.18
 kubedb.dev/apimachinery/apis
 kubedb.dev/apimachinery/apis/catalog

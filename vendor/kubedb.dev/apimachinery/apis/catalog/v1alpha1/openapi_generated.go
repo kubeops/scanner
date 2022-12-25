@@ -368,9 +368,12 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"kmodules.xyz/client-go/api/v1.ClusterMetadata":                                            schema_kmodulesxyz_client_go_api_v1_ClusterMetadata(ref),
 		"kmodules.xyz/client-go/api/v1.Condition":                                                  schema_kmodulesxyz_client_go_api_v1_Condition(ref),
 		"kmodules.xyz/client-go/api/v1.HealthCheckSpec":                                            schema_kmodulesxyz_client_go_api_v1_HealthCheckSpec(ref),
+		"kmodules.xyz/client-go/api/v1.ImageInfo":                                                  schema_kmodulesxyz_client_go_api_v1_ImageInfo(ref),
+		"kmodules.xyz/client-go/api/v1.Lineage":                                                    schema_kmodulesxyz_client_go_api_v1_Lineage(ref),
 		"kmodules.xyz/client-go/api/v1.ObjectID":                                                   schema_kmodulesxyz_client_go_api_v1_ObjectID(ref),
 		"kmodules.xyz/client-go/api/v1.ObjectInfo":                                                 schema_kmodulesxyz_client_go_api_v1_ObjectInfo(ref),
 		"kmodules.xyz/client-go/api/v1.ObjectReference":                                            schema_kmodulesxyz_client_go_api_v1_ObjectReference(ref),
+		"kmodules.xyz/client-go/api/v1.PullSecrets":                                                schema_kmodulesxyz_client_go_api_v1_PullSecrets(ref),
 		"kmodules.xyz/client-go/api/v1.ReadonlyHealthCheckSpec":                                    schema_kmodulesxyz_client_go_api_v1_ReadonlyHealthCheckSpec(ref),
 		"kmodules.xyz/client-go/api/v1.ResourceID":                                                 schema_kmodulesxyz_client_go_api_v1_ResourceID(ref),
 		"kmodules.xyz/client-go/api/v1.TLSConfig":                                                  schema_kmodulesxyz_client_go_api_v1_TLSConfig(ref),
@@ -435,6 +438,11 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"kubedb.dev/apimachinery/apis/catalog/v1alpha1.EtcdVersionExporter":                        schema_apimachinery_apis_catalog_v1alpha1_EtcdVersionExporter(ref),
 		"kubedb.dev/apimachinery/apis/catalog/v1alpha1.EtcdVersionList":                            schema_apimachinery_apis_catalog_v1alpha1_EtcdVersionList(ref),
 		"kubedb.dev/apimachinery/apis/catalog/v1alpha1.EtcdVersionSpec":                            schema_apimachinery_apis_catalog_v1alpha1_EtcdVersionSpec(ref),
+		"kubedb.dev/apimachinery/apis/catalog/v1alpha1.KafkaVersion":                               schema_apimachinery_apis_catalog_v1alpha1_KafkaVersion(ref),
+		"kubedb.dev/apimachinery/apis/catalog/v1alpha1.KafkaVersionDatabase":                       schema_apimachinery_apis_catalog_v1alpha1_KafkaVersionDatabase(ref),
+		"kubedb.dev/apimachinery/apis/catalog/v1alpha1.KafkaVersionList":                           schema_apimachinery_apis_catalog_v1alpha1_KafkaVersionList(ref),
+		"kubedb.dev/apimachinery/apis/catalog/v1alpha1.KafkaVersionPodSecurityPolicy":              schema_apimachinery_apis_catalog_v1alpha1_KafkaVersionPodSecurityPolicy(ref),
+		"kubedb.dev/apimachinery/apis/catalog/v1alpha1.KafkaVersionSpec":                           schema_apimachinery_apis_catalog_v1alpha1_KafkaVersionSpec(ref),
 		"kubedb.dev/apimachinery/apis/catalog/v1alpha1.MariaDBVersion":                             schema_apimachinery_apis_catalog_v1alpha1_MariaDBVersion(ref),
 		"kubedb.dev/apimachinery/apis/catalog/v1alpha1.MariaDBVersionCoordinator":                  schema_apimachinery_apis_catalog_v1alpha1_MariaDBVersionCoordinator(ref),
 		"kubedb.dev/apimachinery/apis/catalog/v1alpha1.MariaDBVersionDatabase":                     schema_apimachinery_apis_catalog_v1alpha1_MariaDBVersionDatabase(ref),
@@ -18206,6 +18214,86 @@ func schema_kmodulesxyz_client_go_api_v1_HealthCheckSpec(ref common.ReferenceCal
 	}
 }
 
+func schema_kmodulesxyz_client_go_api_v1_ImageInfo(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"image": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"lineages": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("kmodules.xyz/client-go/api/v1.Lineage"),
+									},
+								},
+							},
+						},
+					},
+					"pullSecrets": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("kmodules.xyz/client-go/api/v1.PullSecrets"),
+						},
+					},
+				},
+				Required: []string{"pullSecrets"},
+			},
+		},
+		Dependencies: []string{
+			"kmodules.xyz/client-go/api/v1.Lineage", "kmodules.xyz/client-go/api/v1.PullSecrets"},
+	}
+}
+
+func schema_kmodulesxyz_client_go_api_v1_Lineage(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"chain": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("kmodules.xyz/client-go/api/v1.ObjectInfo"),
+									},
+								},
+							},
+						},
+					},
+					"containers": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"kmodules.xyz/client-go/api/v1.ObjectInfo"},
+	}
+}
+
 func schema_kmodulesxyz_client_go_api_v1_ObjectID(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -18298,6 +18386,39 @@ func schema_kmodulesxyz_client_go_api_v1_ObjectReference(ref common.ReferenceCal
 	}
 }
 
+func schema_kmodulesxyz_client_go_api_v1_PullSecrets(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"namespace": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"refs": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("k8s.io/api/core/v1.LocalObjectReference"),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/api/core/v1.LocalObjectReference"},
+	}
+}
+
 func schema_kmodulesxyz_client_go_api_v1_ReadonlyHealthCheckSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -18348,15 +18469,13 @@ func schema_kmodulesxyz_client_go_api_v1_ResourceID(ref common.ReferenceCallback
 					},
 					"version": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Type:   []string{"string"},
+							Format: "",
 						},
 					},
 					"name": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Name is the plural name of the resource to serve.  It must match the name of the CustomResourceDefinition-registration too: plural.group and it must be all lowercase.",
-							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -18364,20 +18483,18 @@ func schema_kmodulesxyz_client_go_api_v1_ResourceID(ref common.ReferenceCallback
 					"kind": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Kind is the serialized kind of the resource.  It is normally CamelCase and singular.",
-							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 					"scope": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Type:   []string{"string"},
+							Format: "",
 						},
 					},
 				},
-				Required: []string{"group", "version", "name", "kind", "scope"},
+				Required: []string{"group"},
 			},
 		},
 	}
@@ -19400,8 +19517,9 @@ func schema_kmodulesxyz_objectstore_api_api_v1_AzureSpec(ref common.ReferenceCal
 				Properties: map[string]spec.Schema{
 					"container": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
 						},
 					},
 					"prefix": {
@@ -19417,6 +19535,7 @@ func schema_kmodulesxyz_objectstore_api_api_v1_AzureSpec(ref common.ReferenceCal
 						},
 					},
 				},
+				Required: []string{"container"},
 			},
 		},
 	}
@@ -19430,8 +19549,9 @@ func schema_kmodulesxyz_objectstore_api_api_v1_B2Spec(ref common.ReferenceCallba
 				Properties: map[string]spec.Schema{
 					"bucket": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
 						},
 					},
 					"prefix": {
@@ -19447,6 +19567,7 @@ func schema_kmodulesxyz_objectstore_api_api_v1_B2Spec(ref common.ReferenceCallba
 						},
 					},
 				},
+				Required: []string{"bucket"},
 			},
 		},
 	}
@@ -19515,8 +19636,9 @@ func schema_kmodulesxyz_objectstore_api_api_v1_GCSSpec(ref common.ReferenceCallb
 				Properties: map[string]spec.Schema{
 					"bucket": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
 						},
 					},
 					"prefix": {
@@ -19532,6 +19654,7 @@ func schema_kmodulesxyz_objectstore_api_api_v1_GCSSpec(ref common.ReferenceCallb
 						},
 					},
 				},
+				Required: []string{"bucket"},
 			},
 		},
 	}
@@ -19719,8 +19842,9 @@ func schema_kmodulesxyz_objectstore_api_api_v1_LocalSpec(ref common.ReferenceCal
 					},
 					"mountPath": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
 						},
 					},
 					"subPath": {
@@ -19730,6 +19854,7 @@ func schema_kmodulesxyz_objectstore_api_api_v1_LocalSpec(ref common.ReferenceCal
 						},
 					},
 				},
+				Required: []string{"mountPath"},
 			},
 		},
 		Dependencies: []string{
@@ -19763,14 +19888,16 @@ func schema_kmodulesxyz_objectstore_api_api_v1_S3Spec(ref common.ReferenceCallba
 				Properties: map[string]spec.Schema{
 					"endpoint": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
 						},
 					},
 					"bucket": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
 						},
 					},
 					"prefix": {
@@ -19786,6 +19913,7 @@ func schema_kmodulesxyz_objectstore_api_api_v1_S3Spec(ref common.ReferenceCallba
 						},
 					},
 				},
+				Required: []string{"endpoint", "bucket"},
 			},
 		},
 	}
@@ -19799,8 +19927,9 @@ func schema_kmodulesxyz_objectstore_api_api_v1_SwiftSpec(ref common.ReferenceCal
 				Properties: map[string]spec.Schema{
 					"container": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
 						},
 					},
 					"prefix": {
@@ -19810,6 +19939,7 @@ func schema_kmodulesxyz_objectstore_api_api_v1_SwiftSpec(ref common.ReferenceCal
 						},
 					},
 				},
+				Required: []string{"container"},
 			},
 		},
 	}
@@ -21390,6 +21520,196 @@ func schema_apimachinery_apis_catalog_v1alpha1_EtcdVersionSpec(ref common.Refere
 		},
 		Dependencies: []string{
 			"kmodules.xyz/custom-resources/apis/appcatalog/v1alpha1.StashAddonSpec", "kubedb.dev/apimachinery/apis/catalog/v1alpha1.EtcdVersionDatabase", "kubedb.dev/apimachinery/apis/catalog/v1alpha1.EtcdVersionExporter"},
+	}
+}
+
+func schema_apimachinery_apis_catalog_v1alpha1_KafkaVersion(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
+						},
+					},
+					"spec": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("kubedb.dev/apimachinery/apis/catalog/v1alpha1.KafkaVersionSpec"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta", "kubedb.dev/apimachinery/apis/catalog/v1alpha1.KafkaVersionSpec"},
+	}
+}
+
+func schema_apimachinery_apis_catalog_v1alpha1_KafkaVersionDatabase(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "KafkaVersionDatabase is the Kafka Database image",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"image": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+				},
+				Required: []string{"image"},
+			},
+		},
+	}
+}
+
+func schema_apimachinery_apis_catalog_v1alpha1_KafkaVersionList(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "KafkaVersionList is a list of KafkaVersions",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"),
+						},
+					},
+					"items": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Items is a list of RedisVersion CRD objects",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("kubedb.dev/apimachinery/apis/catalog/v1alpha1.KafkaVersion"),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta", "kubedb.dev/apimachinery/apis/catalog/v1alpha1.KafkaVersion"},
+	}
+}
+
+func schema_apimachinery_apis_catalog_v1alpha1_KafkaVersionPodSecurityPolicy(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "KafkaVersionPodSecurityPolicy is the Kafka pod security policies",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"databasePolicyName": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+				},
+				Required: []string{"databasePolicyName"},
+			},
+		},
+	}
+}
+
+func schema_apimachinery_apis_catalog_v1alpha1_KafkaVersionSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "KafkaVersionSpec is the spec for kafka version",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"version": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Version",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"db": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Database Image",
+							Default:     map[string]interface{}{},
+							Ref:         ref("kubedb.dev/apimachinery/apis/catalog/v1alpha1.KafkaVersionDatabase"),
+						},
+					},
+					"deprecated": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Deprecated versions usable but regarded as obsolete and best avoided, typically due to having been superseded.",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+					"podSecurityPolicies": {
+						SchemaProps: spec.SchemaProps{
+							Description: "PSP names",
+							Default:     map[string]interface{}{},
+							Ref:         ref("kubedb.dev/apimachinery/apis/catalog/v1alpha1.KafkaVersionPodSecurityPolicy"),
+						},
+					},
+					"stash": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Stash defines backup and restore task definitions.",
+							Default:     map[string]interface{}{},
+							Ref:         ref("kmodules.xyz/custom-resources/apis/appcatalog/v1alpha1.StashAddonSpec"),
+						},
+					},
+					"upgradeConstraints": {
+						SchemaProps: spec.SchemaProps{
+							Description: "upgrade constraints",
+							Default:     map[string]interface{}{},
+							Ref:         ref("kubedb.dev/apimachinery/apis/catalog/v1alpha1.UpgradeConstraints"),
+						},
+					},
+				},
+				Required: []string{"version", "db"},
+			},
+		},
+		Dependencies: []string{
+			"kmodules.xyz/custom-resources/apis/appcatalog/v1alpha1.StashAddonSpec", "kubedb.dev/apimachinery/apis/catalog/v1alpha1.KafkaVersionDatabase", "kubedb.dev/apimachinery/apis/catalog/v1alpha1.KafkaVersionPodSecurityPolicy", "kubedb.dev/apimachinery/apis/catalog/v1alpha1.UpgradeConstraints"},
 	}
 }
 
