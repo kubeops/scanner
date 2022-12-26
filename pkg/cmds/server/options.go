@@ -57,9 +57,6 @@ func NewExtraOptions() *ExtraOptions {
 		NATSAddr:             "this-is-nats.appcode.ninja:4222",
 		FileServerPathPrefix: "files",
 		FileServerFilesDir:   "/var/data/files",
-		ScannerImage:         "appscode/scanner:extend_linux_amd64",
-		TrivyDBCacherImage:   "appscode/trivydb:0.0.1",
-		FileServerAddr:       "scanner-0.kubeops.svc",
 	}
 }
 
@@ -73,11 +70,12 @@ func (s *ExtraOptions) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVar(&s.NATSAddr, "nats-addr", s.NATSAddr, "NATS serve address")
 	fs.StringVar(&s.NATSCredFile, "nats-credential-file", s.NATSCredFile, "PATH to NATS credential file")
 
+	fs.StringVar(&s.FileServerAddr, "file-server-addr", s.FileServerAddr, "The fileserver address to get the trivydb tar file")
 	fs.StringVar(&s.FileServerPathPrefix, "file-server-path-prefix", s.FileServerPathPrefix, "URL prefix for file server")
 	fs.StringVar(&s.FileServerFilesDir, "file-server-files-dir", s.FileServerFilesDir, "Dir used to store user uploaded files")
+
 	fs.StringVar(&s.ScannerImage, "scanner-image", s.ScannerImage, "The image that is being used on scanner operator")
 	fs.StringVar(&s.TrivyDBCacherImage, "trivydb-cacher-image", s.TrivyDBCacherImage, "The image that is being used for TrivyDB caching")
-	fs.StringVar(&s.FileServerAddr, "fileserver-addr", s.FileServerAddr, "The fileserver address to get the trivydb tar file")
 }
 
 func (s *ExtraOptions) ApplyTo(cfg *apiserver.ExtraConfig) error {
