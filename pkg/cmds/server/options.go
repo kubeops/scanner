@@ -44,7 +44,10 @@ type ExtraOptions struct {
 	FileServerPathPrefix string
 	FileServerFilesDir   string
 
-	ScannerImage string
+	ScannerImage       string
+	TrivyDBCacherImage string
+	FileServerAddr     string
+	ScanInCluster      bool
 }
 
 func NewExtraOptions() *ExtraOptions {
@@ -55,7 +58,6 @@ func NewExtraOptions() *ExtraOptions {
 		NATSAddr:             "this-is-nats.appcode.ninja:4222",
 		FileServerPathPrefix: "files",
 		FileServerFilesDir:   "/var/data/files",
-		ScannerImage:         "appscode/scanner:extend_linux_amd64",
 	}
 }
 
@@ -69,9 +71,13 @@ func (s *ExtraOptions) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVar(&s.NATSAddr, "nats-addr", s.NATSAddr, "NATS serve address")
 	fs.StringVar(&s.NATSCredFile, "nats-credential-file", s.NATSCredFile, "PATH to NATS credential file")
 
+	fs.StringVar(&s.FileServerAddr, "file-server-addr", s.FileServerAddr, "The fileserver address to get the trivydb tar file")
 	fs.StringVar(&s.FileServerPathPrefix, "file-server-path-prefix", s.FileServerPathPrefix, "URL prefix for file server")
 	fs.StringVar(&s.FileServerFilesDir, "file-server-files-dir", s.FileServerFilesDir, "Dir used to store user uploaded files")
+
 	fs.StringVar(&s.ScannerImage, "scanner-image", s.ScannerImage, "The image that is being used on scanner operator")
+	fs.StringVar(&s.TrivyDBCacherImage, "trivydb-cacher-image", s.TrivyDBCacherImage, "The image that is being used for TrivyDB caching")
+	fs.BoolVar(&s.ScanInCluster, "scan-public-image-incluster", s.ScanInCluster, "If true public images will be scanned in cluster. Set true for air-gaped cluster")
 }
 
 func (s *ExtraOptions) ApplyTo(cfg *apiserver.ExtraConfig) error {
@@ -82,6 +88,8 @@ func (s *ExtraOptions) ApplyTo(cfg *apiserver.ExtraConfig) error {
 	cfg.FileServerPathPrefix = s.FileServerPathPrefix
 	cfg.FileServerFilesDir = s.FileServerFilesDir
 	cfg.ScannerImage = s.ScannerImage
+	cfg.TrivyDBCacherImage = s.TrivyDBCacherImage
+	cfg.FileServerAddr = s.FileServerAddr
 	cfg.ClientConfig.QPS = float32(s.QPS)
 	cfg.ClientConfig.Burst = s.Burst
 	cfg.ResyncPeriod = s.ResyncPeriod
