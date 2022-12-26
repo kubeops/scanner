@@ -2650,8 +2650,8 @@ k8s.io/utils v0.0.0-20221012122500-cfd413dd9e85 h1:cTdVh7LYu82xeClmfzGtgyspNh6Ux
 k8s.io/utils v0.0.0-20221012122500-cfd413dd9e85/go.mod h1:OLgZIPagt7ERELqWJFomSt595RzquPNLL48iOWgYOg0=
 kmodules.xyz/apiversion v0.2.0 h1:vAQYqZFm4xu4pbB1cAdHbFEPES6EQkcR4wc06xdTOWk=
 kmodules.xyz/apiversion v0.2.0/go.mod h1:oPX8g8LvlPdPX3Yc5YvCzJHQnw3YF/X4/jdW0b1am80=
-kmodules.xyz/client-go v0.25.14 h1:8znhvnL73etOVeTGNcSQjqOAt5bK9vxin9dZPQUNtA4=
-kmodules.xyz/client-go v0.25.14/go.mod h1:PG0s5FqmCvIKXudUhaJELBVbKbX6ESoefVR1cibkl+0=
+kmodules.xyz/client-go v0.25.15-0.20221226125558-8ae1b6114bb2 h1:mbmR3iOes+1zcBSu7uUNrp9tEXlDnf4bvkRsdKXFiLw=
+kmodules.xyz/client-go v0.25.15-0.20221226125558-8ae1b6114bb2/go.mod h1:PG0s5FqmCvIKXudUhaJELBVbKbX6ESoefVR1cibkl+0=
 kmodules.xyz/custom-resources v0.25.1 h1:0qHPTxbT/q0afl2GCOnwPFaoxKziRIPXgVu77YwrCa4=
 kmodules.xyz/custom-resources v0.25.1/go.mod h1:ULwzvLmOqZJcPSXKI7iLclYL5eYRlKx8Nbex28Ht19E=
 kmodules.xyz/go-containerregistry v0.0.3 h1:0MzOIRxsbNYFaPZpkzbmmwclBQhYlSg17uli6Do0LkA=
