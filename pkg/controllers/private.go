@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	"crypto/md5"
 	"fmt"
 
 	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
@@ -66,8 +67,8 @@ func (r *Reconciler) ScanForPrivateImage(isr api.ImageScanRequest) error {
 			APIVersion: batch.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: ScannerJobName + "-",
-			Namespace:    isr.Spec.Namespace,
+			Name:      fmt.Sprintf("%s-%x", ScannerJobName, md5.Sum([]byte(isr.Spec.Image))),
+			Namespace: isr.Spec.Namespace,
 		},
 	}, func(obj client.Object, createOp bool) client.Object {
 		job := obj.(*batch.Job)
@@ -134,6 +135,9 @@ func (r *Reconciler) ScanForPrivateImage(isr api.ImageScanRequest) error {
 		job.Spec.Template.Spec.AutomountServiceAccountToken = pointer.Bool(true)
 		job.Spec.Template.Spec.RestartPolicy = core.RestartPolicyNever
 		job.Spec.Template.Spec.ImagePullSecrets = isr.Spec.PullSecrets
+		if isr.Spec.ServiceAccountName != "" {
+			job.Spec.Template.Spec.ServiceAccountName = isr.Spec.ServiceAccountName
+		}
 		job.Spec.TTLSecondsAfterFinished = pointer.Int32(600)
 		return job
 	})
