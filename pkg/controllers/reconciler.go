@@ -33,16 +33,20 @@ import (
 
 type Reconciler struct {
 	client.Client
-	ctx          context.Context
-	nc           *nats.Conn
-	scannerImage string
+	ctx                context.Context
+	nc                 *nats.Conn
+	scannerImage       string
+	trivyDBCacherImage string
+	fileServerAddr     string
 }
 
-func NewImageScanRequestReconciler(kc client.Client, nc *nats.Conn, scannedImage string) *Reconciler {
+func NewImageScanRequestReconciler(kc client.Client, nc *nats.Conn, scannedImage, trivyDBCacherImage, fsAddr string) *Reconciler {
 	return &Reconciler{
-		Client:       kc,
-		nc:           nc,
-		scannerImage: scannedImage,
+		Client:             kc,
+		nc:                 nc,
+		scannerImage:       scannedImage,
+		trivyDBCacherImage: trivyDBCacherImage,
+		fileServerAddr:     fsAddr,
 	}
 }
 

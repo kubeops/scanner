@@ -52,6 +52,10 @@ spec:
                   type: object
                   x-kubernetes-map-type: atomic
                 type: array
+              serviceAccountName:
+                description: ServiceAccountName is the name of SA used on the pod
+                  where this image has been used
+                type: string
             required:
             - image
             type: object

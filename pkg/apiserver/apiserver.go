@@ -99,6 +99,8 @@ type ExtraConfig struct {
 	FileServerPathPrefix string
 	FileServerFilesDir   string
 	ScannerImage         string
+	TrivyDBCacherImage   string
+	FileServerAddr       string
 }
 
 func (c ExtraConfig) LicenseProvided() bool {
@@ -219,7 +221,8 @@ func (c completedConfig) New(ctx context.Context) (*ScannerServer, error) {
 		}
 	}
 
-	if err = (controllers.NewImageScanRequestReconciler(mgr.GetClient(), nc, c.ExtraConfig.ScannerImage)).SetupWithManager(mgr); err != nil {
+	if err = (controllers.NewImageScanRequestReconciler(mgr.GetClient(), nc, c.ExtraConfig.ScannerImage,
+		c.ExtraConfig.TrivyDBCacherImage, c.ExtraConfig.FileServerAddr)).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "ImageScanRequest")
 		os.Exit(1)
 	}

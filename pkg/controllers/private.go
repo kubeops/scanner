@@ -66,8 +66,8 @@ func (r *Reconciler) ScanForPrivateImage(isr api.ImageScanRequest) error {
 			APIVersion: batch.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      ScannerJobName,
-			Namespace: isr.Spec.Namespace,
+			GenerateName: ScannerJobName + "-",
+			Namespace:    isr.Spec.Namespace,
 		},
 	}, func(obj client.Object, createOp bool) client.Object {
 		job := obj.(*batch.Job)
@@ -91,12 +91,18 @@ func (r *Reconciler) ScanForPrivateImage(isr api.ImageScanRequest) error {
 				},
 				{
 					Name:       NatsCLIImageName,
-					Image:      NatsCLIImage,
+					Image:      r.trivyDBCacherImage,
 					WorkingDir: WorkDir,
 					Command: []string{
 						"/scripts/extract.sh",
 					},
 					ImagePullPolicy: core.PullIfNotPresent,
+					Env: []core.EnvVar{
+						{
+							Name:  "FILESERVER_ADDR",
+							Value: r.fileServerAddr,
+						},
+					},
 				},
 				{
 					Name:       UserImageName,
@@ -125,6 +131,7 @@ func (r *Reconciler) ScanForPrivateImage(isr api.ImageScanRequest) error {
 			})
 			ensureVolumeMounts(&job.Spec.Template)
 		}
+		job.Spec.Template.Spec.AutomountServiceAccountToken = pointer.Bool(true)
 		job.Spec.Template.Spec.RestartPolicy = core.RestartPolicyNever
 		job.Spec.Template.Spec.ImagePullSecrets = isr.Spec.PullSecrets
 		job.Spec.TTLSecondsAfterFinished = pointer.Int32(600)
