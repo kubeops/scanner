@@ -47,6 +47,7 @@ type ExtraOptions struct {
 	ScannerImage       string
 	TrivyDBCacherImage string
 	FileServerAddr     string
+	ScanInCluster      bool
 }
 
 func NewExtraOptions() *ExtraOptions {
@@ -76,6 +77,7 @@ func (s *ExtraOptions) AddFlags(fs *pflag.FlagSet) {
 
 	fs.StringVar(&s.ScannerImage, "scanner-image", s.ScannerImage, "The image that is being used on scanner operator")
 	fs.StringVar(&s.TrivyDBCacherImage, "trivydb-cacher-image", s.TrivyDBCacherImage, "The image that is being used for TrivyDB caching")
+	fs.BoolVar(&s.ScanInCluster, "scan-public-image-incluster", s.ScanInCluster, "If true public images will be scanned in cluster. Set true for air-gaped cluster")
 }
 
 func (s *ExtraOptions) ApplyTo(cfg *apiserver.ExtraConfig) error {
