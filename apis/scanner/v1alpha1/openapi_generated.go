@@ -18005,6 +18005,13 @@ func schema_scanner_apis_scanner_v1alpha1_ImageScanRequestStatus(ref common.Refe
 							Ref: ref("kubeops.dev/scanner/apis/scanner/v1alpha1.ScanReportRef"),
 						},
 					},
+					"jobName": {
+						SchemaProps: spec.SchemaProps{
+							Description: "For Private Images, this field holds the job name created (in .spec.namespace) for scanning.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 					"reason": {
 						SchemaProps: spec.SchemaProps{
 							Description: "A brief CamelCase message indicating details about why the request is in this state.",

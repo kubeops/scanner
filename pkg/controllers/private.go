@@ -31,6 +31,7 @@ import (
 	kutil "kmodules.xyz/client-go"
 	cu "kmodules.xyz/client-go/client"
 	core_util "kmodules.xyz/client-go/core/v1"
+	coreutil "kmodules.xyz/client-go/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -42,7 +43,6 @@ const (
 	WorkDir          = "/root/.cache"
 
 	NatsCLIImageName  = "trivydb"
-	NatsCLIImage      = "appscode/trivydb:0.0.1"
 	UserImageName     = "scanner"
 	UploaderImageName = "uploader"
 )
@@ -73,6 +73,9 @@ func (r *Reconciler) ScanForPrivateImage(isr api.ImageScanRequest) error {
 	}, func(obj client.Object, createOp bool) client.Object {
 		job := obj.(*batch.Job)
 		if createOp {
+			// set the Owner reference to the created job
+			coreutil.EnsureOwnerReference(&job.ObjectMeta, metav1.NewControllerRef(&isr, api.SchemeGroupVersion.WithKind(isr.Kind)))
+
 			job.Spec.Template.Spec.Volumes = core_util.UpsertVolume(job.Spec.Template.Spec.Volumes, core.Volume{
 				Name: SharedVolumeName,
 				VolumeSource: core.VolumeSource{
@@ -147,5 +150,5 @@ func (r *Reconciler) ScanForPrivateImage(isr api.ImageScanRequest) error {
 	if vt == kutil.VerbCreated {
 		klog.Infof("Scanner job %v/%v created", obj.GetNamespace(), obj.GetName())
 	}
-	return nil
+	return r.updateStatusWithJobName(isr, obj.GetName(), vt)
 }

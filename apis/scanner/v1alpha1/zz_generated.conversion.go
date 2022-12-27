@@ -388,6 +388,7 @@ func autoConvert_v1alpha1_ImageScanRequestStatus_To_scanner_ImageScanRequestStat
 	out.Phase = scanner.ImageScanRequestPhase(in.Phase)
 	out.Image = (*scanner.ImageDetails)(unsafe.Pointer(in.Image))
 	out.ReportRef = (*scanner.ScanReportRef)(unsafe.Pointer(in.ReportRef))
+	out.JobName = in.JobName
 	out.Reason = in.Reason
 	return nil
 }
@@ -402,6 +403,7 @@ func autoConvert_scanner_ImageScanRequestStatus_To_v1alpha1_ImageScanRequestStat
 	out.Phase = ImageScanRequestPhase(in.Phase)
 	out.Image = (*ImageDetails)(unsafe.Pointer(in.Image))
 	out.ReportRef = (*ScanReportRef)(unsafe.Pointer(in.ReportRef))
+	out.JobName = in.JobName
 	out.Reason = in.Reason
 	return nil
 }
