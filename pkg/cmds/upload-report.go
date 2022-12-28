@@ -17,6 +17,7 @@ limitations under the License.
 package cmds
 
 import (
+	"context"
 	"os"
 
 	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
@@ -24,10 +25,12 @@ import (
 	"kubeops.dev/scanner/pkg/controllers"
 
 	"github.com/spf13/cobra"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/klog/v2"
 	"k8s.io/klog/v2/klogr"
+	cu "kmodules.xyz/client-go/client"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
@@ -85,6 +88,11 @@ func uploadReport(imageRef, trivyFile, reportFile string) error {
 	}
 
 	_, err = controllers.EnsureScanReport(kc, imageRef, actualReport, ver)
+	if err != nil {
+		return err
+	}
+
+	err = upsertCVEs(kc, actualReport)
 	return err
 }
 
@@ -119,4 +127,31 @@ func NewClient() (client.Client, error) {
 		Scheme: scheme,
 		Mapper: mapper,
 	})
+}
+
+func upsertCVEs(kc client.Client, r trivy.SingleReport) error {
+	vuls := map[string]trivy.Vulnerability{}
+
+	for _, rpt := range r.Results {
+		for _, tv := range rpt.Vulnerabilities {
+			vuls[tv.VulnerabilityID] = tv
+		}
+	}
+
+	for _, vul := range vuls {
+		_, vt, err := cu.CreateOrPatch(context.TODO(), kc, &api.Vulnerability{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: vul.VulnerabilityID,
+			},
+		}, func(o client.Object, createOp bool) client.Object {
+			obj := o.(*api.Vulnerability)
+			obj.Spec.Vulnerability = vul
+			return obj
+		})
+		if err != nil {
+			return err
+		}
+		klog.Infof("Vulnerability %s has been %s\n", vul.VulnerabilityID, vt)
+	}
+	return nil
 }

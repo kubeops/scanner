@@ -25,3 +25,7 @@ type ImageScanReportListerExpansion interface{}
 // ImageScanRequestListerExpansion allows custom methods to be added to
 // ImageScanRequestLister.
 type ImageScanRequestListerExpansion interface{}
+
+// VulnerabilityListerExpansion allows custom methods to be added to
+// VulnerabilityLister.
+type VulnerabilityListerExpansion interface{}

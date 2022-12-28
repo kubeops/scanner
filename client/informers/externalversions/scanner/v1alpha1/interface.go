@@ -28,6 +28,8 @@ type Interface interface {
 	ImageScanReports() ImageScanReportInformer
 	// ImageScanRequests returns a ImageScanRequestInformer.
 	ImageScanRequests() ImageScanRequestInformer
+	// Vulnerabilities returns a VulnerabilityInformer.
+	Vulnerabilities() VulnerabilityInformer
 }
 
 type version struct {
@@ -49,4 +51,9 @@ func (v *version) ImageScanReports() ImageScanReportInformer {
 // ImageScanRequests returns a ImageScanRequestInformer.
 func (v *version) ImageScanRequests() ImageScanRequestInformer {
 	return &imageScanRequestInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
+}
+
+// Vulnerabilities returns a VulnerabilityInformer.
+func (v *version) Vulnerabilities() VulnerabilityInformer {
+	return &vulnerabilityInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
 }

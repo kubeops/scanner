@@ -31,6 +31,7 @@ import (
 	"kubeops.dev/scanner/pkg/fileserver"
 	reportstorage "kubeops.dev/scanner/pkg/registry/scanner/report"
 	requeststorage "kubeops.dev/scanner/pkg/registry/scanner/request"
+	cvestorage "kubeops.dev/scanner/pkg/registry/scanner/vulnerability"
 
 	"github.com/nats-io/nats.go"
 	auditlib "go.bytebuilders.dev/audit/lib"
@@ -253,6 +254,14 @@ func (c completedConfig) New(ctx context.Context) (*ScannerServer, error) {
 			}
 			v1alpha1storage[api.ResourceImageScanReports] = storage.Controller
 			v1alpha1storage[api.ResourceImageScanReports+"/status"] = storage.Status
+		}
+		{
+			storage, err := cvestorage.NewStorage(Scheme, c.GenericConfig.RESTOptionsGetter)
+			if err != nil {
+				return nil, err
+			}
+			v1alpha1storage[api.ResourceVulnerabilities] = storage.Controller
+			v1alpha1storage[api.ResourceVulnerabilities+"/status"] = storage.Status
 		}
 		apiGroupInfo.VersionedResourcesStorageMap["v1alpha1"] = v1alpha1storage
 

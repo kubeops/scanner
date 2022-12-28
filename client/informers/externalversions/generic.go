@@ -57,6 +57,8 @@ func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Scanner().V1alpha1().ImageScanReports().Informer()}, nil
 	case v1alpha1.SchemeGroupVersion.WithResource("imagescanrequests"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Scanner().V1alpha1().ImageScanRequests().Informer()}, nil
+	case v1alpha1.SchemeGroupVersion.WithResource("vulnerabilities"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Scanner().V1alpha1().Vulnerabilities().Informer()}, nil
 
 	}
 

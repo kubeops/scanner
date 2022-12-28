@@ -30,6 +30,7 @@ type ScannerV1alpha1Interface interface {
 	RESTClient() rest.Interface
 	ImageScanReportsGetter
 	ImageScanRequestsGetter
+	VulnerabilitiesGetter
 }
 
 // ScannerV1alpha1Client is used to interact with features provided by the scanner.appscode.com group.
@@ -43,6 +44,10 @@ func (c *ScannerV1alpha1Client) ImageScanReports() ImageScanReportInterface {
 
 func (c *ScannerV1alpha1Client) ImageScanRequests() ImageScanRequestInterface {
 	return newImageScanRequests(c)
+}
+
+func (c *ScannerV1alpha1Client) Vulnerabilities() VulnerabilityInterface {
+	return newVulnerabilities(c)
 }
 
 // NewForConfig creates a new ScannerV1alpha1Client for the given config.

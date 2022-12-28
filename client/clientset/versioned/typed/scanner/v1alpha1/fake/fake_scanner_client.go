@@ -36,6 +36,10 @@ func (c *FakeScannerV1alpha1) ImageScanRequests() v1alpha1.ImageScanRequestInter
 	return &FakeImageScanRequests{c}
 }
 
+func (c *FakeScannerV1alpha1) Vulnerabilities() v1alpha1.VulnerabilityInterface {
+	return &FakeVulnerabilities{c}
+}
+
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
 func (c *FakeScannerV1alpha1) RESTClient() rest.Interface {
