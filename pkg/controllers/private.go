@@ -114,6 +114,12 @@ func (r *Reconciler) ScanForPrivateImage(isr api.ImageScanRequest) error {
 						"-c",
 						"./tv rootfs --skip-update --security-checks vuln --format json / > report.json && ./tv version --format json > trivy.json",
 					},
+					SecurityContext: &core.SecurityContext{
+						RunAsUser:              pointer.Int64(0),
+						RunAsGroup:             pointer.Int64(0),
+						RunAsNonRoot:           nil,
+						ReadOnlyRootFilesystem: pointer.Bool(true),
+					},
 					ImagePullPolicy: core.PullIfNotPresent,
 				},
 			})
