@@ -45,6 +45,7 @@ type ExtraOptions struct {
 	FileServerFilesDir   string
 
 	ScannerImage       string
+	TrivyImage         string
 	TrivyDBCacherImage string
 	FileServerAddr     string
 	ScanInCluster      bool
@@ -58,6 +59,7 @@ func NewExtraOptions() *ExtraOptions {
 		NATSAddr:             "this-is-nats.appcode.ninja:4222",
 		FileServerPathPrefix: "files",
 		FileServerFilesDir:   "/var/data/files",
+		TrivyImage:           "aquasec/trivy",
 	}
 }
 
@@ -75,8 +77,9 @@ func (s *ExtraOptions) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVar(&s.FileServerPathPrefix, "file-server-path-prefix", s.FileServerPathPrefix, "URL prefix for file server")
 	fs.StringVar(&s.FileServerFilesDir, "file-server-files-dir", s.FileServerFilesDir, "Dir used to store user uploaded files")
 
-	fs.StringVar(&s.ScannerImage, "scanner-image", s.ScannerImage, "The image that is being used on scanner operator")
-	fs.StringVar(&s.TrivyDBCacherImage, "trivydb-cacher-image", s.TrivyDBCacherImage, "The image that is being used for TrivyDB caching")
+	fs.StringVar(&s.ScannerImage, "scanner-image", s.ScannerImage, "The image used to upload scan report")
+	fs.StringVar(&s.TrivyImage, "trivy-image", s.TrivyImage, "The image used for Trivy cli")
+	fs.StringVar(&s.TrivyDBCacherImage, "trivydb-cacher-image", s.TrivyDBCacherImage, "The image used for TrivyDB caching")
 	fs.BoolVar(&s.ScanInCluster, "scan-public-image-incluster", s.ScanInCluster, "If true public images will be scanned in cluster. Set true for air-gaped cluster")
 }
 
@@ -88,6 +91,7 @@ func (s *ExtraOptions) ApplyTo(cfg *apiserver.ExtraConfig) error {
 	cfg.FileServerPathPrefix = s.FileServerPathPrefix
 	cfg.FileServerFilesDir = s.FileServerFilesDir
 	cfg.ScannerImage = s.ScannerImage
+	cfg.TrivyImage = s.TrivyImage
 	cfg.TrivyDBCacherImage = s.TrivyDBCacherImage
 	cfg.FileServerAddr = s.FileServerAddr
 	cfg.ClientConfig.QPS = float32(s.QPS)
