@@ -43,15 +43,17 @@ type Reconciler struct {
 	ctx                context.Context
 	nc                 *nats.Conn
 	scannerImage       string
+	trivyImage         string
 	trivyDBCacherImage string
 	fileServerAddr     string
 }
 
-func NewImageScanRequestReconciler(kc client.Client, nc *nats.Conn, scannedImage, trivyDBCacherImage, fsAddr string) *Reconciler {
+func NewImageScanRequestReconciler(kc client.Client, nc *nats.Conn, scannedImage, trivyImage, trivyDBCacherImage, fsAddr string) *Reconciler {
 	return &Reconciler{
 		Client:             kc,
 		nc:                 nc,
 		scannerImage:       scannedImage,
+		trivyImage:         trivyImage,
 		trivyDBCacherImage: trivyDBCacherImage,
 		fileServerAddr:     fsAddr,
 	}

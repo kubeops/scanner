@@ -188,33 +188,19 @@ spec:
                           items:
                             properties:
                               cvss:
-                                properties:
-                                  nvd:
-                                    properties:
-                                      v2Score:
-                                        format: double
-                                        type: number
-                                      v2Vector:
-                                        type: string
-                                      v3Score:
-                                        format: double
-                                        type: number
-                                      v3Vector:
-                                        type: string
-                                    type: object
-                                  redhat:
-                                    properties:
-                                      v2Score:
-                                        format: double
-                                        type: number
-                                      v2Vector:
-                                        type: string
-                                      v3Score:
-                                        format: double
-                                        type: number
-                                      v3Vector:
-                                        type: string
-                                    type: object
+                                additionalProperties:
+                                  properties:
+                                    v2Score:
+                                      format: double
+                                      type: number
+                                    v2Vector:
+                                      type: string
+                                    v3Score:
+                                      format: double
+                                      type: number
+                                    v3Vector:
+                                      type: string
+                                  type: object
                                 type: object
                               cweIDs:
                                 items:
@@ -253,39 +239,6 @@ spec:
                                 items:
                                   type: string
                                 type: array
-                              results:
-                                items:
-                                  properties:
-                                    image:
-                                      type: string
-                                    targets:
-                                      items:
-                                        properties:
-                                          class:
-                                            type: string
-                                          installedVersion:
-                                            type: string
-                                          layer:
-                                            properties:
-                                              diffID:
-                                                type: string
-                                              digest:
-                                                type: string
-                                            required:
-                                            - diffID
-                                            type: object
-                                          target:
-                                            type: string
-                                          type:
-                                            type: string
-                                        required:
-                                        - class
-                                        - target
-                                        - type
-                                        type: object
-                                      type: array
-                                  type: object
-                                type: array
                               severity:
                                 type: string
                               severitySource:
@@ -300,7 +253,6 @@ spec:
                             - pkgName
                             - primaryURL
                             - references
-                            - results
                             - severity
                             - severitySource
                             - vulnerabilityID

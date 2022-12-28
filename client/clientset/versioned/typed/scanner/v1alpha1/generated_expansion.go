@@ -21,3 +21,5 @@ package v1alpha1
 type ImageScanReportExpansion interface{}
 
 type ImageScanRequestExpansion interface{}
+
+type VulnerabilityExpansion interface{}
