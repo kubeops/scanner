@@ -34,7 +34,7 @@ require (
 	k8s.io/klog/v2 v2.80.1
 	k8s.io/kube-openapi v0.0.0-20221012153701-172d655c2280
 	k8s.io/utils v0.0.0-20221012122500-cfd413dd9e85
-	kmodules.xyz/client-go v0.25.15-0.20221226125558-8ae1b6114bb2
+	kmodules.xyz/client-go v0.25.15-0.20221228092437-0612a8c1627c
 	kmodules.xyz/go-containerregistry v0.0.3
 	kubedb.dev/apimachinery v0.30.0-rc.1
 	sigs.k8s.io/controller-runtime v0.13.1

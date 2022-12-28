@@ -37,14 +37,12 @@ import (
 const (
 	ScannerJobName   = "scan-image"
 	SharedVolumeName = "shared-disk"
-	TrivyImageName   = "trivy"
-	TrivyImage       = "aquasec/trivy"
 	WorkDir          = "/root/.cache"
 
-	NatsCLIImageName  = "trivydb"
-	NatsCLIImage      = "appscode/trivydb:0.0.1"
-	UserImageName     = "scanner"
-	UploaderImageName = "uploader"
+	containerTrivyCLI = "trivy"
+	containerTrivyDB  = "trivydb"
+	containerScanner  = "scanner"
+	containerUploader = "uploader"
 )
 
 func (r *Reconciler) ScanForPrivateImage(isr api.ImageScanRequest) error {
@@ -81,8 +79,8 @@ func (r *Reconciler) ScanForPrivateImage(isr api.ImageScanRequest) error {
 			})
 			job.Spec.Template.Spec.InitContainers = core_util.UpsertContainers(job.Spec.Template.Spec.InitContainers, []core.Container{
 				{
-					Name:       TrivyImageName,
-					Image:      TrivyImage,
+					Name:       containerTrivyCLI,
+					Image:      r.trivyImage,
 					WorkingDir: WorkDir,
 					Command: []string{
 						"cp",
@@ -91,7 +89,7 @@ func (r *Reconciler) ScanForPrivateImage(isr api.ImageScanRequest) error {
 					},
 				},
 				{
-					Name:       NatsCLIImageName,
+					Name:       containerTrivyDB,
 					Image:      r.trivyDBCacherImage,
 					WorkingDir: WorkDir,
 					Command: []string{
@@ -106,7 +104,7 @@ func (r *Reconciler) ScanForPrivateImage(isr api.ImageScanRequest) error {
 					},
 				},
 				{
-					Name:       UserImageName,
+					Name:       containerScanner,
 					Image:      isr.Spec.Image,
 					WorkingDir: WorkDir,
 					Command: []string{
@@ -114,12 +112,18 @@ func (r *Reconciler) ScanForPrivateImage(isr api.ImageScanRequest) error {
 						"-c",
 						"./tv rootfs --skip-update --security-checks vuln --format json / > report.json && ./tv version --format json > trivy.json",
 					},
+					SecurityContext: &core.SecurityContext{
+						RunAsUser:              pointer.Int64(0),
+						RunAsGroup:             pointer.Int64(0),
+						RunAsNonRoot:           nil,
+						ReadOnlyRootFilesystem: pointer.Bool(true),
+					},
 					ImagePullPolicy: core.PullIfNotPresent,
 				},
 			})
 			job.Spec.Template.Spec.Containers = core_util.UpsertContainers(job.Spec.Template.Spec.Containers, []core.Container{
 				{
-					Name:       UploaderImageName,
+					Name:       containerUploader,
 					Image:      r.scannerImage,
 					WorkingDir: WorkDir,
 					Command: []string{
