@@ -66,7 +66,7 @@ func DefaultOptions() Options {
 
 type Manager struct {
 	nc      *nats.Conn
-	sub     *nats.Subscription
+	scanSub *nats.Subscription
 	ackWait time.Duration
 
 	// same as stream
@@ -97,9 +97,8 @@ func New(nc *nats.Conn, opts Options) *Manager {
 }
 
 const (
-	RespondTypeReport     = "report"
-	RespondTypeVersion    = "version"
-	RespondTypeVisibility = "visibility"
+	RespondTypeReport  = "report"
+	RespondTypeVersion = "version"
 )
 
 func (mgr *Manager) Start(ctx context.Context, jsmOpts ...nats.JSOpt) error {
@@ -114,8 +113,6 @@ func (mgr *Manager) Start(ctx context.Context, jsmOpts ...nats.JSOpt) error {
 				data, err = DownloadReport(mgr.fs, img)
 			} else if resType == RespondTypeVersion {
 				data, err = DownloadVersionInfo(mgr.fs, img)
-			} else if resType == RespondTypeVisibility {
-				data, err = DownloadVisibility(mgr.fs, img)
 			}
 			if err != nil {
 				s := ErrorToAPIStatus(err)
@@ -153,11 +150,6 @@ func (mgr *Manager) Start(ctx context.Context, jsmOpts ...nats.JSOpt) error {
 		return err
 	}
 
-	_, err = mgr.nc.QueueSubscribe(fmt.Sprintf("%s.visibility", mgr.stream), "scanner-backend", queueSubscribeMsgHandler(RespondTypeVisibility))
-	if err != nil {
-		return err
-	}
-
 	// create stream
 	jsm, err := mgr.nc.JetStream(jsmOpts...)
 	if err != nil {
@@ -187,9 +179,30 @@ func (mgr *Manager) Start(ctx context.Context, jsmOpts ...nats.JSOpt) error {
 	}
 
 	// create nats consumer
-	consumerName := "workers"
+	scanConsumerName := "workers"
+	err = mgr.addConsumer(jsm, scanConsumerName)
+	if err != nil {
+		return err
+	}
+	scanSubscription, err := jsm.PullSubscribe(fmt.Sprintf("%s.queue.scan", mgr.stream), scanConsumerName, nats.Bind(mgr.stream, scanConsumerName))
+	if err != nil {
+		return err
+	}
+	mgr.scanSub = scanSubscription
+
+	// start workers
+	klog.Info("Starting workers")
+	// Launch two workers to process Foo resources
+	for i := 0; i < mgr.numWorkersPerReplica; i++ {
+		go wait.Until(mgr.runWorker, 5*time.Second, ctx.Done())
+	}
+
+	return nil
+}
+
+func (mgr *Manager) addConsumer(jsm nats.JetStreamContext, consumerName string) error {
 	ackPolicy := nats.AckExplicitPolicy
-	_, err = jsm.AddConsumer(mgr.stream, &nats.ConsumerConfig{
+	_, err := jsm.AddConsumer(mgr.stream, &nats.ConsumerConfig{
 		Durable:   consumerName,
 		AckPolicy: ackPolicy,
 		AckWait:   mgr.ackWait, // TODO: max for any task type
@@ -209,19 +222,6 @@ func (mgr *Manager) Start(ctx context.Context, jsmOpts ...nats.JSOpt) error {
 	if err != nil && !strings.Contains(err.Error(), "nats: consumer name already in use") {
 		return err
 	}
-	sub, err := jsm.PullSubscribe("", consumerName, nats.Bind(mgr.stream, consumerName))
-	if err != nil {
-		return err
-	}
-	mgr.sub = sub
-
-	// start workers
-	klog.Info("Starting workers")
-	// Launch two workers to process Foo resources
-	for i := 0; i < mgr.numWorkersPerReplica; i++ {
-		go wait.Until(mgr.runWorker, 5*time.Second, ctx.Done())
-	}
-
 	return nil
 }
 
@@ -267,7 +267,7 @@ func (mgr *Manager) runWorker() {
 
 func (mgr *Manager) processNextMsg() (err error) {
 	var msgs []*nats.Msg
-	msgs, err = mgr.sub.Fetch(1, nats.MaxWait(50*time.Millisecond))
+	msgs, err = mgr.scanSub.Fetch(1, nats.MaxWait(50*time.Millisecond))
 	if err != nil || len(msgs) == 0 {
 		// no more msg to process
 		err = errors.Wrap(err, "failed to fetch msg")

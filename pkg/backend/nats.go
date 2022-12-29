@@ -143,16 +143,3 @@ func GetVersionInfo(nc *nats.Conn, isr api.ImageScanRequest) (trivy.Version, err
 	}
 	return ver, nil
 }
-
-func GetVisibility(nc *nats.Conn, img string) (bool, error) {
-	msg, err := nc.Request("scanner.visibility", []byte(img), NatsRequestTimeout)
-	if err != nil {
-		return false, err
-	}
-	var vis trivy.Visibility
-	err = trivy.JSON.Unmarshal(msg.Data, &vis)
-	if err != nil {
-		return false, err
-	}
-	return vis.Public, nil
-}
