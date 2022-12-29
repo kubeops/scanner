@@ -106,5 +106,38 @@ func EnsureScanReport(kc client.Client, imageRef string, singleReport trivy.Sing
 	if err != nil {
 		return nil, err
 	}
+
+	err = upsertCVEs(kc, singleReport)
+	if err != nil {
+		return nil, err
+	}
+
 	return obj.(*api.ImageScanReport), nil
+}
+
+func upsertCVEs(kc client.Client, r trivy.SingleReport) error {
+	vuls := map[string]trivy.Vulnerability{}
+
+	for _, rpt := range r.Results {
+		for _, tv := range rpt.Vulnerabilities {
+			vuls[tv.VulnerabilityID] = tv
+		}
+	}
+
+	for _, vul := range vuls {
+		_, vt, err := cu.CreateOrPatch(context.TODO(), kc, &api.Vulnerability{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: vul.VulnerabilityID,
+			},
+		}, func(o client.Object, createOp bool) client.Object {
+			obj := o.(*api.Vulnerability)
+			obj.Spec.Vulnerability = vul
+			return obj
+		})
+		if err != nil {
+			return err
+		}
+		klog.Infof("Vulnerability %s has been %s\n", vul.VulnerabilityID, vt)
+	}
+	return nil
 }
