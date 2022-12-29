@@ -152,10 +152,19 @@ func (r *Reconciler) scan(isr api.ImageScanRequest) error {
 		return err
 	}
 
-	isPrivate, err := backend.CheckPrivateImage(imageRef)
+	visible, err := backend.GetVisibility(r.nc, isr.Spec.Image)
 	if err != nil {
-		klog.Errorf("Some serious error occurred when checking if the image is Private: %v \n", err)
 		return err
+	}
+	isPrivate := !visible
+
+	// if visibility is true, no need to check again whether it is a private image.
+	if !visible {
+		isPrivate, err = backend.CheckPrivateImage(imageRef)
+		if err != nil {
+			klog.Errorf("Some serious error occurred when checking if the image is Private: %v \n", err)
+			return err
+		}
 	}
 
 	err = r.updateStatusWithImageDetails(isr, isPrivate)

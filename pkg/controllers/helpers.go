@@ -35,24 +35,11 @@ import (
 )
 
 func (r *Reconciler) doReportRelatedStuffs(isr api.ImageScanRequest) error {
-	// Getting the report.json file
-	msg, err := r.nc.Request("scanner.report", []byte(isr.Spec.Image), backend.NatsRequestTimeout)
+	report, err := backend.GetReport(r.nc, isr)
 	if err != nil {
 		return err
 	}
-	var report trivy.SingleReport
-	err = trivy.JSON.Unmarshal(msg.Data, &report)
-	if err != nil {
-		return err
-	}
-
-	// Getting the trivy.json file
-	msg, err = r.nc.Request("scanner.version", []byte(isr.Spec.Image), backend.NatsRequestTimeout)
-	if err != nil {
-		return err
-	}
-	var ver trivy.Version
-	err = trivy.JSON.Unmarshal(msg.Data, &ver)
+	ver, err := backend.GetVersionInfo(r.nc, isr)
 	if err != nil {
 		return err
 	}

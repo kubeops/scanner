@@ -22,6 +22,9 @@ import (
 	"os"
 	"time"
 
+	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
+	"kubeops.dev/scanner/apis/trivy"
+
 	"github.com/nats-io/nats.go"
 	"k8s.io/klog/v2"
 )
@@ -113,4 +116,43 @@ func disconnectHandler(nc *nats.Conn, err error) {
 	} else {
 		klog.V(5).Infof("Disconnected from event receiver")
 	}
+}
+
+func GetReport(nc *nats.Conn, isr api.ImageScanRequest) (trivy.SingleReport, error) {
+	msg, err := nc.Request("scanner.report", []byte(isr.Spec.Image), NatsRequestTimeout)
+	if err != nil {
+		return trivy.SingleReport{}, err
+	}
+	var report trivy.SingleReport
+	err = trivy.JSON.Unmarshal(msg.Data, &report)
+	if err != nil {
+		return trivy.SingleReport{}, err
+	}
+	return report, nil
+}
+
+func GetVersionInfo(nc *nats.Conn, isr api.ImageScanRequest) (trivy.Version, error) {
+	msg, err := nc.Request("scanner.version", []byte(isr.Spec.Image), NatsRequestTimeout)
+	if err != nil {
+		return trivy.Version{}, err
+	}
+	var ver trivy.Version
+	err = trivy.JSON.Unmarshal(msg.Data, &ver)
+	if err != nil {
+		return trivy.Version{}, err
+	}
+	return ver, nil
+}
+
+func GetVisibility(nc *nats.Conn, img string) (bool, error) {
+	msg, err := nc.Request("scanner.visibility", []byte(img), NatsRequestTimeout)
+	if err != nil {
+		return false, err
+	}
+	var vis trivy.Visibility
+	err = trivy.JSON.Unmarshal(msg.Data, &vis)
+	if err != nil {
+		return false, err
+	}
+	return vis.Public, nil
 }

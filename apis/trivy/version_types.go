@@ -27,3 +27,7 @@ type VulnerabilityDBStruct struct {
 	DownloadedAt Time  `json:"downloadedAt" tv:"DownloadedAt"`
 	NextUpdate   Time  `json:"nextUpdate" tv:"NextUpdate"`
 }
+
+type Visibility struct {
+	Public bool `json:"public"`
+}

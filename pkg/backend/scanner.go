@@ -60,6 +60,10 @@ func DownloadVersionInfo(fs blobfs.Interface, img string) ([]byte, error) {
 	return download(fs, img, "trivy.json")
 }
 
+func DownloadVisibility(fs blobfs.Interface, img string) ([]byte, error) {
+	return download(fs, img, "visibility.json")
+}
+
 func download(fs blobfs.Interface, img, fileName string) ([]byte, error) {
 	repo, digest, err := ParseReference(img)
 	if err != nil {
@@ -102,6 +106,17 @@ func uploadVersionInfo(fs blobfs.Interface, repo, digest string) error {
 	return fs.WriteFile(context.TODO(), path.Join(repo, digest, "trivy.json"), out)
 }
 
+func uploadVisibility(fs blobfs.Interface, repo, digest string) error {
+	out := []byte(`{"public": true}`)
+	var v trivy.Visibility
+	err := trivy.JSON.Unmarshal(out, &v)
+	if err != nil {
+		return err
+	}
+
+	return fs.WriteFile(context.TODO(), path.Join(repo, digest, "visibility.json"), out)
+}
+
 func UploadReport(fs blobfs.Interface, img string) error {
 	_, reportBytes, err := scan(img)
 	if err != nil {
@@ -118,7 +133,11 @@ func UploadReport(fs blobfs.Interface, img string) error {
 		return err
 	}
 
-	return uploadVersionInfo(fs, repo, digest)
+	err = uploadVersionInfo(fs, repo, digest)
+	if err != nil {
+		return err
+	}
+	return uploadVisibility(fs, repo, digest)
 }
 
 // trivy image ubuntu --security-checks vuln --format json --quiet

@@ -97,8 +97,9 @@ func New(nc *nats.Conn, opts Options) *Manager {
 }
 
 const (
-	RespondTypeReport  = "report"
-	RespondTypeVersion = "version"
+	RespondTypeReport     = "report"
+	RespondTypeVersion    = "version"
+	RespondTypeVisibility = "visibility"
 )
 
 func (mgr *Manager) Start(ctx context.Context, jsmOpts ...nats.JSOpt) error {
@@ -113,6 +114,8 @@ func (mgr *Manager) Start(ctx context.Context, jsmOpts ...nats.JSOpt) error {
 				data, err = DownloadReport(mgr.fs, img)
 			} else if resType == RespondTypeVersion {
 				data, err = DownloadVersionInfo(mgr.fs, img)
+			} else if resType == RespondTypeVisibility {
+				data, err = DownloadVisibility(mgr.fs, img)
 			}
 			if err != nil {
 				s := ErrorToAPIStatus(err)
@@ -146,6 +149,11 @@ func (mgr *Manager) Start(ctx context.Context, jsmOpts ...nats.JSOpt) error {
 	}
 
 	_, err = mgr.nc.QueueSubscribe(fmt.Sprintf("%s.version", mgr.stream), "scanner-backend", queueSubscribeMsgHandler(RespondTypeVersion))
+	if err != nil {
+		return err
+	}
+
+	_, err = mgr.nc.QueueSubscribe(fmt.Sprintf("%s.visibility", mgr.stream), "scanner-backend", queueSubscribeMsgHandler(RespondTypeVisibility))
 	if err != nil {
 		return err
 	}
