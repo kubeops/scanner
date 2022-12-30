@@ -39,7 +39,7 @@ func (r *Reconciler) setDefaultStatus(isr api.ImageScanRequest) error {
 	return err
 }
 
-func (r *Reconciler) updateStatusWithImageDetails(isr api.ImageScanRequest, isPrivate bool) error {
+func (r *Reconciler) updateStatusWithImageDetails(isr api.ImageScanRequest, vis trivy.BackendVisibility) error {
 	tag, dig, err := tagAndDigest(isr.Spec.Image)
 	if err != nil {
 		return err
@@ -48,7 +48,7 @@ func (r *Reconciler) updateStatusWithImageDetails(isr api.ImageScanRequest, isPr
 	_, _, err = cu.PatchStatus(r.ctx, r.Client, &isr, func(obj client.Object) client.Object {
 		in := obj.(*api.ImageScanRequest)
 		in.Status.Image.Visibility = func() api.ImageVisibility {
-			if isPrivate {
+			if vis == trivy.BackendVisibilityPrivate {
 				return api.ImagePrivate
 			}
 			return api.ImagePublic

@@ -147,29 +147,22 @@ func (r *Reconciler) patchReportRefAndPhase(isr api.ImageScanRequest) error {
 }
 
 func (r *Reconciler) scan(isr api.ImageScanRequest) error {
-	imageRef, err := name.ParseReference(isr.Spec.Image)
+	resp, err := backend.PassToBackend(r.nc, isr.Spec.Image)
+	if err != nil {
+		return err
+	}
+	if resp.Visibility == trivy.BackendVisibilityUnknown {
+		klog.Infof("visibility of %s image is unknown", isr.Spec.Image)
+		return nil
+	}
+
+	err = r.updateStatusWithImageDetails(isr, resp.Visibility)
 	if err != nil {
 		return err
 	}
 
-	isPrivate, err := backend.CheckPrivateImage(imageRef)
-	if err != nil {
-		klog.Errorf("Some serious error occurred when checking if the image is Private: %v \n", err)
-		return err
-	}
-
-	err = r.updateStatusWithImageDetails(isr, isPrivate)
-	if err != nil {
-		return err
-	}
-
-	if isPrivate {
+	if resp.Visibility == trivy.BackendVisibilityPrivate {
 		return r.ScanForPrivateImage(isr)
-	}
-	// Call SubmitScanRequest only for public image
-	err = backend.SubmitScanRequest(r.nc, "scanner.queue.scan", isr.Spec.Image)
-	if err != nil {
-		klog.Errorf("error on Submitting ScanRequest ", err)
 	}
 
 	// Report related stuffs for private image will be done by `scanner upload-report` command in job's container.

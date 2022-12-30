@@ -16,14 +16,16 @@ limitations under the License.
 
 package trivy
 
-type Version struct {
-	Version         string                `json:"version" tv:"Version"`
-	VulnerabilityDB VulnerabilityDBStruct `json:"vulnerabilityDB" tv:"VulnerabilityDB"`
+type BackendResponse struct {
+	Report     SingleReport      `json:"report"`
+	Visibility BackendVisibility `json:"visibility"`
 }
 
-type VulnerabilityDBStruct struct {
-	Version      int32 `json:"version" tv:"Version"`
-	UpdatedAt    Time  `json:"updatedAt" tv:"UpdatedAt"`
-	DownloadedAt Time  `json:"downloadedAt" tv:"DownloadedAt"`
-	NextUpdate   Time  `json:"nextUpdate" tv:"NextUpdate"`
-}
+// +kubebuilder:validation:Enum=Public;Private;Unknown
+type BackendVisibility string
+
+const (
+	BackendVisibilityPublic  BackendVisibility = "Public"
+	BackendVisibilityPrivate BackendVisibility = "Private"
+	BackendVisibilityUnknown BackendVisibility = "Unknown"
+)

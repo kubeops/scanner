@@ -35,11 +35,11 @@ import (
 )
 
 func (r *Reconciler) doReportRelatedStuffs(isr api.ImageScanRequest) error {
-	report, err := backend.GetReport(r.nc, isr)
+	report, err := backend.GetReport(r.nc, isr.Spec.Image)
 	if err != nil {
 		return err
 	}
-	ver, err := backend.GetVersionInfo(r.nc, isr)
+	ver, err := backend.GetVersionInfo(r.nc, isr.Spec.Image)
 	if err != nil {
 		return err
 	}

@@ -22,7 +22,6 @@ import (
 	"os"
 	"time"
 
-	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
 	"kubeops.dev/scanner/apis/trivy"
 
 	"github.com/nats-io/nats.go"
@@ -118,8 +117,8 @@ func disconnectHandler(nc *nats.Conn, err error) {
 	}
 }
 
-func GetReport(nc *nats.Conn, isr api.ImageScanRequest) (trivy.SingleReport, error) {
-	msg, err := nc.Request("scanner.report", []byte(isr.Spec.Image), NatsRequestTimeout)
+func GetReport(nc *nats.Conn, img string) (trivy.SingleReport, error) {
+	msg, err := nc.Request("scanner.report", []byte(img), NatsRequestTimeout)
 	if err != nil {
 		return trivy.SingleReport{}, err
 	}
@@ -131,8 +130,8 @@ func GetReport(nc *nats.Conn, isr api.ImageScanRequest) (trivy.SingleReport, err
 	return report, nil
 }
 
-func GetVersionInfo(nc *nats.Conn, isr api.ImageScanRequest) (trivy.Version, error) {
-	msg, err := nc.Request("scanner.version", []byte(isr.Spec.Image), NatsRequestTimeout)
+func GetVersionInfo(nc *nats.Conn, img string) (trivy.Version, error) {
+	msg, err := nc.Request("scanner.version", []byte(img), NatsRequestTimeout)
 	if err != nil {
 		return trivy.Version{}, err
 	}

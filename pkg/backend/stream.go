@@ -26,6 +26,8 @@ import (
 	"strings"
 	"time"
 
+	"kubeops.dev/scanner/apis/trivy"
+
 	"github.com/google/go-containerregistry/pkg/name"
 	"github.com/nats-io/nats.go"
 	"github.com/pkg/errors"
@@ -150,6 +152,11 @@ func (mgr *Manager) Start(ctx context.Context, jsmOpts ...nats.JSOpt) error {
 		return err
 	}
 
+	err = mgr.addBackendSubscription()
+	if err != nil {
+		return err
+	}
+
 	// create stream
 	jsm, err := mgr.nc.JetStream(jsmOpts...)
 	if err != nil {
@@ -200,6 +207,106 @@ func (mgr *Manager) Start(ctx context.Context, jsmOpts ...nats.JSOpt) error {
 	return nil
 }
 
+func (mgr *Manager) addBackendSubscription() error {
+	checkPrivate := func(img string) (bool, error) {
+		reference, err := name.ParseReference(img)
+		if err != nil {
+			return false, err
+		}
+		isPrivate, err := CheckPrivateImage(reference)
+		if err != nil {
+			return false, err
+		}
+		return isPrivate, nil
+	}
+	getMarshalledResponse := func(report trivy.SingleReport, vis trivy.BackendVisibility) ([]byte, error) {
+		resp := trivy.BackendResponse{
+			Report:     report,
+			Visibility: vis,
+		}
+		ret, err := trivy.JSON.Marshal(resp)
+		if err != nil {
+			return nil, err
+		}
+		return ret, nil
+	}
+
+	// If Report exists:
+	//     GetReport & Respond
+	// If any problem on checking Private:
+	//     VisibilityUnknown & Respond
+	// If private:
+	//     VisibilityPrivate & Respond
+	// no cases above:
+	//     SubmitScanRequest, VisibilityPublic & Respond
+	_, err := mgr.nc.Subscribe(fmt.Sprintf("%s.backend", mgr.stream), func(msg *nats.Msg) {
+		img := string(msg.Data)
+		if img == "" {
+			return
+		}
+		exists, err := ExistsReport(mgr.fs, img)
+		if err != nil {
+			return
+		}
+
+		if exists {
+			report, err := GetReport(mgr.nc, img)
+			if err != nil {
+				return
+			}
+
+			resp, err := getMarshalledResponse(report, trivy.BackendVisibilityPublic)
+			if err != nil {
+				return
+			}
+			_ = msg.Respond(resp)
+			return
+		}
+		private, err := checkPrivate(img)
+		if err != nil {
+			klog.Infof("Image %s is not pullable from scanner backend side", img)
+			resp, err := getMarshalledResponse(trivy.SingleReport{}, trivy.BackendVisibilityUnknown)
+			if err != nil {
+				return
+			}
+			_ = msg.Respond(resp)
+			return
+		}
+		if private {
+			resp, err := getMarshalledResponse(trivy.SingleReport{}, trivy.BackendVisibilityPrivate)
+			if err != nil {
+				return
+			}
+			_ = msg.Respond(resp)
+			return
+		}
+		err = mgr.submitScanRequest(img)
+		if err != nil {
+			return
+		}
+		resp, err := getMarshalledResponse(trivy.SingleReport{}, trivy.BackendVisibilityPublic)
+		if err != nil {
+			return
+		}
+		_ = msg.Respond(resp)
+	})
+	return err
+}
+
+func PassToBackend(nc *nats.Conn, img string) (trivy.BackendResponse, error) {
+	var ret trivy.BackendResponse
+	resp, err := nc.Request("scanner.backend", []byte(img), time.Second*20)
+	if err != nil {
+		klog.ErrorS(err, "failed to request to the backend", "image", img)
+		return ret, err
+	} else {
+		klog.InfoS("requested to backend", "image", img)
+
+		err = trivy.JSON.Unmarshal(resp.Data, &ret)
+		return ret, err
+	}
+}
+
 func (mgr *Manager) addConsumer(jsm nats.JetStreamContext, consumerName string) error {
 	ackPolicy := nats.AckExplicitPolicy
 	_, err := jsm.AddConsumer(mgr.stream, &nats.ConsumerConfig{
@@ -230,19 +337,6 @@ func (mgr *Manager) submitScanRequest(img string) error {
 }
 
 func SubmitScanRequest(nc *nats.Conn, subj string, img string) error {
-	// We need to double-check to ensure that this image is pullable from outside the user's cluster
-	reference, err := name.ParseReference(img)
-	if err != nil {
-		return err
-	}
-	isPrivate, err := CheckPrivateImage(reference)
-	if err != nil {
-		return err
-	}
-	if isPrivate {
-		return errors.New(fmt.Sprintf("Image %s is not pullable from scanner backend side", img))
-	}
-
 	if _, err := nc.Request(subj, []byte(img), natsScanRequestTimeout); err != nil {
 		klog.ErrorS(err, "failed submit scan request", "image", img)
 		return err

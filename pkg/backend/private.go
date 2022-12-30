@@ -25,7 +25,7 @@ import (
 )
 
 func CheckPrivateImage(imageRef name.Reference) (bool, error) {
-	_, err := remote.Get(imageRef, remote.WithAuth(authn.Anonymous))
+	_, err := remote.Get(imageRef, remote.WithAuthFromKeychain(authn.DefaultKeychain))
 	if err == nil {
 		return false, nil
 	}
