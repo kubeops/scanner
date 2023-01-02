@@ -79,7 +79,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	if isr.Status.ReportRef == nil && isr.Status.JobName != "" {
 		// For Private Images, Job is still running case.
 		if r.isJobSucceeded(isr) {
-			return ctrl.Result{}, r.patchReportRefAndPhase(isr)
+			return ctrl.Result{RequeueAfter: time.Hour * 6}, r.patchReportRefAndPhase(isr)
 		}
 	}
 
@@ -90,7 +90,14 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	// We are here means, Phase is Pending or Outdated
-	return ctrl.Result{}, r.scan(isr)
+	fasterRequeueNeeded, err := r.scan(isr)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+	if fasterRequeueNeeded {
+		return ctrl.Result{RequeueAfter: time.Minute}, nil
+	}
+	return ctrl.Result{RequeueAfter: time.Hour * 6}, nil
 }
 
 func (r *Reconciler) isReconciliationNeeded(isr api.ImageScanRequest) bool {
@@ -146,27 +153,32 @@ func (r *Reconciler) patchReportRefAndPhase(isr api.ImageScanRequest) error {
 	return err
 }
 
-func (r *Reconciler) scan(isr api.ImageScanRequest) error {
+func (r *Reconciler) scan(isr api.ImageScanRequest) (bool, error) {
 	resp, err := backend.PassToBackend(r.nc, isr.Spec.Image)
 	if err != nil {
-		return err
+		return false, err
 	}
 	if resp.Visibility == trivy.BackendVisibilityUnknown {
 		klog.Infof("visibility of %s image is unknown", isr.Spec.Image)
-		return nil
+		return false, nil
 	}
 
 	err = r.updateStatusWithImageDetails(isr, resp.Visibility)
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	if resp.Visibility == trivy.BackendVisibilityPrivate {
-		return r.ScanForPrivateImage(isr)
+		return false, r.ScanForPrivateImage(isr)
+	}
+
+	// if the report is not generated yet (just submitted for scanning)
+	if resp.Report.ArtifactName == "" { // `ArtifactName` is just a random field to check whether the report generated
+		return true, nil
 	}
 
 	// Report related stuffs for private image will be done by `scanner upload-report` command in job's container.
-	return r.doReportRelatedStuffs(isr)
+	return false, r.doReportRelatedStuffs(isr)
 }
 
 func tagAndDigest(img string) (string, string, error) {

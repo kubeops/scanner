@@ -21,6 +21,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"time"
 
 	"kubeops.dev/scanner/apis/trivy"
 
@@ -60,10 +61,6 @@ func DownloadVersionInfo(fs blobfs.Interface, img string) ([]byte, error) {
 	return download(fs, img, "trivy.json")
 }
 
-func DownloadVisibility(fs blobfs.Interface, img string) ([]byte, error) {
-	return download(fs, img, "visibility.json")
-}
-
 func download(fs blobfs.Interface, img, fileName string) ([]byte, error) {
 	repo, digest, err := ParseReference(img)
 	if err != nil {
@@ -77,7 +74,25 @@ func ExistsReport(fs blobfs.Interface, img string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	return fs.Exists(context.TODO(), path.Join(repo, digest, "report.json"))
+	exists, err := fs.Exists(context.TODO(), path.Join(repo, digest, "report.json"))
+	if err != nil || !exists {
+		return false, err
+	}
+
+	//// If file exists, & it is more than 6 hours old, We consider it as if it doesn't exist.
+	read, err := fs.ReadFile(context.TODO(), path.Join(repo, digest, "report.json"))
+	if err != nil {
+		return false, err
+	}
+	var rep trivy.SingleReport
+	err = trivy.JSON.Unmarshal(read, &rep)
+	if err != nil {
+		return false, err
+	}
+	if time.Since(rep.LastModificationTime.Time) > time.Hour*6 {
+		return false, nil
+	}
+	return true, nil
 }
 
 func uploadVersionInfo(fs blobfs.Interface, repo, digest string) error {
@@ -149,6 +164,11 @@ func scan(img string) (*trivy.SingleReport, []byte, error) {
 
 	var r trivy.SingleReport
 	err = trivy.JSON.Unmarshal(out, &r)
+	if err != nil {
+		return nil, nil, err
+	}
+	r.LastModificationTime = trivy.Time{Time: time.Now()}
+	out, err = trivy.JSON.Marshal(r)
 	if err != nil {
 		return nil, nil, err
 	}

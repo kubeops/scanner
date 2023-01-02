@@ -17,11 +17,12 @@ limitations under the License.
 package trivy
 
 type SingleReport struct {
-	SchemaVersion int           `json:"schemaVersion" tv:"SchemaVersion"`
-	ArtifactName  string        `json:"artifactName" tv:"ArtifactName"`
-	ArtifactType  string        `json:"artifactType" tv:"ArtifactType"`
-	Metadata      ImageMetadata `json:"metadata" tv:"Metadata"`
-	Results       []Result      `json:"results" tv:"Results"`
+	SchemaVersion        int           `json:"schemaVersion" tv:"SchemaVersion"`
+	ArtifactName         string        `json:"artifactName" tv:"ArtifactName"`
+	ArtifactType         string        `json:"artifactType" tv:"ArtifactType"`
+	Metadata             ImageMetadata `json:"metadata" tv:"Metadata"`
+	Results              []Result      `json:"results" tv:"Results"`
+	LastModificationTime Time          `json:"lastModificationTime"`
 }
 
 type ImageMetadata struct {

@@ -231,21 +231,22 @@ func (mgr *Manager) addBackendSubscription() error {
 		return ret, nil
 	}
 
-	// If Report exists:
-	//     GetReport & Respond
-	// If any problem on checking Private:
-	//     VisibilityUnknown & Respond
-	// If private:
-	//     VisibilityPrivate & Respond
-	// no cases above:
-	//     SubmitScanRequest, VisibilityPublic & Respond
-	_, err := mgr.nc.Subscribe(fmt.Sprintf("%s.backend", mgr.stream), func(msg *nats.Msg) {
+	msgHandler := func(msg *nats.Msg) {
+		// If Report exists:
+		//     GetReport & Respond
+		// If any problem on checking Private:
+		//     VisibilityUnknown & Respond
+		// If private:
+		//     VisibilityPrivate & Respond
+		// no cases above:
+		//     SubmitScanRequest, VisibilityPublic & Respond
 		img := string(msg.Data)
 		if img == "" {
 			return
 		}
 		exists, err := ExistsReport(mgr.fs, img)
-		if err != nil {
+		// We will continue for the UNAUTHORIZED / MANIFEST_UNKNOWN error, because crane.Digest will throw that for non-public images.
+		if err != nil && !strings.Contains(err.Error(), "UNAUTHORIZED") && !strings.Contains(err.Error(), "MANIFEST_UNKNOWN") {
 			return
 		}
 
@@ -289,8 +290,15 @@ func (mgr *Manager) addBackendSubscription() error {
 			return
 		}
 		_ = msg.Respond(resp)
-	})
-	return err
+	}
+
+	for i := 0; i < mgr.numWorkersPerReplica; i++ {
+		_, err := mgr.nc.QueueSubscribe(fmt.Sprintf("%s.backend", mgr.stream), "backend-task", msgHandler)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func PassToBackend(nc *nats.Conn, img string) (trivy.BackendResponse, error) {

@@ -79,7 +79,7 @@ func UpdateStatusAsReportEnsured(kc client.Client, isr api.ImageScanRequest, rep
 		in := obj.(*api.ImageScanRequest)
 		in.Status.ReportRef = &api.ScanReportRef{
 			Name:        rep.GetName(),
-			LastChecked: trivy.Time(rep.CreationTimestamp),
+			LastChecked: rep.Status.LastChecked,
 		}
 		in.Status.Phase = api.ImageScanRequestPhaseCurrent
 		return in
