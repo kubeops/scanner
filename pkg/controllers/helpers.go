@@ -31,29 +31,15 @@ import (
 	kutil "kmodules.xyz/client-go"
 	cu "kmodules.xyz/client-go/client"
 	"kmodules.xyz/go-containerregistry/name"
-	_ "kmodules.xyz/go-containerregistry/name"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func (r *Reconciler) doReportRelatedStuffs(isr api.ImageScanRequest) error {
-	// Getting the report.json file
-	msg, err := r.nc.Request("scanner.report", []byte(isr.Spec.Image), backend.NatsRequestTimeout)
+	report, err := backend.GetReport(r.nc, isr.Spec.Image)
 	if err != nil {
 		return err
 	}
-	var report trivy.SingleReport
-	err = trivy.JSON.Unmarshal(msg.Data, &report)
-	if err != nil {
-		return err
-	}
-
-	// Getting the trivy.json file
-	msg, err = r.nc.Request("scanner.version", []byte(isr.Spec.Image), backend.NatsRequestTimeout)
-	if err != nil {
-		return err
-	}
-	var ver trivy.Version
-	err = trivy.JSON.Unmarshal(msg.Data, &ver)
+	ver, err := backend.GetVersionInfo(r.nc, isr.Spec.Image)
 	if err != nil {
 		return err
 	}
@@ -62,7 +48,7 @@ func (r *Reconciler) doReportRelatedStuffs(isr api.ImageScanRequest) error {
 	if err != nil {
 		return err
 	}
-	return updateStatusAsReportEnsured(r.Client, isr, rep)
+	return UpdateStatusAsReportEnsured(r.Client, isr, rep)
 }
 
 func EnsureScanReport(kc client.Client, imageRef string, singleReport trivy.SingleReport, versionInfo trivy.Version) (*api.ImageScanReport, error) {
@@ -114,19 +100,6 @@ func EnsureScanReport(kc client.Client, imageRef string, singleReport trivy.Sing
 	}
 
 	return obj.(*api.ImageScanReport), nil
-}
-
-func updateStatusAsReportEnsured(kc client.Client, isr api.ImageScanRequest, rep *api.ImageScanReport) error {
-	_, _, err := cu.PatchStatus(context.TODO(), kc, &isr, func(obj client.Object) client.Object {
-		in := obj.(*api.ImageScanRequest)
-		in.Status.ReportRef = &api.ScanReportRef{
-			Name:        rep.GetName(),
-			LastChecked: trivy.Time(rep.CreationTimestamp),
-		}
-		in.Status.Phase = api.ImageScanRequestPhaseCurrent
-		return in
-	})
-	return err
 }
 
 func upsertCVEs(kc client.Client, r trivy.SingleReport) error {

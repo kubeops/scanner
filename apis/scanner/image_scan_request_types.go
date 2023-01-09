@@ -45,6 +45,7 @@ type ImageScanRequestStatus struct {
 	Phase              ImageScanRequestPhase
 	Image              *ImageDetails
 	ReportRef          *ScanReportRef
+	JobName            string
 	Reason             string
 }
 

@@ -70,6 +70,10 @@ type ImageScanRequestStatus struct {
 	Image     *ImageDetails         `json:"image,omitempty"`
 	ReportRef *ScanReportRef        `json:"reportRef,omitempty"`
 
+	// +optional
+	// For Private Images, this field holds the job name created (in .spec.namespace) for scanning.
+	JobName string `json:"jobName,omitempty"`
+
 	// A brief CamelCase message indicating details about why the request is in this state.
 	// +optional
 	Reason string `json:"reason,omitempty"`
