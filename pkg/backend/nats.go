@@ -29,8 +29,7 @@ import (
 const (
 	natsConnectionTimeout       = 350 * time.Millisecond
 	natsConnectionRetryInterval = 100 * time.Millisecond
-	NatsRequestTimeout          = 10 * time.Second
-	natsScanRequestTimeout      = 500 * time.Millisecond
+	natsRequestTimeout          = 10 * time.Second
 	dockerHubRateLimitDelay     = 1 * time.Hour
 )
 

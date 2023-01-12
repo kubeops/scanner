@@ -62,9 +62,6 @@ spec:
                     type: string
                   artifactType:
                     type: string
-                  lastModificationTime:
-                    format: date-time
-                    type: string
                   metadata:
                     properties:
                       diffIDs:
@@ -272,7 +269,6 @@ spec:
                 required:
                 - artifactName
                 - artifactType
-                - lastModificationTime
                 - metadata
                 - results
                 - schemaVersion

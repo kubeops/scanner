@@ -18,6 +18,7 @@ package cmds
 
 import (
 	"os"
+	"time"
 
 	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
 	"kubeops.dev/scanner/apis/trivy"
@@ -84,7 +85,14 @@ func uploadReport(imageRef, trivyFile, reportFile string) error {
 		return err
 	}
 
-	_, err = controllers.EnsureScanReport(kc, imageRef, actualReport, ver)
+	resp := trivy.BackendResponse{
+		Report:               actualReport,
+		TrivyVersion:         ver,
+		Visibility:           trivy.ImageVisibilityPrivate,
+		LastModificationTime: trivy.Time{Time: time.Now()},
+	}
+
+	_, err = controllers.EnsureScanReport(kc, imageRef, resp)
 	return err
 }
 

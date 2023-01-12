@@ -25,6 +25,8 @@ package trivy
 func (in *BackendResponse) DeepCopyInto(out *BackendResponse) {
 	*out = *in
 	in.Report.DeepCopyInto(&out.Report)
+	in.TrivyVersion.DeepCopyInto(&out.TrivyVersion)
+	in.LastModificationTime.DeepCopyInto(&out.LastModificationTime)
 	return
 }
 
@@ -262,7 +264,6 @@ func (in *SingleReport) DeepCopyInto(out *SingleReport) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
-	in.LastModificationTime.DeepCopyInto(&out.LastModificationTime)
 	return
 }
 

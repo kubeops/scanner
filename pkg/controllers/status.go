@@ -17,13 +17,13 @@ limitations under the License.
 package controllers
 
 import (
-	"context"
-
 	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
 	"kubeops.dev/scanner/apis/trivy"
 
+	"k8s.io/apimachinery/pkg/types"
 	kutil "kmodules.xyz/client-go"
 	cu "kmodules.xyz/client-go/client"
+	kname "kmodules.xyz/go-containerregistry/name"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -39,7 +39,7 @@ func (r *Reconciler) setDefaultStatus(isr api.ImageScanRequest) error {
 	return err
 }
 
-func (r *Reconciler) updateStatusWithImageDetails(isr api.ImageScanRequest, vis trivy.BackendVisibility) error {
+func (r *Reconciler) updateStatusWithImageDetails(isr api.ImageScanRequest, vis trivy.ImageVisibility) error {
 	tag, dig, err := tagAndDigest(isr.Spec.Image)
 	if err != nil {
 		return err
@@ -47,12 +47,7 @@ func (r *Reconciler) updateStatusWithImageDetails(isr api.ImageScanRequest, vis 
 
 	_, _, err = cu.PatchStatus(r.ctx, r.Client, &isr, func(obj client.Object) client.Object {
 		in := obj.(*api.ImageScanRequest)
-		in.Status.Image.Visibility = func() api.ImageVisibility {
-			if vis == trivy.BackendVisibilityPrivate {
-				return api.ImagePrivate
-			}
-			return api.ImagePublic
-		}()
+		in.Status.Image.Visibility = vis
 		in.Status.Image.Tag = tag
 		in.Status.Image.Digest = dig
 		in.Status.Phase = api.ImageScanRequestPhaseInProgress
@@ -74,8 +69,8 @@ func (r *Reconciler) updateStatusWithJobName(isr api.ImageScanRequest, jobName s
 	return err
 }
 
-func UpdateStatusAsReportEnsured(kc client.Client, isr api.ImageScanRequest, rep *api.ImageScanReport) error {
-	_, _, err := cu.PatchStatus(context.TODO(), kc, &isr, func(obj client.Object) client.Object {
+func (r *Reconciler) updateStatusAsReportEnsured(isr api.ImageScanRequest, rep *api.ImageScanReport) error {
+	_, _, err := cu.PatchStatus(r.ctx, r.Client, &isr, func(obj client.Object) client.Object {
 		in := obj.(*api.ImageScanRequest)
 		in.Status.ReportRef = &api.ScanReportRef{
 			Name:        rep.GetName(),
@@ -91,6 +86,32 @@ func (r *Reconciler) updateStatusAsOutdated(isr api.ImageScanRequest) error {
 	_, _, err := cu.PatchStatus(r.ctx, r.Client, &isr, func(obj client.Object) client.Object {
 		in := obj.(*api.ImageScanRequest)
 		in.Status.Phase = api.ImageScanRequestPhaseOutdated
+		return in
+	})
+	return err
+}
+
+func (r *Reconciler) updateStatusWithReportDetails(isr api.ImageScanRequest) error {
+	img, err := kname.ParseReference(isr.Spec.Image)
+	if err != nil {
+		return err
+	}
+
+	var rep api.ImageScanReport
+	err = r.Get(r.ctx, types.NamespacedName{
+		Name: getReportName(img.Name),
+	}, &rep)
+	if err != nil {
+		return err
+	}
+
+	_, _, err = cu.PatchStatus(r.ctx, r.Client, &isr, func(obj client.Object) client.Object {
+		in := obj.(*api.ImageScanRequest)
+		in.Status.ReportRef = &api.ScanReportRef{
+			Name:        getReportName(img.Name),
+			LastChecked: trivy.Time(rep.ObjectMeta.CreationTimestamp),
+		}
+		in.Status.Phase = api.ImageScanRequestPhaseCurrent
 		return in
 	})
 	return err

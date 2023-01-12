@@ -18331,6 +18331,12 @@ func schema_kubeopsdev_scanner_apis_trivy_BackendResponse(ref common.ReferenceCa
 							Ref:     ref("kubeops.dev/scanner/apis/trivy.SingleReport"),
 						},
 					},
+					"trivyVersion": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("kubeops.dev/scanner/apis/trivy.Version"),
+						},
+					},
 					"visibility": {
 						SchemaProps: spec.SchemaProps{
 							Default: "",
@@ -18338,12 +18344,18 @@ func schema_kubeopsdev_scanner_apis_trivy_BackendResponse(ref common.ReferenceCa
 							Format:  "",
 						},
 					},
+					"lastModificationTime": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("kubeops.dev/scanner/apis/trivy.Time"),
+						},
+					},
 				},
-				Required: []string{"report", "visibility"},
+				Required: []string{"report", "trivyVersion", "visibility", "lastModificationTime"},
 			},
 		},
 		Dependencies: []string{
-			"kubeops.dev/scanner/apis/trivy.SingleReport"},
+			"kubeops.dev/scanner/apis/trivy.SingleReport", "kubeops.dev/scanner/apis/trivy.Time", "kubeops.dev/scanner/apis/trivy.Version"},
 	}
 }
 
@@ -18854,18 +18866,12 @@ func schema_kubeopsdev_scanner_apis_trivy_SingleReport(ref common.ReferenceCallb
 							},
 						},
 					},
-					"lastModificationTime": {
-						SchemaProps: spec.SchemaProps{
-							Default: map[string]interface{}{},
-							Ref:     ref("kubeops.dev/scanner/apis/trivy.Time"),
-						},
-					},
 				},
-				Required: []string{"schemaVersion", "artifactName", "artifactType", "metadata", "results", "lastModificationTime"},
+				Required: []string{"schemaVersion", "artifactName", "artifactType", "metadata", "results"},
 			},
 		},
 		Dependencies: []string{
-			"kubeops.dev/scanner/apis/trivy.ImageMetadata", "kubeops.dev/scanner/apis/trivy.Result", "kubeops.dev/scanner/apis/trivy.Time"},
+			"kubeops.dev/scanner/apis/trivy.ImageMetadata", "kubeops.dev/scanner/apis/trivy.Result"},
 	}
 }
 

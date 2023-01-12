@@ -18,21 +18,16 @@ package controllers
 
 import (
 	"context"
-	"crypto/md5"
-	"fmt"
 	"time"
 
 	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
 	"kubeops.dev/scanner/apis/trivy"
 	"kubeops.dev/scanner/pkg/backend"
 
-	"github.com/google/go-containerregistry/pkg/name"
 	"github.com/nats-io/nats.go"
 	batch "k8s.io/api/batch/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2"
-	cu "kmodules.xyz/client-go/client"
-	kname "kmodules.xyz/go-containerregistry/name"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -79,7 +74,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	if isr.Status.ReportRef == nil && isr.Status.JobName != "" {
 		// For Private Images, Job is still running case.
 		if r.isJobSucceeded(isr) {
-			return ctrl.Result{RequeueAfter: time.Hour * 6}, r.patchReportRefAndPhase(isr)
+			return ctrl.Result{RequeueAfter: backend.TrivyUpdationPeriod}, r.updateStatusWithReportDetails(isr)
 		}
 	}
 
@@ -97,7 +92,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	if fasterRequeueNeeded {
 		return ctrl.Result{RequeueAfter: time.Minute}, nil
 	}
-	return ctrl.Result{RequeueAfter: time.Hour * 6}, nil
+	return ctrl.Result{RequeueAfter: backend.TrivyUpdationPeriod}, nil
 }
 
 func (r *Reconciler) isReconciliationNeeded(isr api.ImageScanRequest) bool {
@@ -105,7 +100,7 @@ func (r *Reconciler) isReconciliationNeeded(isr api.ImageScanRequest) bool {
 	if rep == nil {
 		return true
 	}
-	if rep != nil && time.Since(rep.LastChecked.Time) > time.Hour*6 {
+	if rep != nil && time.Since(rep.LastChecked.Time) > backend.TrivyUpdationPeriod {
 		// report is older than 6 hours
 		_ = r.updateStatusAsOutdated(isr)
 		return true
@@ -126,40 +121,13 @@ func (r *Reconciler) isJobSucceeded(isr api.ImageScanRequest) bool {
 	return job.Status.Succeeded > 0
 }
 
-func (r *Reconciler) patchReportRefAndPhase(isr api.ImageScanRequest) error {
-	img, err := kname.ParseReference(isr.Spec.Image)
-	if err != nil {
-		return err
-	}
-
-	reportName := fmt.Sprintf("%x", md5.Sum([]byte(img.Name)))
-	var rep api.ImageScanReport
-	err = r.Get(r.ctx, types.NamespacedName{
-		Name: reportName,
-	}, &rep)
-	if err != nil {
-		return err
-	}
-
-	_, _, err = cu.PatchStatus(r.ctx, r.Client, &isr, func(obj client.Object) client.Object {
-		in := obj.(*api.ImageScanRequest)
-		in.Status.ReportRef = &api.ScanReportRef{
-			Name:        reportName,
-			LastChecked: trivy.Time(rep.ObjectMeta.CreationTimestamp),
-		}
-		in.Status.Phase = api.ImageScanRequestPhaseCurrent
-		return in
-	})
-	return err
-}
-
 func (r *Reconciler) scan(isr api.ImageScanRequest) (bool, error) {
-	resp, err := backend.PassToBackend(r.nc, isr.Spec.Image)
+	resp, err := backend.GetResponseFromBackend(r.nc, isr.Spec.Image)
 	if err != nil {
 		return false, err
 	}
-	if resp.Visibility == trivy.BackendVisibilityUnknown {
-		klog.Infof("visibility of %s image is unknown", isr.Spec.Image)
+	if resp.Visibility == trivy.ImageVisibilityUnknown {
+		klog.Infof("visibility of %s image is unknown \n", isr.Spec.Image)
 		return false, nil
 	}
 
@@ -168,7 +136,7 @@ func (r *Reconciler) scan(isr api.ImageScanRequest) (bool, error) {
 		return false, err
 	}
 
-	if resp.Visibility == trivy.BackendVisibilityPrivate {
+	if resp.Visibility == trivy.ImageVisibilityPrivate {
 		return false, r.ScanForPrivateImage(isr)
 	}
 
@@ -178,27 +146,11 @@ func (r *Reconciler) scan(isr api.ImageScanRequest) (bool, error) {
 	}
 
 	// Report related stuffs for private image will be done by `scanner upload-report` command in job's container.
-	rep, err := EnsureScanReport(r.Client, isr.Spec.Image, resp.Report, resp.TrivyVersion)
+	rep, err := EnsureScanReport(r.Client, isr.Spec.Image, resp)
 	if err != nil {
 		return false, err
 	}
-	return false, UpdateStatusAsReportEnsured(r.Client, isr, rep)
-}
-
-func tagAndDigest(img string) (string, string, error) {
-	var (
-		tag name.Tag
-		dig name.Digest
-		err error
-	)
-	tag, err = name.NewTag(img)
-	if err != nil {
-		dig, err = name.NewDigest(img)
-		if err != nil {
-			return "", "", err
-		}
-	}
-	return tag.TagStr(), dig.DigestStr(), nil
+	return false, r.updateStatusAsReportEnsured(isr, rep)
 }
 
 // SetupWithManager sets up the controller with the Manager.

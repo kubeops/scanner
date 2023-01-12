@@ -27,6 +27,7 @@ import (
 
 	"kubeops.dev/scanner/apis/trivy"
 
+	"github.com/google/go-containerregistry/pkg/authn"
 	"github.com/google/go-containerregistry/pkg/crane"
 	"github.com/google/go-containerregistry/pkg/name"
 	_ "gocloud.dev/blob/s3blob"
@@ -57,20 +58,6 @@ func NewBlobFS() blobfs.Interface {
 }
 
 func (mgr *Manager) getBucketResponse(img string) (*trivy.BackendResponse, error) {
-	data, err := mgr.read(img)
-	if err != nil {
-		return nil, err
-	}
-	var resp trivy.BackendResponse
-	err = trivy.JSON.Unmarshal(data, &resp)
-	if err != nil {
-		return nil, err
-	}
-	return &resp, nil
-}
-
-func (mgr *Manager) read(img string) ([]byte, error) {
-	klog.InfoS("working on", "image", img)
 	data, err := ReadFromBucket(mgr.fs, img)
 	if err != nil {
 		s := ErrorToAPIStatus(err)
@@ -92,31 +79,37 @@ func (mgr *Manager) read(img string) ([]byte, error) {
 			}()
 		}
 	}
-	return data, err
-}
 
-const ReportFileName = "report.json"
-
-func ReadFromBucket(fs blobfs.Interface, img string) ([]byte, error) {
-	repo, digest, err := ParseReference(img)
+	var resp trivy.BackendResponse
+	err = trivy.JSON.Unmarshal(data, &resp)
 	if err != nil {
 		return nil, err
 	}
-	return fs.ReadFile(context.TODO(), path.Join(repo, digest, ReportFileName))
+	return &resp, nil
+}
+
+const reportFileName = "report.json"
+
+func ReadFromBucket(fs blobfs.Interface, img string) ([]byte, error) {
+	repo, digest, err := parseReference(img)
+	if err != nil {
+		return nil, err
+	}
+	return fs.ReadFile(context.TODO(), path.Join(repo, digest, reportFileName))
 }
 
 func ExistsReport(fs blobfs.Interface, img string) (bool, error) {
-	repo, digest, err := ParseReference(img)
+	repo, digest, err := parseReference(img)
 	if err != nil {
 		return false, err
 	}
-	exists, err := fs.Exists(context.TODO(), path.Join(repo, digest, ReportFileName))
+	exists, err := fs.Exists(context.TODO(), path.Join(repo, digest, reportFileName))
 	if err != nil || !exists {
 		return false, err
 	}
 
 	//// If file exists, & it is more than 6 hours old, We consider it as if it doesn't exist.
-	read, err := fs.ReadFile(context.TODO(), path.Join(repo, digest, ReportFileName))
+	read, err := fs.ReadFile(context.TODO(), path.Join(repo, digest, reportFileName))
 	if err != nil {
 		return false, err
 	}
@@ -125,19 +118,14 @@ func ExistsReport(fs blobfs.Interface, img string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	if time.Since(res.Report.LastModificationTime.Time) > time.Hour*6 {
+	if time.Since(res.LastModificationTime.Time) > TrivyUpdationPeriod {
 		return false, nil
 	}
 	return true, nil
 }
 
 func UploadReport(fs blobfs.Interface, img string) error {
-	rep, _, err := scan(img)
-	if err != nil {
-		return err
-	}
-
-	repo, digest, err := ParseReference(img)
+	rep, err := scan(img)
 	if err != nil {
 		return err
 	}
@@ -148,28 +136,27 @@ func UploadReport(fs blobfs.Interface, img string) error {
 	}
 
 	resp := trivy.BackendResponse{
-		Report:       *rep,
-		TrivyVersion: *ver,
-		Visibility:   trivy.BackendVisibilityPublic,
+		Report:               *rep,
+		TrivyVersion:         *ver,
+		Visibility:           trivy.ImageVisibilityPublic,
+		LastModificationTime: trivy.Time{Time: time.Now()},
 	}
 	marshaledResp, err := trivy.JSON.Marshal(&resp)
 	if err != nil {
 		return err
 	}
 
-	return fs.WriteFile(context.TODO(), path.Join(repo, digest, ReportFileName), marshaledResp)
+	repo, digest, err := parseReference(img)
+	if err != nil {
+		return err
+	}
+
+	return fs.WriteFile(context.TODO(), path.Join(repo, digest, reportFileName), marshaledResp)
 }
 
 // trivy image ubuntu --security-checks vuln --format json --quiet
-func scan(img string) (*trivy.SingleReport, []byte, error) {
-	sh := shell.NewSession()
-	// sh.SetEnv("BUILD_ID", "123")
-	sh.SetDir("/tmp")
-
-	sh.ShowCMD = true
-	sh.Stdout = os.Stdout
-	sh.Stderr = os.Stderr
-
+func scan(img string) (*trivy.SingleReport, error) {
+	sh := getNewShell()
 	args := []any{
 		"image",
 		img,
@@ -179,31 +166,19 @@ func scan(img string) (*trivy.SingleReport, []byte, error) {
 	}
 	out, err := sh.Command("trivy", args...).Output()
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	var r trivy.SingleReport
 	err = trivy.JSON.Unmarshal(out, &r)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-	r.LastModificationTime = trivy.Time{Time: time.Now()}
-	out, err = trivy.JSON.Marshal(r)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return &r, out, nil
+	return &r, nil
 }
 
 func getVersionInfo() (*trivy.Version, error) {
-	sh := shell.NewSession()
-	sh.SetDir("/tmp")
-
-	sh.ShowCMD = true
-	sh.Stdout = os.Stdout
-	sh.Stderr = os.Stderr
-
+	sh := getNewShell()
 	args := []any{
 		"version",
 		"--format", "json",
@@ -222,7 +197,17 @@ func getVersionInfo() (*trivy.Version, error) {
 	return &ver, nil
 }
 
-func ParseReference(img string) (repo string, digest string, err error) {
+func getNewShell() *shell.Session {
+	sh := shell.NewSession()
+	sh.SetDir("/tmp")
+
+	sh.ShowCMD = true
+	sh.Stdout = os.Stdout
+	sh.Stderr = os.Stderr
+	return sh
+}
+
+func parseReference(img string) (repo string, digest string, err error) {
 	ref, err := name.ParseReference(img)
 	if err != nil {
 		return
@@ -232,6 +217,6 @@ func ParseReference(img string) (repo string, digest string, err error) {
 		digest = ref.Identifier()
 		return
 	}
-	digest, err = crane.Digest(img)
+	digest, err = crane.Digest(img, crane.WithAuthFromKeychain(authn.DefaultKeychain))
 	return
 }

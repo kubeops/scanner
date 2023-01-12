@@ -17,16 +17,17 @@ limitations under the License.
 package trivy
 
 type BackendResponse struct {
-	Report       SingleReport      `json:"report"`
-	TrivyVersion Version           `json:"trivyVersion"`
-	Visibility   BackendVisibility `json:"visibility"`
+	Report               SingleReport    `json:"report"`
+	TrivyVersion         Version         `json:"trivyVersion"`
+	Visibility           ImageVisibility `json:"visibility"`
+	LastModificationTime Time            `json:"lastModificationTime"`
 }
 
 // +kubebuilder:validation:Enum=Public;Private;Unknown
-type BackendVisibility string
+type ImageVisibility string
 
 const (
-	BackendVisibilityPublic  BackendVisibility = "Public"
-	BackendVisibilityPrivate BackendVisibility = "Private"
-	BackendVisibilityUnknown BackendVisibility = "Unknown"
+	ImageVisibilityPublic  ImageVisibility = "Public"
+	ImageVisibilityPrivate ImageVisibility = "Private"
+	ImageVisibilityUnknown ImageVisibility = "Unknown"
 )

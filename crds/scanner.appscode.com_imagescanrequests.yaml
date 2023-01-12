@@ -78,6 +78,7 @@ spec:
                     enum:
                     - Public
                     - Private
+                    - Unknown
                     type: string
                 type: object
               jobName:
