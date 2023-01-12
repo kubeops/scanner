@@ -485,10 +485,12 @@ install:
 	@cd ../installer; \
 	helm upgrade -i scanner charts/scanner --wait \
 		--namespace=$(KUBE_NAMESPACE) --create-namespace \
+		--set registryFQDN="" \
 		--set app.registry=$(REGISTRY) \
 		--set app.tag=$(TAG_PROD) \
 		--set imagePullPolicy=$(IMAGE_PULL_POLICY) \
 		--set-file license=$(LICENSE_FILE) \
+		--set imagePullSecrets[0].name=pull-secret \
 		--set nats.addr=$(NATS_ADDR) \
 		--set nats.auth.username=$(NATS_USERNAME) \
 		--set nats.auth.password=$(NATS_PASSWORD) \

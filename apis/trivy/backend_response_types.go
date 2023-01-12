@@ -17,8 +17,9 @@ limitations under the License.
 package trivy
 
 type BackendResponse struct {
-	Report     SingleReport      `json:"report"`
-	Visibility BackendVisibility `json:"visibility"`
+	Report       SingleReport      `json:"report"`
+	TrivyVersion Version           `json:"trivyVersion"`
+	Visibility   BackendVisibility `json:"visibility"`
 }
 
 // +kubebuilder:validation:Enum=Public;Private;Unknown

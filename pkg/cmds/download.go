@@ -42,7 +42,7 @@ func NewCmdDownload() *cobra.Command {
 				return err
 			}
 
-			data, err := backend.DownloadReport(backend.NewBlobFS(), img)
+			data, err := backend.ReadFromBucket(backend.NewBlobFS(), img)
 			// gocloud.dev/gcerrors.NotFound (2)
 			if err != nil {
 				if gcerrors.Code(err) == gcerrors.NotFound {

@@ -178,7 +178,11 @@ func (r *Reconciler) scan(isr api.ImageScanRequest) (bool, error) {
 	}
 
 	// Report related stuffs for private image will be done by `scanner upload-report` command in job's container.
-	return false, r.doReportRelatedStuffs(isr)
+	rep, err := EnsureScanReport(r.Client, isr.Spec.Image, resp.Report, resp.TrivyVersion)
+	if err != nil {
+		return false, err
+	}
+	return false, UpdateStatusAsReportEnsured(r.Client, isr, rep)
 }
 
 func tagAndDigest(img string) (string, string, error) {

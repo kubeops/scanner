@@ -24,7 +24,6 @@ import (
 
 	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
 	"kubeops.dev/scanner/apis/trivy"
-	"kubeops.dev/scanner/pkg/backend"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/klog/v2"
@@ -33,23 +32,6 @@ import (
 	"kmodules.xyz/go-containerregistry/name"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
-
-func (r *Reconciler) doReportRelatedStuffs(isr api.ImageScanRequest) error {
-	report, err := backend.GetReport(r.nc, isr.Spec.Image)
-	if err != nil {
-		return err
-	}
-	ver, err := backend.GetVersionInfo(r.nc, isr.Spec.Image)
-	if err != nil {
-		return err
-	}
-
-	rep, err := EnsureScanReport(r.Client, isr.Spec.Image, report, ver)
-	if err != nil {
-		return err
-	}
-	return UpdateStatusAsReportEnsured(r.Client, isr, rep)
-}
 
 func EnsureScanReport(kc client.Client, imageRef string, singleReport trivy.SingleReport, versionInfo trivy.Version) (*api.ImageScanReport, error) {
 	img, err := name.ParseReference(imageRef)

@@ -18,9 +18,7 @@ package backend
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"net/http"
 	"os"
 	"runtime"
 	"strings"
@@ -98,61 +96,8 @@ func New(nc *nats.Conn, opts Options) *Manager {
 	}
 }
 
-const (
-	RespondTypeReport  = "report"
-	RespondTypeVersion = "version"
-)
-
 func (mgr *Manager) Start(ctx context.Context, jsmOpts ...nats.JSOpt) error {
-	queueSubscribeMsgHandler := func(resType string) nats.MsgHandler {
-		return func(msg *nats.Msg) {
-			img := string(msg.Data)
-			klog.InfoS(msg.Subject, "image", img)
-
-			var data []byte
-			var err error
-			if resType == RespondTypeReport {
-				data, err = DownloadReport(mgr.fs, img)
-			} else if resType == RespondTypeVersion {
-				data, err = DownloadVersionInfo(mgr.fs, img)
-			}
-			if err != nil {
-				s := ErrorToAPIStatus(err)
-				data, _ = json.Marshal(s)
-				if s.Code == http.StatusNotFound {
-					err = mgr.submitScanRequest(img)
-					if err != nil {
-						klog.ErrorS(err, "failed to parse or get", "image", img)
-						return
-					}
-				} else if s.Code == http.StatusTooManyRequests {
-					go func() {
-						time.Sleep(dockerHubRateLimitDelay)
-						err = mgr.submitScanRequest(img)
-						if err != nil {
-							klog.ErrorS(err, "failed to parse or get", "image", img)
-							return
-						}
-					}()
-				}
-			}
-			if err = msg.Respond(data); err != nil {
-				klog.ErrorS(err, "failed to respond to", "image", img)
-			}
-		}
-	}
-
-	_, err := mgr.nc.QueueSubscribe(fmt.Sprintf("%s.report", mgr.stream), "scanner-backend", queueSubscribeMsgHandler(RespondTypeReport))
-	if err != nil {
-		return err
-	}
-
-	_, err = mgr.nc.QueueSubscribe(fmt.Sprintf("%s.version", mgr.stream), "scanner-backend", queueSubscribeMsgHandler(RespondTypeVersion))
-	if err != nil {
-		return err
-	}
-
-	err = mgr.addBackendSubscription()
+	err := mgr.addBackendSubscription()
 	if err != nil {
 		return err
 	}
@@ -219,11 +164,7 @@ func (mgr *Manager) addBackendSubscription() error {
 		}
 		return isPrivate, nil
 	}
-	getMarshalledResponse := func(report trivy.SingleReport, vis trivy.BackendVisibility) ([]byte, error) {
-		resp := trivy.BackendResponse{
-			Report:     report,
-			Visibility: vis,
-		}
+	getMarshalledResponse := func(resp *trivy.BackendResponse) ([]byte, error) {
 		ret, err := trivy.JSON.Marshal(resp)
 		if err != nil {
 			return nil, err
@@ -251,22 +192,24 @@ func (mgr *Manager) addBackendSubscription() error {
 		}
 
 		if exists {
-			report, err := GetReport(mgr.nc, img)
+			resp, err := mgr.getBucketResponse(img)
 			if err != nil {
 				return
 			}
 
-			resp, err := getMarshalledResponse(report, trivy.BackendVisibilityPublic)
+			marshalledResponse, err := getMarshalledResponse(resp)
 			if err != nil {
 				return
 			}
-			_ = msg.Respond(resp)
+			_ = msg.Respond(marshalledResponse)
 			return
 		}
 		private, err := checkPrivate(img)
 		if err != nil {
 			klog.Infof("Image %s is not pullable from scanner backend side", img)
-			resp, err := getMarshalledResponse(trivy.SingleReport{}, trivy.BackendVisibilityUnknown)
+			resp, err := getMarshalledResponse(&trivy.BackendResponse{
+				Visibility: trivy.BackendVisibilityUnknown,
+			})
 			if err != nil {
 				return
 			}
@@ -274,7 +217,9 @@ func (mgr *Manager) addBackendSubscription() error {
 			return
 		}
 		if private {
-			resp, err := getMarshalledResponse(trivy.SingleReport{}, trivy.BackendVisibilityPrivate)
+			resp, err := getMarshalledResponse(&trivy.BackendResponse{
+				Visibility: trivy.BackendVisibilityPrivate,
+			})
 			if err != nil {
 				return
 			}
@@ -285,7 +230,9 @@ func (mgr *Manager) addBackendSubscription() error {
 		if err != nil {
 			return
 		}
-		resp, err := getMarshalledResponse(trivy.SingleReport{}, trivy.BackendVisibilityPublic)
+		resp, err := getMarshalledResponse(&trivy.BackendResponse{
+			Visibility: trivy.BackendVisibilityPublic,
+		})
 		if err != nil {
 			return
 		}
@@ -322,17 +269,17 @@ func (mgr *Manager) addConsumer(jsm nats.JetStreamContext, consumerName string) 
 		AckPolicy: ackPolicy,
 		AckWait:   mgr.ackWait, // TODO: max for any task type
 		// The number of pulls that can be outstanding on a pull consumer, pulls received after this is reached are ignored
-		MaxWaiting: 1,
+		// MaxWaiting: 1,
 		// max working set
 		MaxAckPending: mgr.numReplicas * mgr.numWorkersPerReplica,
 		// one request per worker
-		MaxRequestBatch: 1,
+		// MaxRequestBatch: 1,
 		// max_expires the max amount of time that a pull request with an expires should be allowed to remain active
-		MaxRequestExpires: 1 * time.Second,
-		DeliverPolicy:     nats.DeliverAllPolicy,
-		MaxDeliver:        5,
-		FilterSubject:     "",
-		ReplayPolicy:      nats.ReplayInstantPolicy,
+		// MaxRequestExpires: 1 * time.Second,
+		DeliverPolicy: nats.DeliverAllPolicy,
+		MaxDeliver:    5,
+		FilterSubject: "",
+		ReplayPolicy:  nats.ReplayInstantPolicy,
 	})
 	if err != nil && !strings.Contains(err.Error(), "nats: consumer name already in use") {
 		return err
@@ -345,11 +292,13 @@ func (mgr *Manager) submitScanRequest(img string) error {
 }
 
 func SubmitScanRequest(nc *nats.Conn, subj string, img string) error {
-	if _, err := nc.Request(subj, []byte(img), natsScanRequestTimeout); err != nil {
+	msg, err := nc.Request(subj, []byte(img), 5*time.Second)
+	if err != nil {
 		klog.ErrorS(err, "failed submit scan request", "image", img)
 		return err
 	} else {
-		klog.InfoS("submitted scan request", "image", img)
+		klog.InfoS("submitted scan request", "image", img, "subj", subj)
+		klog.Infof("%+v", msg)
 		return nil
 	}
 }
@@ -369,11 +318,12 @@ func (mgr *Manager) runWorker() {
 
 func (mgr *Manager) processNextMsg() (err error) {
 	var msgs []*nats.Msg
-	msgs, err = mgr.scanSub.Fetch(1, nats.MaxWait(50*time.Millisecond))
+	msgs, err = mgr.scanSub.Fetch(1, nats.MaxWait(5*time.Second))
 	if err != nil || len(msgs) == 0 {
+		klog.Error(err)
 		// no more msg to process
 		err = errors.Wrap(err, "failed to fetch msg")
-		return
+		return err
 	}
 
 	img := string(msgs[0].Data)
