@@ -26,6 +26,7 @@ import (
 
 	"github.com/nats-io/nats.go"
 	batch "k8s.io/api/batch/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -41,6 +42,7 @@ type Reconciler struct {
 	trivyImage         string
 	trivyDBCacherImage string
 	fileServerAddr     string
+	isr                api.ImageScanRequest
 }
 
 func NewImageScanRequestReconciler(kc client.Client, nc *nats.Conn, scannedImage, trivyImage, trivyDBCacherImage, fsAddr string) *Reconciler {
@@ -67,25 +69,31 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		// on deleted requests.
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
+	r.isr = isr
 
-	if !r.isReconciliationNeeded(isr) {
+	if !r.isReconciliationNeeded() {
 		return ctrl.Result{}, nil
 	}
-	if isr.Status.ReportRef == nil && isr.Status.JobName != "" {
-		// For Private Images, Job is still running case.
-		if r.isJobSucceeded(isr) {
-			return ctrl.Result{RequeueAfter: backend.TrivyUpdationPeriod}, r.updateStatusWithReportDetails(isr)
+	if isr.Status.JobName != "" { // Only for Private Images
+		job, err := r.getScannerJob()
+		if err != nil && !errors.IsNotFound(err) {
+			return ctrl.Result{}, err
 		}
+
+		if r.isRunning(job) && job.Status.Succeeded > 0 {
+			return ctrl.Result{RequeueAfter: backend.TrivyUpdationPeriod}, r.updateStatusWithReportDetails()
+		}
+
 	}
 
 	if isr.Status.Phase == "" {
-		if err := r.setDefaultStatus(isr); err != nil {
+		if err := r.setDefaultStatus(); err != nil {
 			return ctrl.Result{}, err
 		}
 	}
 
 	// We are here means, Phase is Pending or Outdated
-	fasterRequeueNeeded, err := r.scan(isr)
+	fasterRequeueNeeded, err := r.scan()
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -95,49 +103,62 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	return ctrl.Result{RequeueAfter: backend.TrivyUpdationPeriod}, nil
 }
 
-func (r *Reconciler) isReconciliationNeeded(isr api.ImageScanRequest) bool {
-	rep := isr.Status.ReportRef
+func (r *Reconciler) isReconciliationNeeded() bool {
+	rep := r.isr.Status.ReportRef
 	if rep == nil {
 		return true
 	}
 	if rep != nil && time.Since(rep.LastChecked.Time) > backend.TrivyUpdationPeriod {
 		// report is older than 6 hours
-		_ = r.updateStatusAsOutdated(isr)
+		_ = r.updateStatusAsOutdated()
 		return true
 	}
 	return false
 }
 
-func (r *Reconciler) isJobSucceeded(isr api.ImageScanRequest) bool {
+func (r *Reconciler) getScannerJob() (*batch.Job, error) {
 	var job batch.Job
 	err := r.Get(r.ctx, types.NamespacedName{
-		Name:      isr.Status.JobName,
-		Namespace: isr.Spec.Namespace,
+		Name:      r.isr.Status.JobName,
+		Namespace: r.isr.Spec.Namespace,
 	}, &job)
 	if err != nil {
-		klog.Errorf("error %v on getting %v/%v job \n", err, isr.Spec.Namespace, isr.Status.JobName)
-		return false
+		klog.Errorf("error %v on getting %v/%v job \n", err, r.isr.Spec.Namespace, r.isr.Status.JobName)
+		return nil, err
 	}
-	return job.Status.Succeeded > 0
+	return &job, nil
 }
 
-func (r *Reconciler) scan(isr api.ImageScanRequest) (bool, error) {
-	resp, err := backend.GetResponseFromBackend(r.nc, isr.Spec.Image)
+func (r *Reconciler) isRunning(job *batch.Job) bool {
+	if r.isr.Status.ReportRef == nil {
+		return true
+	}
+	if job == nil {
+		return false
+	}
+	if r.isr.Status.Phase == api.ImageScanRequestPhaseOutdated && time.Since(job.CreationTimestamp.Time) < time.Minute*10 {
+		return true
+	}
+	return false
+}
+
+func (r *Reconciler) scan() (bool, error) {
+	resp, err := backend.GetResponseFromBackend(r.nc, r.isr.Spec.Image)
 	if err != nil {
 		return false, err
 	}
 	if resp.Visibility == trivy.ImageVisibilityUnknown {
-		klog.Infof("visibility of %s image is unknown \n", isr.Spec.Image)
+		klog.Infof("visibility of %s image is unknown \n", r.isr.Spec.Image)
 		return false, nil
 	}
 
-	err = r.updateStatusWithImageDetails(isr, resp.Visibility)
+	err = r.updateStatusWithImageDetails(resp.Visibility)
 	if err != nil {
 		return false, err
 	}
 
 	if resp.Visibility == trivy.ImageVisibilityPrivate {
-		return false, r.ScanForPrivateImage(isr)
+		return false, r.ScanForPrivateImage()
 	}
 
 	// if the report is not generated yet (just submitted for scanning)
@@ -146,11 +167,11 @@ func (r *Reconciler) scan(isr api.ImageScanRequest) (bool, error) {
 	}
 
 	// Report related stuffs for private image will be done by `scanner upload-report` command in job's container.
-	rep, err := EnsureScanReport(r.Client, isr.Spec.Image, resp)
+	rep, err := EnsureScanReport(r.Client, r.isr.Spec.Image, resp)
 	if err != nil {
 		return false, err
 	}
-	return false, r.updateStatusAsReportEnsured(isr, rep)
+	return false, r.updateStatusAsReportEnsured(rep)
 }
 
 // SetupWithManager sets up the controller with the Manager.

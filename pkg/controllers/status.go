@@ -27,11 +27,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func (r *Reconciler) setDefaultStatus(isr api.ImageScanRequest) error {
-	_, _, err := cu.PatchStatus(r.ctx, r.Client, &isr, func(obj client.Object) client.Object {
+func (r *Reconciler) setDefaultStatus() error {
+	_, _, err := cu.PatchStatus(r.ctx, r.Client, &r.isr, func(obj client.Object) client.Object {
 		in := obj.(*api.ImageScanRequest)
 		in.Status.Image = &api.ImageDetails{
-			Name: isr.Spec.Image,
+			Name: r.isr.Spec.Image,
 		}
 		in.Status.Phase = api.ImageScanRequestPhasePending
 		return in
@@ -39,13 +39,13 @@ func (r *Reconciler) setDefaultStatus(isr api.ImageScanRequest) error {
 	return err
 }
 
-func (r *Reconciler) updateStatusWithImageDetails(isr api.ImageScanRequest, vis trivy.ImageVisibility) error {
-	tag, dig, err := tagAndDigest(isr.Spec.Image)
+func (r *Reconciler) updateStatusWithImageDetails(vis trivy.ImageVisibility) error {
+	tag, dig, err := tagAndDigest(r.isr.Spec.Image)
 	if err != nil {
 		return err
 	}
 
-	_, _, err = cu.PatchStatus(r.ctx, r.Client, &isr, func(obj client.Object) client.Object {
+	_, _, err = cu.PatchStatus(r.ctx, r.Client, &r.isr, func(obj client.Object) client.Object {
 		in := obj.(*api.ImageScanRequest)
 		in.Status.Image.Visibility = vis
 		in.Status.Image.Tag = tag
@@ -56,8 +56,8 @@ func (r *Reconciler) updateStatusWithImageDetails(isr api.ImageScanRequest, vis 
 	return err
 }
 
-func (r *Reconciler) updateStatusWithJobName(isr api.ImageScanRequest, jobName string, vt kutil.VerbType) error {
-	_, _, err := cu.PatchStatus(r.ctx, r.Client, &isr, func(obj client.Object) client.Object {
+func (r *Reconciler) updateStatusWithJobName(jobName string, vt kutil.VerbType) error {
+	_, _, err := cu.PatchStatus(r.ctx, r.Client, &r.isr, func(obj client.Object) client.Object {
 		in := obj.(*api.ImageScanRequest)
 		in.Status.JobName = jobName
 		if vt == kutil.VerbCreated {
@@ -69,8 +69,8 @@ func (r *Reconciler) updateStatusWithJobName(isr api.ImageScanRequest, jobName s
 	return err
 }
 
-func (r *Reconciler) updateStatusAsReportEnsured(isr api.ImageScanRequest, rep *api.ImageScanReport) error {
-	_, _, err := cu.PatchStatus(r.ctx, r.Client, &isr, func(obj client.Object) client.Object {
+func (r *Reconciler) updateStatusAsReportEnsured(rep *api.ImageScanReport) error {
+	_, _, err := cu.PatchStatus(r.ctx, r.Client, &r.isr, func(obj client.Object) client.Object {
 		in := obj.(*api.ImageScanRequest)
 		in.Status.ReportRef = &api.ScanReportRef{
 			Name:        rep.GetName(),
@@ -82,8 +82,8 @@ func (r *Reconciler) updateStatusAsReportEnsured(isr api.ImageScanRequest, rep *
 	return err
 }
 
-func (r *Reconciler) updateStatusAsOutdated(isr api.ImageScanRequest) error {
-	_, _, err := cu.PatchStatus(r.ctx, r.Client, &isr, func(obj client.Object) client.Object {
+func (r *Reconciler) updateStatusAsOutdated() error {
+	_, _, err := cu.PatchStatus(r.ctx, r.Client, &r.isr, func(obj client.Object) client.Object {
 		in := obj.(*api.ImageScanRequest)
 		in.Status.Phase = api.ImageScanRequestPhaseOutdated
 		return in
@@ -91,8 +91,8 @@ func (r *Reconciler) updateStatusAsOutdated(isr api.ImageScanRequest) error {
 	return err
 }
 
-func (r *Reconciler) updateStatusWithReportDetails(isr api.ImageScanRequest) error {
-	img, err := kname.ParseReference(isr.Spec.Image)
+func (r *Reconciler) updateStatusWithReportDetails() error {
+	img, err := kname.ParseReference(r.isr.Spec.Image)
 	if err != nil {
 		return err
 	}
@@ -105,11 +105,11 @@ func (r *Reconciler) updateStatusWithReportDetails(isr api.ImageScanRequest) err
 		return err
 	}
 
-	_, _, err = cu.PatchStatus(r.ctx, r.Client, &isr, func(obj client.Object) client.Object {
+	_, _, err = cu.PatchStatus(r.ctx, r.Client, &r.isr, func(obj client.Object) client.Object {
 		in := obj.(*api.ImageScanRequest)
 		in.Status.ReportRef = &api.ScanReportRef{
 			Name:        getReportName(img.Name),
-			LastChecked: trivy.Time(rep.ObjectMeta.CreationTimestamp),
+			LastChecked: rep.Status.LastChecked,
 		}
 		in.Status.Phase = api.ImageScanRequestPhaseCurrent
 		return in

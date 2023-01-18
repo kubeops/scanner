@@ -46,7 +46,8 @@ const (
 	containerUploader = "uploader"
 )
 
-func (r *Reconciler) ScanForPrivateImage(isr api.ImageScanRequest) error {
+func (r *Reconciler) ScanForPrivateImage() error {
+	isr := r.isr
 	ensureVolumeMounts := func(pt *core.PodTemplateSpec) {
 		mount := core.VolumeMount{
 			MountPath: WorkDir,
@@ -155,5 +156,5 @@ func (r *Reconciler) ScanForPrivateImage(isr api.ImageScanRequest) error {
 	if vt == kutil.VerbCreated {
 		klog.Infof("Scanner job %v/%v created", obj.GetNamespace(), obj.GetName())
 	}
-	return r.updateStatusWithJobName(isr, obj.GetName(), vt)
+	return r.updateStatusWithJobName(obj.GetName(), vt)
 }
