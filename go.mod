@@ -14,8 +14,8 @@ require (
 	github.com/spf13/pflag v1.0.5
 	go.bytebuilders.dev/audit v0.0.26
 	go.bytebuilders.dev/license-proxyserver v0.0.2
-	go.bytebuilders.dev/license-verifier v0.12.1
-	go.bytebuilders.dev/license-verifier/kubernetes v0.12.1
+	go.bytebuilders.dev/license-verifier v0.12.2
+	go.bytebuilders.dev/license-verifier/kubernetes v0.12.2
 	go.uber.org/automaxprocs v1.5.1
 	go.wandrs.dev/http v0.0.2
 	gocloud.dev v0.27.0
@@ -54,6 +54,7 @@ require (
 	github.com/Masterminds/semver/v3 v3.1.1 // indirect
 	github.com/Masterminds/sprig/v3 v3.2.2 // indirect
 	github.com/NYTimes/gziphandler v1.1.1 // indirect
+	github.com/PuerkitoBio/purell v1.2.0 // indirect
 	github.com/aws/aws-sdk-go v1.44.100 // indirect
 	github.com/aws/aws-sdk-go-v2 v1.17.3 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.4.3 // indirect

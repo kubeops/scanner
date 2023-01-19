@@ -212,6 +212,8 @@ github.com/NYTimes/gziphandler v1.1.1/go.mod h1:n/CVRwUEOgIxrgPvAQhUUr9oeUtvrhMo
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/PuerkitoBio/purell v1.0.0/go.mod h1:c11w/QuzBsJSee3cPx9rAFu61PvFxuPbtSwDGJws/X0=
 github.com/PuerkitoBio/purell v1.1.1/go.mod h1:c11w/QuzBsJSee3cPx9rAFu61PvFxuPbtSwDGJws/X0=
+github.com/PuerkitoBio/purell v1.2.0 h1:/Jdm5QfyM8zdlqT6WVZU4cfP23sot6CEHA4CS49Ezig=
+github.com/PuerkitoBio/purell v1.2.0/go.mod h1:OhLRTaaIzhvIyofkJfB24gokC7tM42Px5UhoT32THBk=
 github.com/PuerkitoBio/urlesc v0.0.0-20160726150825-5bd2802263f2/go.mod h1:uGdkoq3SwY9Y+13GIhn11/XLaGBb4BfwItxLd5jeuXE=
 github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578/go.mod h1:uGdkoq3SwY9Y+13GIhn11/XLaGBb4BfwItxLd5jeuXE=
 github.com/Shopify/logrus-bugsnag v0.0.0-20171204204709-577dee27f20d/go.mod h1:HI8ITrYtUY+O+ZhtlqUnD8+KwNPOyugEhfP9fdUIaEQ=
@@ -1621,10 +1623,10 @@ go.bytebuilders.dev/audit v0.0.26 h1:YwYWHSEq0QGs0Vk81FqouvGsyG+GYRzB/1Ywt6r68S4
 go.bytebuilders.dev/audit v0.0.26/go.mod h1:itgg6k3gNmSjR8fY8Sk1cP9TD5O2KNIc4x4MCA7EmD0=
 go.bytebuilders.dev/license-proxyserver v0.0.2 h1:f4A3AVex9+lGqjuUqJx81ccphFPoIbCHrnGe6eVKPcA=
 go.bytebuilders.dev/license-proxyserver v0.0.2/go.mod h1:iMJbPzDf2R2EJOZwRi7ziEr5DBMfT9Cm75/XfPb/QnU=
-go.bytebuilders.dev/license-verifier v0.12.1 h1:2bQJ8naHTv0a04/x+luoabCGQ37VuaccA7Yz5fVPHaU=
-go.bytebuilders.dev/license-verifier v0.12.1/go.mod h1:47HPt3RVp9gsujYpOeXi28IsTV5lilZ+EOpuhz/DIJM=
-go.bytebuilders.dev/license-verifier/kubernetes v0.12.1 h1:Xr2AiglEgVhFZ2JzhPMCGWniEx037eT6UKEFS3DsdiA=
-go.bytebuilders.dev/license-verifier/kubernetes v0.12.1/go.mod h1:mJMkwXOfV4mHu75hcMFQru3y3AeITyNjCMwii5/Vrpk=
+go.bytebuilders.dev/license-verifier v0.12.2 h1:S+4BMR1E7Ii6qDYKDYzt9+VgMRsOyQvdOiwHhLJ6wCc=
+go.bytebuilders.dev/license-verifier v0.12.2/go.mod h1:ahObOawJ+6AuFZUBZi6Dp3g4Q9AboqD97eH+bQPsLQw=
+go.bytebuilders.dev/license-verifier/kubernetes v0.12.2 h1:GKnv+ogzupp3TRGCFrDetMgHmcjV5rS/MOtedKVwPj0=
+go.bytebuilders.dev/license-verifier/kubernetes v0.12.2/go.mod h1:58EvQUGBVo66VFLkmz9HXUd/VkfmSZvft0UNeDj4Myk=
 go.etcd.io/bbolt v1.3.2/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
 go.etcd.io/bbolt v1.3.3/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
 go.etcd.io/bbolt v1.3.5/go.mod h1:G5EMThwa9y8QZGBClrRx5EY+Yw9kAhnjy3bSjsnlVTQ=

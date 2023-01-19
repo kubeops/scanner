@@ -18,10 +18,12 @@ package cmds
 
 import (
 	"context"
+	"net"
 
 	"kubeops.dev/scanner/pkg/backend"
 
 	"github.com/spf13/cobra"
+	"go.bytebuilders.dev/license-verifier/info"
 )
 
 func NewCmdBackend(ctx context.Context) *cobra.Command {
@@ -34,6 +36,14 @@ func NewCmdBackend(ctx context.Context) *cobra.Command {
 		Short:             "Scanner backend",
 		DisableAutoGenTag: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			host, _, err := net.SplitHostPort(addr)
+			if err != nil {
+				return err
+			}
+			if info.HostedDomain(host) {
+				backend.DeploymentMode = backend.Production
+			}
+
 			nc, err := backend.NewConnection(addr, credFile)
 			if err != nil {
 				return err

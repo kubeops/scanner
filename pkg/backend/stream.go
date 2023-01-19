@@ -100,6 +100,15 @@ const (
 	TrivyUpdationPeriod time.Duration = time.Hour * 6
 )
 
+type deploymentMode int8
+
+const (
+	Dev deploymentMode = iota
+	Production
+)
+
+var DeploymentMode = Dev
+
 func (mgr *Manager) Start(ctx context.Context, jsmOpts ...nats.JSOpt) error {
 	jsm, err := mgr.ensureStream(jsmOpts...)
 	if err != nil {
@@ -164,8 +173,14 @@ func (mgr *Manager) ensureStream(jsmOpts ...nats.JSOpt) (nats.JetStreamContext, 
 }
 
 func (mgr *Manager) addBackendSubscription() error {
+	sub := ReportSubject
+	if DeploymentMode == Production {
+		// Because production backends use cross account request/reply services
+		sub += ".*"
+	}
+
 	for i := 0; i < mgr.numWorkersPerReplica; i++ {
-		_, err := mgr.nc.QueueSubscribe(ReportSubject, "backend-task", mgr.getMessageQueueHandler())
+		_, err := mgr.nc.QueueSubscribe(sub, "backend-task", mgr.getMessageQueueHandler())
 		if err != nil {
 			return err
 		}
