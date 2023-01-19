@@ -194,11 +194,11 @@ func (mgr *Manager) addConsumer(jsm nats.JetStreamContext, consumerName string) 
 		AckPolicy: ackPolicy,
 		AckWait:   mgr.ackWait, // TODO: max for any task type
 		// The number of pulls that can be outstanding on a pull consumer, pulls received after this is reached are ignored
-		// MaxWaiting: 1,
+		MaxWaiting: 1,
 		// max working set
 		MaxAckPending: mgr.numReplicas * mgr.numWorkersPerReplica,
 		// one request per worker
-		// MaxRequestBatch: 1,
+		MaxRequestBatch: 1,
 		// max_expires the max amount of time that a pull request with an expires should be allowed to remain active
 		// MaxRequestExpires: 1 * time.Second,
 		DeliverPolicy: nats.DeliverAllPolicy,
