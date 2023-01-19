@@ -8,11 +8,11 @@ require (
 	github.com/google/go-containerregistry v0.12.1
 	github.com/google/gofuzz v1.2.0
 	github.com/json-iterator/go v1.1.12
-	github.com/nats-io/nats.go v1.22.1
+	github.com/nats-io/nats.go v1.23.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.6.0
 	github.com/spf13/pflag v1.0.5
-	go.bytebuilders.dev/audit v0.0.26
+	go.bytebuilders.dev/audit v0.0.27
 	go.bytebuilders.dev/license-proxyserver v0.0.2
 	go.bytebuilders.dev/license-verifier v0.12.2
 	go.bytebuilders.dev/license-verifier/kubernetes v0.12.2
@@ -34,7 +34,7 @@ require (
 	k8s.io/klog/v2 v2.80.1
 	k8s.io/kube-openapi v0.0.0-20221012153701-172d655c2280
 	k8s.io/utils v0.0.0-20221012122500-cfd413dd9e85
-	kmodules.xyz/client-go v0.25.15-0.20221228092437-0612a8c1627c
+	kmodules.xyz/client-go v0.25.16
 	kmodules.xyz/go-containerregistry v0.0.3
 	kubedb.dev/apimachinery v0.30.0-rc.1
 	sigs.k8s.io/controller-runtime v0.13.1
@@ -168,13 +168,13 @@ require (
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
 	go.uber.org/zap v1.21.0 // indirect
-	golang.org/x/crypto v0.1.0 // indirect
-	golang.org/x/net v0.4.1-0.20221210045730-e1ec361d0b39 // indirect
+	golang.org/x/crypto v0.5.0 // indirect
+	golang.org/x/net v0.5.0 // indirect
 	golang.org/x/oauth2 v0.1.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/sys v0.3.0 // indirect
-	golang.org/x/term v0.3.0 // indirect
-	golang.org/x/text v0.5.1-0.20221206182405-ec5565b1b747 // indirect
+	golang.org/x/sys v0.4.0 // indirect
+	golang.org/x/term v0.4.0 // indirect
+	golang.org/x/text v0.6.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220609144429-65e65417b02f // indirect
 	gomodules.xyz/clock v0.0.0-20200817085942-06523dba733f // indirect
