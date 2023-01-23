@@ -72,7 +72,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	r.isr = isr
 
 	if !r.isReconciliationNeeded() {
-		return ctrl.Result{}, nil
+		return ctrl.Result{RequeueAfter: backend.TrivyUpdationPeriod}, nil
 	}
 	if isr.Status.JobName != "" { // Only for Private Images
 		job, err := r.getScannerJob()
@@ -83,7 +83,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		if r.isRunning(job) && job.Status.Succeeded > 0 {
 			return ctrl.Result{RequeueAfter: backend.TrivyUpdationPeriod}, r.updateStatusWithReportDetails()
 		}
-
 	}
 
 	if isr.Status.Phase == "" {
@@ -93,14 +92,11 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	// We are here means, Phase is Pending or Outdated
-	fasterRequeueNeeded, err := r.scan()
+	rc, err := r.scan()
 	if err != nil {
 		return ctrl.Result{}, err
 	}
-	if fasterRequeueNeeded {
-		return ctrl.Result{RequeueAfter: time.Minute}, nil
-	}
-	return ctrl.Result{RequeueAfter: backend.TrivyUpdationPeriod}, nil
+	return returnAccordingToRequeueCode(rc), nil
 }
 
 func (r *Reconciler) isReconciliationNeeded() bool {
@@ -142,36 +138,46 @@ func (r *Reconciler) isRunning(job *batch.Job) bool {
 	return false
 }
 
-func (r *Reconciler) scan() (bool, error) {
+func (r *Reconciler) scan() (requeueCode, error) {
 	resp, err := backend.GetResponseFromBackend(r.nc, r.isr.Spec.Image)
 	if err != nil {
-		return false, err
+		return requeueCodeNone, err
 	}
 	if resp.Visibility == trivy.ImageVisibilityUnknown {
 		klog.Infof("visibility of %s image is unknown \n", r.isr.Spec.Image)
-		return false, nil
+		return requeueCodeNone, nil
 	}
 
 	err = r.updateStatusWithImageDetails(resp.Visibility)
 	if err != nil {
-		return false, err
+		return requeueCodeNone, err
 	}
 
 	if resp.Visibility == trivy.ImageVisibilityPrivate {
-		return false, r.ScanForPrivateImage()
+		return requeueCodeNone, r.ScanForPrivateImage()
 	}
 
 	// if the report is not generated yet (just submitted for scanning)
 	if resp.Report.ArtifactName == "" { // `ArtifactName` is just a random field to check whether the report generated
-		return true, nil
+		return requeueCodeFaster, nil
 	}
 
 	// Report related stuffs for private image will be done by `scanner upload-report` command in job's container.
 	rep, err := EnsureScanReport(r.Client, r.isr.Spec.Image, resp)
 	if err != nil {
-		return false, err
+		return requeueCodeNone, err
 	}
-	return false, r.updateStatusAsReportEnsured(rep)
+	return requeueCodeDelay, r.updateStatusAsReportEnsured(rep)
+}
+
+func returnAccordingToRequeueCode(rc requeueCode) ctrl.Result {
+	if rc == requeueCodeFaster {
+		return ctrl.Result{RequeueAfter: time.Minute}
+	}
+	if rc == requeueCodeDelay {
+		return ctrl.Result{RequeueAfter: backend.TrivyUpdationPeriod}
+	}
+	return ctrl.Result{}
 }
 
 // SetupWithManager sets up the controller with the Manager.

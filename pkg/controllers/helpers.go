@@ -129,3 +129,11 @@ func tagAndDigest(img string) (string, string, error) {
 	}
 	return tag.TagStr(), dig.DigestStr(), nil
 }
+
+type requeueCode int
+
+const (
+	requeueCodeNone   = 0
+	requeueCodeFaster = 1
+	requeueCodeDelay  = 2
+)
