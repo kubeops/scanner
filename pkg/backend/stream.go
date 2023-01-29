@@ -254,7 +254,7 @@ func (mgr *Manager) processNextMsg() (err error) {
 	var msgs []*nats.Msg
 	msgs, err = mgr.scanSub.Fetch(1, nats.MaxWait(natsRequestTimeout))
 	if err != nil || len(msgs) == 0 {
-		klog.Error(err)
+		// klog.Error(err)
 		// no more msg to process
 		err = errors.Wrap(err, "failed to fetch msg")
 		return err
