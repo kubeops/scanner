@@ -13,7 +13,7 @@ require (
 	github.com/spf13/cobra v1.6.0
 	github.com/spf13/pflag v1.0.5
 	go.bytebuilders.dev/audit v0.0.26
-	go.bytebuilders.dev/license-proxyserver v0.0.2
+	go.bytebuilders.dev/license-proxyserver v0.0.3
 	go.bytebuilders.dev/license-verifier v0.12.1
 	go.bytebuilders.dev/license-verifier/kubernetes v0.12.1
 	go.uber.org/automaxprocs v1.5.1
@@ -167,13 +167,13 @@ require (
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
 	go.uber.org/zap v1.21.0 // indirect
-	golang.org/x/crypto v0.1.0 // indirect
-	golang.org/x/net v0.4.1-0.20221210045730-e1ec361d0b39 // indirect
+	golang.org/x/crypto v0.6.0 // indirect
+	golang.org/x/net v0.7.0 // indirect
 	golang.org/x/oauth2 v0.1.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/sys v0.3.0 // indirect
-	golang.org/x/term v0.3.0 // indirect
-	golang.org/x/text v0.5.1-0.20221206182405-ec5565b1b747 // indirect
+	golang.org/x/sys v0.5.0 // indirect
+	golang.org/x/term v0.5.0 // indirect
+	golang.org/x/text v0.7.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220609144429-65e65417b02f // indirect
 	gomodules.xyz/clock v0.0.0-20200817085942-06523dba733f // indirect
