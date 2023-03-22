@@ -14,8 +14,8 @@ require (
 	github.com/spf13/pflag v1.0.5
 	go.bytebuilders.dev/audit v0.0.27
 	go.bytebuilders.dev/license-proxyserver v0.0.3
-	go.bytebuilders.dev/license-verifier v0.12.2
-	go.bytebuilders.dev/license-verifier/kubernetes v0.12.2
+	go.bytebuilders.dev/license-verifier v0.13.0
+	go.bytebuilders.dev/license-verifier/kubernetes v0.13.0
 	go.uber.org/automaxprocs v1.5.1
 	go.wandrs.dev/http v0.0.2
 	gocloud.dev v0.27.0

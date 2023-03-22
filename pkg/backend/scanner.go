@@ -118,7 +118,7 @@ func ExistsReport(fs blobfs.Interface, img string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	if time.Since(res.LastModificationTime.Time) > TrivyUpdationPeriod {
+	if time.Since(res.LastModificationTime.Time) > TrivyRefreshPeriod {
 		return false, nil
 	}
 	return true, nil

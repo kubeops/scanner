@@ -72,7 +72,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	r.isr = isr
 
 	if !r.isReconciliationNeeded() {
-		return ctrl.Result{RequeueAfter: backend.TrivyUpdationPeriod}, nil
+		return ctrl.Result{RequeueAfter: backend.TrivyRefreshPeriod}, nil
 	}
 	if isr.Status.JobName != "" { // Only for Private Images
 		job, err := r.getScannerJob()
@@ -81,7 +81,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		}
 
 		if r.isRunning(job) && job.Status.Succeeded > 0 {
-			return ctrl.Result{RequeueAfter: backend.TrivyUpdationPeriod}, r.updateStatusWithReportDetails()
+			return ctrl.Result{RequeueAfter: backend.TrivyRefreshPeriod}, r.updateStatusWithReportDetails()
 		}
 	}
 
@@ -104,7 +104,7 @@ func (r *Reconciler) isReconciliationNeeded() bool {
 	if rep == nil {
 		return true
 	}
-	if rep != nil && time.Since(rep.LastChecked.Time) > backend.TrivyUpdationPeriod {
+	if rep != nil && time.Since(rep.LastChecked.Time) > backend.TrivyRefreshPeriod {
 		// report is older than 6 hours
 		_ = r.updateStatusAsOutdated()
 		return true
@@ -175,7 +175,7 @@ func returnAccordingToRequeueCode(rc requeueCode) ctrl.Result {
 		return ctrl.Result{RequeueAfter: time.Minute}
 	}
 	if rc == requeueCodeDelay {
-		return ctrl.Result{RequeueAfter: backend.TrivyUpdationPeriod}
+		return ctrl.Result{RequeueAfter: backend.TrivyRefreshPeriod}
 	}
 	return ctrl.Result{}
 }

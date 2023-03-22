@@ -95,9 +95,9 @@ func New(nc *nats.Conn, opts Options) *Manager {
 }
 
 const (
-	ScanSubject         = "scanner.queue.scan"
-	ReportSubject       = "scanner.report"
-	TrivyUpdationPeriod = time.Hour * 6
+	ScanSubject        = "scanner.queue.scan"
+	ReportSubject      = "scanner.report"
+	TrivyRefreshPeriod = time.Hour * 6
 )
 
 type deploymentMode int8
