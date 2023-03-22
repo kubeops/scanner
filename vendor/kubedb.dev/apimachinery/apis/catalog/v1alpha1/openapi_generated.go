@@ -373,7 +373,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"kmodules.xyz/client-go/api/v1.ObjectID":                                                   schema_kmodulesxyz_client_go_api_v1_ObjectID(ref),
 		"kmodules.xyz/client-go/api/v1.ObjectInfo":                                                 schema_kmodulesxyz_client_go_api_v1_ObjectInfo(ref),
 		"kmodules.xyz/client-go/api/v1.ObjectReference":                                            schema_kmodulesxyz_client_go_api_v1_ObjectReference(ref),
-		"kmodules.xyz/client-go/api/v1.PullSecrets":                                                schema_kmodulesxyz_client_go_api_v1_PullSecrets(ref),
+		"kmodules.xyz/client-go/api/v1.PullCredentials":                                            schema_kmodulesxyz_client_go_api_v1_PullCredentials(ref),
 		"kmodules.xyz/client-go/api/v1.ReadonlyHealthCheckSpec":                                    schema_kmodulesxyz_client_go_api_v1_ReadonlyHealthCheckSpec(ref),
 		"kmodules.xyz/client-go/api/v1.ResourceID":                                                 schema_kmodulesxyz_client_go_api_v1_ResourceID(ref),
 		"kmodules.xyz/client-go/api/v1.TLSConfig":                                                  schema_kmodulesxyz_client_go_api_v1_TLSConfig(ref),
@@ -485,6 +485,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"kubedb.dev/apimachinery/apis/catalog/v1alpha1.PerconaXtraDBVersionList":                   schema_apimachinery_apis_catalog_v1alpha1_PerconaXtraDBVersionList(ref),
 		"kubedb.dev/apimachinery/apis/catalog/v1alpha1.PerconaXtraDBVersionPodSecurityPolicy":      schema_apimachinery_apis_catalog_v1alpha1_PerconaXtraDBVersionPodSecurityPolicy(ref),
 		"kubedb.dev/apimachinery/apis/catalog/v1alpha1.PerconaXtraDBVersionSpec":                   schema_apimachinery_apis_catalog_v1alpha1_PerconaXtraDBVersionSpec(ref),
+		"kubedb.dev/apimachinery/apis/catalog/v1alpha1.PgBouncerSecurityContext":                   schema_apimachinery_apis_catalog_v1alpha1_PgBouncerSecurityContext(ref),
 		"kubedb.dev/apimachinery/apis/catalog/v1alpha1.PgBouncerVersion":                           schema_apimachinery_apis_catalog_v1alpha1_PgBouncerVersion(ref),
 		"kubedb.dev/apimachinery/apis/catalog/v1alpha1.PgBouncerVersionDatabase":                   schema_apimachinery_apis_catalog_v1alpha1_PgBouncerVersionDatabase(ref),
 		"kubedb.dev/apimachinery/apis/catalog/v1alpha1.PgBouncerVersionExporter":                   schema_apimachinery_apis_catalog_v1alpha1_PgBouncerVersionExporter(ref),
@@ -18222,8 +18223,9 @@ func schema_kmodulesxyz_client_go_api_v1_ImageInfo(ref common.ReferenceCallback)
 				Properties: map[string]spec.Schema{
 					"image": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
 						},
 					},
 					"lineages": {
@@ -18239,17 +18241,17 @@ func schema_kmodulesxyz_client_go_api_v1_ImageInfo(ref common.ReferenceCallback)
 							},
 						},
 					},
-					"pullSecrets": {
+					"pullCredentials": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("kmodules.xyz/client-go/api/v1.PullSecrets"),
+							Ref: ref("kmodules.xyz/client-go/api/v1.PullCredentials"),
 						},
 					},
 				},
-				Required: []string{"pullSecrets"},
+				Required: []string{"image"},
 			},
 		},
 		Dependencies: []string{
-			"kmodules.xyz/client-go/api/v1.Lineage", "kmodules.xyz/client-go/api/v1.PullSecrets"},
+			"kmodules.xyz/client-go/api/v1.Lineage", "kmodules.xyz/client-go/api/v1.PullCredentials"},
 	}
 }
 
@@ -18386,7 +18388,7 @@ func schema_kmodulesxyz_client_go_api_v1_ObjectReference(ref common.ReferenceCal
 	}
 }
 
-func schema_kmodulesxyz_client_go_api_v1_PullSecrets(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_kmodulesxyz_client_go_api_v1_PullCredentials(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -18394,11 +18396,18 @@ func schema_kmodulesxyz_client_go_api_v1_PullSecrets(ref common.ReferenceCallbac
 				Properties: map[string]spec.Schema{
 					"namespace": {
 						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"serviceAccountName": {
+						SchemaProps: spec.SchemaProps{
 							Type:   []string{"string"},
 							Format: "",
 						},
 					},
-					"refs": {
+					"secretRefs": {
 						SchemaProps: spec.SchemaProps{
 							Type: []string{"array"},
 							Items: &spec.SchemaOrArray{
@@ -18412,6 +18421,7 @@ func schema_kmodulesxyz_client_go_api_v1_PullSecrets(ref common.ReferenceCallbac
 						},
 					},
 				},
+				Required: []string{"namespace"},
 			},
 		},
 		Dependencies: []string{
@@ -23180,6 +23190,33 @@ func schema_apimachinery_apis_catalog_v1alpha1_PerconaXtraDBVersionSpec(ref comm
 	}
 }
 
+func schema_apimachinery_apis_catalog_v1alpha1_PgBouncerSecurityContext(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "PgBouncerSecurityContext is the additional features for the PgBouncer",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"runAsUser": {
+						SchemaProps: spec.SchemaProps{
+							Description: "RunAsUser is default UID for the DB container. It is by default 70 for postgres user.",
+							Type:        []string{"integer"},
+							Format:      "int64",
+						},
+					},
+					"runAsAnyNonRoot": {
+						SchemaProps: spec.SchemaProps{
+							Description: "RunAsAnyNonRoot will be true if user can change the default db container user to other than postgres user.",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
 func schema_apimachinery_apis_catalog_v1alpha1_PgBouncerVersion(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -23347,13 +23384,6 @@ func schema_apimachinery_apis_catalog_v1alpha1_PgBouncerVersionSpec(ref common.R
 							Format:      "",
 						},
 					},
-					"initContainer": {
-						SchemaProps: spec.SchemaProps{
-							Description: "init container image",
-							Default:     map[string]interface{}{},
-							Ref:         ref("kubedb.dev/apimachinery/apis/catalog/v1alpha1.PgBouncerVersionInitContainer"),
-						},
-					},
 					"pgBouncer": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Database Image",
@@ -23375,6 +23405,13 @@ func schema_apimachinery_apis_catalog_v1alpha1_PgBouncerVersionSpec(ref common.R
 							Format:      "",
 						},
 					},
+					"securityContext": {
+						SchemaProps: spec.SchemaProps{
+							Description: "SecurityContext is for the additional config for pgbouncer DB container",
+							Default:     map[string]interface{}{},
+							Ref:         ref("kubedb.dev/apimachinery/apis/catalog/v1alpha1.PgBouncerSecurityContext"),
+						},
+					},
 					"upgradeConstraints": {
 						SchemaProps: spec.SchemaProps{
 							Description: "upgrade constraints",
@@ -23387,7 +23424,7 @@ func schema_apimachinery_apis_catalog_v1alpha1_PgBouncerVersionSpec(ref common.R
 			},
 		},
 		Dependencies: []string{
-			"kubedb.dev/apimachinery/apis/catalog/v1alpha1.PgBouncerVersionDatabase", "kubedb.dev/apimachinery/apis/catalog/v1alpha1.PgBouncerVersionExporter", "kubedb.dev/apimachinery/apis/catalog/v1alpha1.PgBouncerVersionInitContainer", "kubedb.dev/apimachinery/apis/catalog/v1alpha1.UpgradeConstraints"},
+			"kubedb.dev/apimachinery/apis/catalog/v1alpha1.PgBouncerSecurityContext", "kubedb.dev/apimachinery/apis/catalog/v1alpha1.PgBouncerVersionDatabase", "kubedb.dev/apimachinery/apis/catalog/v1alpha1.PgBouncerVersionExporter", "kubedb.dev/apimachinery/apis/catalog/v1alpha1.UpgradeConstraints"},
 	}
 }
 

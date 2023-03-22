@@ -134,8 +134,7 @@ func processDir(nc *nats.Conn, fs blobfs.Interface, dir string) error {
 			}
 			scanImages(nc, fs,
 				v.Spec.PgBouncer.Image,
-				v.Spec.Exporter.Image,
-				v.Spec.InitContainer.Image)
+				v.Spec.Exporter.Image)
 		case api.ResourceKindProxySQLVersion:
 			var v api.ProxySQLVersion
 			err := runtime.DefaultUnstructuredConverter.FromUnstructured(ri.Object.UnstructuredContent(), &v)
