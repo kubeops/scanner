@@ -47,7 +47,6 @@ const (
 )
 
 func (r *RequestReconciler) ScanForPrivateImage() error {
-	isr := r.req
 	ensureVolumeMounts := func(pt *core.PodTemplateSpec) {
 		mount := core.VolumeMount{
 			MountPath: WorkDir,
@@ -67,14 +66,14 @@ func (r *RequestReconciler) ScanForPrivateImage() error {
 			APIVersion: batch.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-%x", ScannerJobName, md5.Sum([]byte(isr.Spec.Image))),
-			Namespace: isr.Spec.Namespace,
+			Name:      fmt.Sprintf("%s-%x", ScannerJobName, md5.Sum([]byte(r.req.Spec.Image))),
+			Namespace: r.req.Spec.Namespace,
 		},
 	}, func(obj client.Object, createOp bool) client.Object {
 		job := obj.(*batch.Job)
 		if createOp {
 			// set the Owner reference to the created job
-			coreutil.EnsureOwnerReference(&job.ObjectMeta, metav1.NewControllerRef(isr, api.SchemeGroupVersion.WithKind(isr.Kind)))
+			coreutil.EnsureOwnerReference(&job.ObjectMeta, metav1.NewControllerRef(r.req, api.SchemeGroupVersion.WithKind(r.req.Kind)))
 
 			job.Spec.Template.Spec.Volumes = core_util.UpsertVolume(job.Spec.Template.Spec.Volumes, core.Volume{
 				Name: SharedVolumeName,
@@ -110,7 +109,7 @@ func (r *RequestReconciler) ScanForPrivateImage() error {
 				},
 				{
 					Name:       containerScanner,
-					Image:      isr.Spec.Image,
+					Image:      r.req.Spec.Image,
 					WorkingDir: WorkDir,
 					Command: []string{
 						"sh",
@@ -134,7 +133,7 @@ func (r *RequestReconciler) ScanForPrivateImage() error {
 					Command: []string{
 						"sh",
 						"-c",
-						fmt.Sprintf("/scanner upload-report --report-file report.json --trivy-file trivy.json --image %s > output.txt && cat output.txt", isr.Spec.Image),
+						fmt.Sprintf("/scanner upload-report --report-file report.json --trivy-file trivy.json --image %s > output.txt && cat output.txt", r.req.Spec.Image),
 					},
 					ImagePullPolicy: core.PullIfNotPresent,
 				},
@@ -143,9 +142,9 @@ func (r *RequestReconciler) ScanForPrivateImage() error {
 		}
 		job.Spec.Template.Spec.AutomountServiceAccountToken = pointer.Bool(true)
 		job.Spec.Template.Spec.RestartPolicy = core.RestartPolicyNever
-		job.Spec.Template.Spec.ImagePullSecrets = isr.Spec.PullSecrets
-		if isr.Spec.ServiceAccountName != "" {
-			job.Spec.Template.Spec.ServiceAccountName = isr.Spec.ServiceAccountName
+		job.Spec.Template.Spec.ImagePullSecrets = r.req.Spec.PullSecrets
+		if r.req.Spec.ServiceAccountName != "" {
+			job.Spec.Template.Spec.ServiceAccountName = r.req.Spec.ServiceAccountName
 		}
 		job.Spec.TTLSecondsAfterFinished = pointer.Int32(600)
 		return job

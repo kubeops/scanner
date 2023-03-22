@@ -24,17 +24,16 @@ import (
 	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
 	"kubeops.dev/scanner/apis/trivy"
 
-	"github.com/google/go-containerregistry/pkg/name"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/klog/v2"
 	kutil "kmodules.xyz/client-go"
 	cu "kmodules.xyz/client-go/client"
-	kname "kmodules.xyz/go-containerregistry/name"
+	"kmodules.xyz/go-containerregistry/name"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func EnsureScanReport(kc client.Client, imageRef string, resp trivy.BackendResponse) (*api.ImageScanReport, error) {
-	img, err := kname.ParseReference(imageRef)
+	img, err := name.ParseReference(imageRef)
 	if err != nil {
 		return nil, err
 	}
@@ -112,22 +111,6 @@ func upsertCVEs(kc client.Client, r trivy.SingleReport) error {
 
 func getReportName(imgName string) string {
 	return fmt.Sprintf("%x", md5.Sum([]byte(imgName)))
-}
-
-func tagAndDigest(img string) (string, string, error) {
-	var (
-		tag name.Tag
-		dig name.Digest
-		err error
-	)
-	tag, err = name.NewTag(img)
-	if err != nil {
-		dig, err = name.NewDigest(img)
-		if err != nil {
-			return "", "", err
-		}
-	}
-	return tag.TagStr(), dig.DigestStr(), nil
 }
 
 type requeueCode int

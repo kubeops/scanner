@@ -107,11 +107,11 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 }
 
 func (r *RequestReconciler) isReconciliationNeeded() bool {
-	rep := r.req.Status.ReportRef
-	if rep == nil {
+	report := r.req.Status.ReportRef
+	if report == nil {
 		return true
 	}
-	if rep != nil && time.Since(rep.LastChecked.Time) > backend.TrivyRefreshPeriod {
+	if time.Since(report.LastChecked.Time) > backend.TrivyRefreshPeriod {
 		// report is older than 6 hours
 		_ = r.updateStatusAsOutdated()
 		return true

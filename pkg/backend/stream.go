@@ -190,16 +190,16 @@ func (mgr *Manager) addBackendSubscription() error {
 
 func GetResponseFromBackend(nc *nats.Conn, img string) (trivy.BackendResponse, error) {
 	var ret trivy.BackendResponse
+
+	klog.InfoS("requested to backend", "image", img)
 	resp, err := nc.Request(ReportSubject, []byte(img), natsRequestTimeout)
 	if err != nil {
 		klog.ErrorS(err, "failed to request to the backend", "image", img)
 		return ret, err
-	} else {
-		klog.InfoS("requested to backend", "image", img)
-
-		err = trivy.JSON.Unmarshal(resp.Data, &ret)
-		return ret, err
 	}
+
+	err = trivy.JSON.Unmarshal(resp.Data, &ret)
+	return ret, err
 }
 
 func (mgr *Manager) addConsumer(jsm nats.JetStreamContext, consumerName string) error {

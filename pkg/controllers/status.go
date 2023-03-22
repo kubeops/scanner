@@ -23,7 +23,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	kutil "kmodules.xyz/client-go"
 	cu "kmodules.xyz/client-go/client"
-	kname "kmodules.xyz/go-containerregistry/name"
+	"kmodules.xyz/go-containerregistry/name"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -31,7 +31,7 @@ func (r *RequestReconciler) setDefaultStatus() error {
 	_, _, err := cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
 		in := obj.(*api.ImageScanRequest)
 		in.Status.Image = &api.ImageDetails{
-			Name: r.req.Spec.Image,
+			Name: r.req.Spec.Image, // should be the image name expected by the report
 		}
 		in.Status.Phase = api.ImageScanRequestPhasePending
 		return in
@@ -40,7 +40,7 @@ func (r *RequestReconciler) setDefaultStatus() error {
 }
 
 func (r *RequestReconciler) updateStatusWithImageDetails(vis trivy.ImageVisibility) error {
-	tag, dig, err := tagAndDigest(r.req.Spec.Image)
+	img, err := name.ParseReference(r.req.Spec.Image)
 	if err != nil {
 		return err
 	}
@@ -48,8 +48,8 @@ func (r *RequestReconciler) updateStatusWithImageDetails(vis trivy.ImageVisibili
 	_, _, err = cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
 		in := obj.(*api.ImageScanRequest)
 		in.Status.Image.Visibility = vis
-		in.Status.Image.Tag = tag
-		in.Status.Image.Digest = dig
+		in.Status.Image.Tag = img.Tag
+		in.Status.Image.Digest = img.Digest
 		in.Status.Phase = api.ImageScanRequestPhaseInProgress
 		return in
 	})
@@ -92,7 +92,7 @@ func (r *RequestReconciler) updateStatusAsOutdated() error {
 }
 
 func (r *RequestReconciler) updateStatusWithReportDetails() error {
-	img, err := kname.ParseReference(r.req.Spec.Image)
+	img, err := name.ParseReference(r.req.Spec.Image)
 	if err != nil {
 		return err
 	}
@@ -108,7 +108,7 @@ func (r *RequestReconciler) updateStatusWithReportDetails() error {
 	_, _, err = cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
 		in := obj.(*api.ImageScanRequest)
 		in.Status.ReportRef = &api.ScanReportRef{
-			Name:        getReportName(img.Name),
+			Name:        rep.Name,
 			LastChecked: rep.Status.LastChecked,
 		}
 		in.Status.Phase = api.ImageScanRequestPhaseCurrent

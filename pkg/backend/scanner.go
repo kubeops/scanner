@@ -108,7 +108,7 @@ func ExistsReport(fs blobfs.Interface, img string) (bool, error) {
 		return false, err
 	}
 
-	//// If file exists, & it is more than 6 hours old, We consider it as if it doesn't exist.
+	// If file exists, & it is more than 6 hours old, We consider it as if it doesn't exist.
 	read, err := fs.ReadFile(context.TODO(), path.Join(repo, digest, reportFileName))
 	if err != nil {
 		return false, err
