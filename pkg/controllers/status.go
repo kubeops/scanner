@@ -27,11 +27,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func (r *Reconciler) setDefaultStatus() error {
-	_, _, err := cu.PatchStatus(r.ctx, r.Client, &r.isr, func(obj client.Object) client.Object {
+func (r *RequestReconciler) setDefaultStatus() error {
+	_, _, err := cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
 		in := obj.(*api.ImageScanRequest)
 		in.Status.Image = &api.ImageDetails{
-			Name: r.isr.Spec.Image,
+			Name: r.req.Spec.Image,
 		}
 		in.Status.Phase = api.ImageScanRequestPhasePending
 		return in
@@ -39,13 +39,13 @@ func (r *Reconciler) setDefaultStatus() error {
 	return err
 }
 
-func (r *Reconciler) updateStatusWithImageDetails(vis trivy.ImageVisibility) error {
-	tag, dig, err := tagAndDigest(r.isr.Spec.Image)
+func (r *RequestReconciler) updateStatusWithImageDetails(vis trivy.ImageVisibility) error {
+	tag, dig, err := tagAndDigest(r.req.Spec.Image)
 	if err != nil {
 		return err
 	}
 
-	_, _, err = cu.PatchStatus(r.ctx, r.Client, &r.isr, func(obj client.Object) client.Object {
+	_, _, err = cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
 		in := obj.(*api.ImageScanRequest)
 		in.Status.Image.Visibility = vis
 		in.Status.Image.Tag = tag
@@ -56,8 +56,8 @@ func (r *Reconciler) updateStatusWithImageDetails(vis trivy.ImageVisibility) err
 	return err
 }
 
-func (r *Reconciler) updateStatusWithJobName(jobName string, vt kutil.VerbType) error {
-	_, _, err := cu.PatchStatus(r.ctx, r.Client, &r.isr, func(obj client.Object) client.Object {
+func (r *RequestReconciler) updateStatusWithJobName(jobName string, vt kutil.VerbType) error {
+	_, _, err := cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
 		in := obj.(*api.ImageScanRequest)
 		in.Status.JobName = jobName
 		if vt == kutil.VerbCreated {
@@ -69,8 +69,8 @@ func (r *Reconciler) updateStatusWithJobName(jobName string, vt kutil.VerbType) 
 	return err
 }
 
-func (r *Reconciler) updateStatusAsReportEnsured(rep *api.ImageScanReport) error {
-	_, _, err := cu.PatchStatus(r.ctx, r.Client, &r.isr, func(obj client.Object) client.Object {
+func (r *RequestReconciler) updateStatusAsReportEnsured(rep *api.ImageScanReport) error {
+	_, _, err := cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
 		in := obj.(*api.ImageScanRequest)
 		in.Status.ReportRef = &api.ScanReportRef{
 			Name:        rep.GetName(),
@@ -82,8 +82,8 @@ func (r *Reconciler) updateStatusAsReportEnsured(rep *api.ImageScanReport) error
 	return err
 }
 
-func (r *Reconciler) updateStatusAsOutdated() error {
-	_, _, err := cu.PatchStatus(r.ctx, r.Client, &r.isr, func(obj client.Object) client.Object {
+func (r *RequestReconciler) updateStatusAsOutdated() error {
+	_, _, err := cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
 		in := obj.(*api.ImageScanRequest)
 		in.Status.Phase = api.ImageScanRequestPhaseOutdated
 		return in
@@ -91,8 +91,8 @@ func (r *Reconciler) updateStatusAsOutdated() error {
 	return err
 }
 
-func (r *Reconciler) updateStatusWithReportDetails() error {
-	img, err := kname.ParseReference(r.isr.Spec.Image)
+func (r *RequestReconciler) updateStatusWithReportDetails() error {
+	img, err := kname.ParseReference(r.req.Spec.Image)
 	if err != nil {
 		return err
 	}
@@ -105,7 +105,7 @@ func (r *Reconciler) updateStatusWithReportDetails() error {
 		return err
 	}
 
-	_, _, err = cu.PatchStatus(r.ctx, r.Client, &r.isr, func(obj client.Object) client.Object {
+	_, _, err = cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
 		in := obj.(*api.ImageScanRequest)
 		in.Status.ReportRef = &api.ScanReportRef{
 			Name:        getReportName(img.Name),

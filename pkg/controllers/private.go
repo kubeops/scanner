@@ -46,8 +46,8 @@ const (
 	containerUploader = "uploader"
 )
 
-func (r *Reconciler) ScanForPrivateImage() error {
-	isr := r.isr
+func (r *RequestReconciler) ScanForPrivateImage() error {
+	isr := r.req
 	ensureVolumeMounts := func(pt *core.PodTemplateSpec) {
 		mount := core.VolumeMount{
 			MountPath: WorkDir,
@@ -74,7 +74,7 @@ func (r *Reconciler) ScanForPrivateImage() error {
 		job := obj.(*batch.Job)
 		if createOp {
 			// set the Owner reference to the created job
-			coreutil.EnsureOwnerReference(&job.ObjectMeta, metav1.NewControllerRef(&isr, api.SchemeGroupVersion.WithKind(isr.Kind)))
+			coreutil.EnsureOwnerReference(&job.ObjectMeta, metav1.NewControllerRef(isr, api.SchemeGroupVersion.WithKind(isr.Kind)))
 
 			job.Spec.Template.Spec.Volumes = core_util.UpsertVolume(job.Spec.Template.Spec.Volumes, core.Volume{
 				Name: SharedVolumeName,
