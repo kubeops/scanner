@@ -20,61 +20,27 @@ import (
 	"context"
 	"crypto/md5"
 	"fmt"
-	"time"
 
 	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
 	"kubeops.dev/scanner/apis/trivy"
-	"kubeops.dev/scanner/pkg/backend"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/klog/v2"
 	kutil "kmodules.xyz/client-go"
 	cu "kmodules.xyz/client-go/client"
 	"kmodules.xyz/go-containerregistry/name"
-	_ "kmodules.xyz/go-containerregistry/name"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func (r *Reconciler) doReportRelatedStuffs(isr api.ImageScanRequest) error {
-	// Getting the report.json file
-	msg, err := r.nc.Request("scanner.report", []byte(isr.Spec.Image), backend.NatsRequestTimeout)
-	if err != nil {
-		return err
-	}
-	var report trivy.SingleReport
-	err = trivy.JSON.Unmarshal(msg.Data, &report)
-	if err != nil {
-		return err
-	}
-
-	// Getting the trivy.json file
-	msg, err = r.nc.Request("scanner.version", []byte(isr.Spec.Image), backend.NatsRequestTimeout)
-	if err != nil {
-		return err
-	}
-	var ver trivy.Version
-	err = trivy.JSON.Unmarshal(msg.Data, &ver)
-	if err != nil {
-		return err
-	}
-
-	rep, err := EnsureScanReport(r.Client, isr.Spec.Image, report, ver)
-	if err != nil {
-		return err
-	}
-	return updateStatusAsReportEnsured(r.Client, isr, rep)
-}
-
-func EnsureScanReport(kc client.Client, imageRef string, singleReport trivy.SingleReport, versionInfo trivy.Version) (*api.ImageScanReport, error) {
+func EnsureScanReport(kc client.Client, imageRef string, resp trivy.BackendResponse) (*api.ImageScanReport, error) {
 	img, err := name.ParseReference(imageRef)
 	if err != nil {
 		return nil, err
 	}
-	reportName := fmt.Sprintf("%x", md5.Sum([]byte(img.Name)))
 
 	obj, vt, err := cu.CreateOrPatch(context.TODO(), kc, &api.ImageScanReport{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: reportName,
+			Name: getReportName(img.Name),
 		},
 	}, func(obj client.Object, createOp bool) client.Object {
 		rep := obj.(*api.ImageScanReport)
@@ -95,38 +61,25 @@ func EnsureScanReport(kc client.Client, imageRef string, singleReport trivy.Sing
 	// TODO: Is a single CreateOrPatch is able to modify the status too ?
 	_, _, err = cu.PatchStatus(context.TODO(), kc, &api.ImageScanReport{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: reportName,
+			Name: getReportName(img.Name),
 		},
 	}, func(obj client.Object) client.Object {
 		rep := obj.(*api.ImageScanReport)
-		rep.Status.LastChecked = trivy.Time(metav1.Time{Time: time.Now()})
-		rep.Status.TrivyDBVersion = versionInfo.Version
-		rep.Status.Report = singleReport
+		rep.Status.LastChecked = resp.LastModificationTime
+		rep.Status.TrivyDBVersion = resp.TrivyVersion.Version
+		rep.Status.Report = resp.Report
 		return rep
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	err = upsertCVEs(kc, singleReport)
+	err = upsertCVEs(kc, resp.Report)
 	if err != nil {
 		return nil, err
 	}
 
 	return obj.(*api.ImageScanReport), nil
-}
-
-func updateStatusAsReportEnsured(kc client.Client, isr api.ImageScanRequest, rep *api.ImageScanReport) error {
-	_, _, err := cu.PatchStatus(context.TODO(), kc, &isr, func(obj client.Object) client.Object {
-		in := obj.(*api.ImageScanRequest)
-		in.Status.ReportRef = &api.ScanReportRef{
-			Name:        rep.GetName(),
-			LastChecked: trivy.Time(rep.CreationTimestamp),
-		}
-		in.Status.Phase = api.ImageScanRequestPhaseCurrent
-		return in
-	})
-	return err
 }
 
 func upsertCVEs(kc client.Client, r trivy.SingleReport) error {
@@ -155,3 +108,15 @@ func upsertCVEs(kc client.Client, r trivy.SingleReport) error {
 	}
 	return nil
 }
+
+func getReportName(imgName string) string {
+	return fmt.Sprintf("%x", md5.Sum([]byte(imgName)))
+}
+
+type requeueCode int
+
+const (
+	requeueCodeNone   = 0
+	requeueCodeFaster = 1
+	requeueCodeDelay  = 2
+)

@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 SHELL=/bin/bash -o pipefail
 
 PRODUCT_OWNER_NAME := appscode
@@ -485,6 +486,7 @@ install:
 	@cd ../installer; \
 	helm upgrade -i scanner charts/scanner --wait \
 		--namespace=$(KUBE_NAMESPACE) --create-namespace \
+		--set registryFQDN="" \
 		--set app.registry=$(REGISTRY) \
 		--set app.tag=$(TAG_PROD) \
 		--set imagePullPolicy=$(IMAGE_PULL_POLICY) \

@@ -78,8 +78,13 @@ spec:
                     enum:
                     - Public
                     - Private
+                    - Unknown
                     type: string
                 type: object
+              jobName:
+                description: For Private Images, this field holds the job name created
+                  (in .spec.namespace) for scanning.
+                type: string
               observedGeneration:
                 description: observedGeneration is the most recent generation observed
                   for this resource. It corresponds to the resource's generation,

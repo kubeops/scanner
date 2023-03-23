@@ -134,8 +134,7 @@ func processDir(nc *nats.Conn, fs blobfs.Interface, dir string) error {
 			}
 			scanImages(nc, fs,
 				v.Spec.PgBouncer.Image,
-				v.Spec.Exporter.Image,
-				v.Spec.InitContainer.Image)
+				v.Spec.Exporter.Image)
 		case api.ResourceKindProxySQLVersion:
 			var v api.ProxySQLVersion
 			err := runtime.DefaultUnstructuredConverter.FromUnstructured(ri.Object.UnstructuredContent(), &v)
@@ -178,7 +177,7 @@ func scanImages(nc *nats.Conn, fs blobfs.Interface, refs ...string) {
 			continue
 		}
 		if exists, _ := backend.ExistsReport(fs, img); !exists {
-			if _, err := nc.Request("scanner.queue.scan", []byte(img), 100*time.Millisecond); err != nil {
+			if _, err := nc.Request(backend.ScanSubject, []byte(img), 100*time.Millisecond); err != nil {
 				klog.ErrorS(err, "failed submit scan request", "image", img)
 			} else {
 				klog.InfoS("submitted scan request", "image", img)

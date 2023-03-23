@@ -42,12 +42,12 @@ func NewCmdDownload() *cobra.Command {
 				return err
 			}
 
-			data, err := backend.DownloadReport(backend.NewBlobFS(), img)
+			data, err := backend.ReadFromBucket(backend.NewBlobFS(), img)
 			// gocloud.dev/gcerrors.NotFound (2)
 			if err != nil {
 				if gcerrors.Code(err) == gcerrors.NotFound {
 					// submit scan request
-					if _, err := nc.Request("scanner.queue.scan", []byte(img), 100*time.Millisecond); err != nil {
+					if _, err := nc.Request(backend.ScanSubject, []byte(img), 100*time.Millisecond); err != nil {
 						klog.ErrorS(err, "failed submit scan request", "image", img)
 					} else {
 						klog.InfoS("submitted scan request", "image", img)

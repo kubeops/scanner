@@ -18,15 +18,13 @@ package backend
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
-	"net/http"
 	"os"
 	"runtime"
 	"strings"
 	"time"
 
-	"github.com/google/go-containerregistry/pkg/name"
+	"kubeops.dev/scanner/apis/trivy"
+
 	"github.com/nats-io/nats.go"
 	"github.com/pkg/errors"
 	"gomodules.xyz/blobfs"
@@ -66,7 +64,7 @@ func DefaultOptions() Options {
 
 type Manager struct {
 	nc      *nats.Conn
-	sub     *nats.Subscription
+	scanSub *nats.Subscription
 	ackWait time.Duration
 
 	// same as stream
@@ -97,63 +95,57 @@ func New(nc *nats.Conn, opts Options) *Manager {
 }
 
 const (
-	RespondTypeReport  = "report"
-	RespondTypeVersion = "version"
+	ScanSubject        = "scanner.queue.scan"
+	ReportSubject      = "scanner.report"
+	TrivyRefreshPeriod = time.Hour * 6
 )
 
+type deploymentMode int8
+
+const (
+	Dev deploymentMode = iota
+	Production
+)
+
+var DeploymentMode = Dev
+
 func (mgr *Manager) Start(ctx context.Context, jsmOpts ...nats.JSOpt) error {
-	queueSubscribeMsgHandler := func(resType string) nats.MsgHandler {
-		return func(msg *nats.Msg) {
-			img := string(msg.Data)
-			klog.InfoS(msg.Subject, "image", img)
-
-			var data []byte
-			var err error
-			if resType == RespondTypeReport {
-				data, err = DownloadReport(mgr.fs, img)
-			} else if resType == RespondTypeVersion {
-				data, err = DownloadVersionInfo(mgr.fs, img)
-			}
-			if err != nil {
-				s := ErrorToAPIStatus(err)
-				data, _ = json.Marshal(s)
-				if s.Code == http.StatusNotFound {
-					err = mgr.submitScanRequest(img)
-					if err != nil {
-						klog.ErrorS(err, "failed to parse or get", "image", img)
-						return
-					}
-				} else if s.Code == http.StatusTooManyRequests {
-					go func() {
-						time.Sleep(dockerHubRateLimitDelay)
-						err = mgr.submitScanRequest(img)
-						if err != nil {
-							klog.ErrorS(err, "failed to parse or get", "image", img)
-							return
-						}
-					}()
-				}
-			}
-			if err = msg.Respond(data); err != nil {
-				klog.ErrorS(err, "failed to respond to", "image", img)
-			}
-		}
-	}
-
-	_, err := mgr.nc.QueueSubscribe(fmt.Sprintf("%s.report", mgr.stream), "scanner-backend", queueSubscribeMsgHandler(RespondTypeReport))
+	jsm, err := mgr.ensureStream(jsmOpts...)
 	if err != nil {
 		return err
 	}
 
-	_, err = mgr.nc.QueueSubscribe(fmt.Sprintf("%s.version", mgr.stream), "scanner-backend", queueSubscribeMsgHandler(RespondTypeVersion))
+	err = mgr.addBackendSubscription()
 	if err != nil {
 		return err
 	}
 
-	// create stream
+	// create nats consumer
+	scanConsumerName := "workers"
+	err = mgr.addConsumer(jsm, scanConsumerName)
+	if err != nil {
+		return err
+	}
+	scanSubscription, err := jsm.PullSubscribe(ScanSubject, scanConsumerName, nats.Bind(mgr.stream, scanConsumerName))
+	if err != nil {
+		return err
+	}
+	mgr.scanSub = scanSubscription
+
+	// start workers
+	klog.Info("Starting workers")
+	// Launch two workers to process Foo resources
+	for i := 0; i < mgr.numWorkersPerReplica; i++ {
+		go wait.Until(mgr.runWorker, 5*time.Second, ctx.Done())
+	}
+
+	return nil
+}
+
+func (mgr *Manager) ensureStream(jsmOpts ...nats.JSOpt) (nats.JetStreamContext, error) {
 	jsm, err := mgr.nc.JetStream(jsmOpts...)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	streamInfo, err := jsm.StreamInfo(mgr.stream, jsmOpts...)
@@ -174,14 +166,45 @@ func (mgr *Manager) Start(ctx context.Context, jsmOpts ...nats.JSOpt) error {
 			Duplicates: time.Hour,
 		})
 		if err != nil {
+			return nil, err
+		}
+	}
+	return jsm, nil
+}
+
+func (mgr *Manager) addBackendSubscription() error {
+	sub := ReportSubject
+	if DeploymentMode == Production {
+		// Because production backends use cross account request/reply services
+		sub += ".*"
+	}
+
+	for i := 0; i < mgr.numWorkersPerReplica; i++ {
+		_, err := mgr.nc.QueueSubscribe(sub, "backend-task", mgr.getMessageQueueHandler())
+		if err != nil {
 			return err
 		}
 	}
+	return nil
+}
 
-	// create nats consumer
-	consumerName := "workers"
+func GetResponseFromBackend(nc *nats.Conn, img string) (trivy.BackendResponse, error) {
+	var ret trivy.BackendResponse
+
+	klog.InfoS("requested to backend", "image", img)
+	resp, err := nc.Request(ReportSubject, []byte(img), natsRequestTimeout)
+	if err != nil {
+		klog.ErrorS(err, "failed to request to the backend", "image", img)
+		return ret, err
+	}
+
+	err = trivy.JSON.Unmarshal(resp.Data, &ret)
+	return ret, err
+}
+
+func (mgr *Manager) addConsumer(jsm nats.JetStreamContext, consumerName string) error {
 	ackPolicy := nats.AckExplicitPolicy
-	_, err = jsm.AddConsumer(mgr.stream, &nats.ConsumerConfig{
+	_, err := jsm.AddConsumer(mgr.stream, &nats.ConsumerConfig{
 		Durable:   consumerName,
 		AckPolicy: ackPolicy,
 		AckWait:   mgr.ackWait, // TODO: max for any task type
@@ -192,56 +215,26 @@ func (mgr *Manager) Start(ctx context.Context, jsmOpts ...nats.JSOpt) error {
 		// one request per worker
 		MaxRequestBatch: 1,
 		// max_expires the max amount of time that a pull request with an expires should be allowed to remain active
-		MaxRequestExpires: 1 * time.Second,
-		DeliverPolicy:     nats.DeliverAllPolicy,
-		MaxDeliver:        5,
-		FilterSubject:     "",
-		ReplayPolicy:      nats.ReplayInstantPolicy,
+		// MaxRequestExpires: 1 * time.Second,
+		DeliverPolicy: nats.DeliverAllPolicy,
+		MaxDeliver:    5,
+		FilterSubject: "",
+		ReplayPolicy:  nats.ReplayInstantPolicy,
 	})
 	if err != nil && !strings.Contains(err.Error(), "nats: consumer name already in use") {
 		return err
 	}
-	sub, err := jsm.PullSubscribe("", consumerName, nats.Bind(mgr.stream, consumerName))
-	if err != nil {
-		return err
-	}
-	mgr.sub = sub
-
-	// start workers
-	klog.Info("Starting workers")
-	// Launch two workers to process Foo resources
-	for i := 0; i < mgr.numWorkersPerReplica; i++ {
-		go wait.Until(mgr.runWorker, 5*time.Second, ctx.Done())
-	}
-
 	return nil
 }
 
 func (mgr *Manager) submitScanRequest(img string) error {
-	return SubmitScanRequest(mgr.nc, fmt.Sprintf("%s.queue.scan", mgr.stream), img)
-}
-
-func SubmitScanRequest(nc *nats.Conn, subj string, img string) error {
-	// We need to double-check to ensure that this image is pullable from outside the user's cluster
-	reference, err := name.ParseReference(img)
+	_, err := mgr.nc.Request(ScanSubject, []byte(img), natsRequestTimeout)
 	if err != nil {
-		return err
-	}
-	isPrivate, err := CheckPrivateImage(reference)
-	if err != nil {
-		return err
-	}
-	if isPrivate {
-		return errors.New(fmt.Sprintf("Image %s is not pullable from scanner backend side", img))
-	}
-
-	if _, err := nc.Request(subj, []byte(img), natsScanRequestTimeout); err != nil {
 		klog.ErrorS(err, "failed submit scan request", "image", img)
 		return err
-	} else {
-		klog.InfoS("submitted scan request", "image", img)
-		return nil
 	}
+	klog.InfoS("submitted scan request", "image", img)
+	return nil
 }
 
 func (mgr *Manager) runWorker() {
@@ -259,11 +252,12 @@ func (mgr *Manager) runWorker() {
 
 func (mgr *Manager) processNextMsg() (err error) {
 	var msgs []*nats.Msg
-	msgs, err = mgr.sub.Fetch(1, nats.MaxWait(50*time.Millisecond))
+	msgs, err = mgr.scanSub.Fetch(1, nats.MaxWait(natsRequestTimeout))
 	if err != nil || len(msgs) == 0 {
+		// klog.Error(err)
 		// no more msg to process
 		err = errors.Wrap(err, "failed to fetch msg")
-		return
+		return err
 	}
 
 	img := string(msgs[0].Data)
@@ -279,7 +273,7 @@ func (mgr *Manager) processNextMsg() (err error) {
 
 	if img != "" {
 		if exists, _ := ExistsReport(mgr.fs, img); !exists {
-			klog.InfoS("generate.report", "image", img)
+			klog.InfoS("generating report", "image", img)
 
 			if err = UploadReport(mgr.fs, img); err != nil {
 				err = errors.Wrapf(err, "failed to generate report %s", img)
