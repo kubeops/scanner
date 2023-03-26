@@ -114,7 +114,7 @@ func (r *RequestReconciler) ScanForPrivateImage() error {
 					Command: []string{
 						"sh",
 						"-c",
-						"./tv rootfs --skip-update --security-checks vuln --format json / > report.json && ./tv version --format json > trivy.json",
+						"./tv rootfs --skip-db-update --skip-java-db-update --offline-scan --security-checks vuln --format json / > report.json && ./tv version --format json > trivy.json",
 					},
 					SecurityContext: &core.SecurityContext{
 						RunAsUser:              pointer.Int64(0),
