@@ -19,21 +19,26 @@ package controllers
 import (
 	"context"
 	"crypto/md5"
+	"encoding/json"
 	"fmt"
+	"io/fs"
+	"os"
+	"path/filepath"
 
 	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
 	"kubeops.dev/scanner/apis/trivy"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2"
 	kutil "kmodules.xyz/client-go"
 	cu "kmodules.xyz/client-go/client"
-	"kmodules.xyz/go-containerregistry/name"
+	kname "kmodules.xyz/go-containerregistry/name"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func EnsureScanReport(kc client.Client, imageRef string, resp trivy.BackendResponse) (*api.ImageScanReport, error) {
-	img, err := name.ParseReference(imageRef)
+	img, err := kname.ParseReference(imageRef)
 	if err != nil {
 		return nil, err
 	}
@@ -45,9 +50,9 @@ func EnsureScanReport(kc client.Client, imageRef string, resp trivy.BackendRespo
 	}, func(obj client.Object, createOp bool) client.Object {
 		rep := obj.(*api.ImageScanReport)
 		rep.Spec.Image = api.ImageReference{
-			Name:   img.Name,
-			Tag:    img.Tag,
-			Digest: img.Digest,
+			Name:   resp.ImageDetails.Name,
+			Tag:    resp.ImageDetails.Tag,
+			Digest: resp.ImageDetails.Digest,
 		}
 		return rep
 	})
@@ -58,7 +63,6 @@ func EnsureScanReport(kc client.Client, imageRef string, resp trivy.BackendRespo
 		klog.Infof("%v ImageScanReport has been created\n", obj.GetName())
 	}
 
-	// TODO: Is a single CreateOrPatch is able to modify the status too ?
 	_, _, err = cu.PatchStatus(context.TODO(), kc, &api.ImageScanReport{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: getReportName(img.Name),
@@ -66,7 +70,7 @@ func EnsureScanReport(kc client.Client, imageRef string, resp trivy.BackendRespo
 	}, func(obj client.Object) client.Object {
 		rep := obj.(*api.ImageScanReport)
 		rep.Status.LastChecked = resp.LastModificationTime
-		rep.Status.TrivyDBVersion = resp.TrivyVersion.Version
+		rep.Status.Version = resp.TrivyVersion
 		rep.Status.Report = resp.Report
 		return rep
 	})
@@ -109,14 +113,29 @@ func upsertCVEs(kc client.Client, r trivy.SingleReport) error {
 	return nil
 }
 
+func getReport(kc client.Client, name string) (*api.ImageScanReport, error) {
+	var isrp api.ImageScanReport
+	err := kc.Get(context.TODO(), types.NamespacedName{
+		Name: name,
+	}, &isrp)
+	return &isrp, err
+}
+
 func getReportName(imgName string) string {
 	return fmt.Sprintf("%x", md5.Sum([]byte(imgName)))
 }
 
-type requeueCode int
+func readFromFileServer(fsDir string) (*trivy.VulnerabilityDBStruct, error) {
+	dir := filepath.Join(fsDir, "trivy")
+	fsdata, err := fs.ReadFile(os.DirFS(dir), "metadata.json")
+	if err != nil {
+		return nil, err
+	}
 
-const (
-	requeueCodeNone   = 0
-	requeueCodeFaster = 1
-	requeueCodeDelay  = 2
-)
+	var ver trivy.VulnerabilityDBStruct
+	err = json.Unmarshal(fsdata, &ver)
+	if err != nil {
+		return nil, err
+	}
+	return &ver, nil
+}

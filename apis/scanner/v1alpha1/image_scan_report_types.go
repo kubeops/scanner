@@ -63,7 +63,7 @@ type ImageScanReportStatus struct {
 
 	// which TrivyDBVersion was used when the last check
 	// +optional
-	TrivyDBVersion string `json:"trivyDBVersion,omitempty"`
+	Version trivy.Version `json:"version,omitempty"`
 
 	// This is the actual trivy Report
 	// +optional

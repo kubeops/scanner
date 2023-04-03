@@ -29,6 +29,7 @@ import (
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/klog/v2"
 	"k8s.io/klog/v2/klogr"
+	kname "kmodules.xyz/go-containerregistry/name"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
@@ -85,10 +86,20 @@ func uploadReport(imageRef, trivyFile, reportFile string) error {
 		return err
 	}
 
+	ref, err := kname.ParseReference(imageRef)
+	if err != nil {
+		return err
+	}
+
 	resp := trivy.BackendResponse{
-		Report:               actualReport,
-		TrivyVersion:         ver,
-		Visibility:           trivy.ImageVisibilityPrivate,
+		Report:       actualReport,
+		TrivyVersion: ver,
+		ImageDetails: trivy.ImageDetails{
+			Name:       ref.Name,
+			Tag:        ref.Tag,
+			Digest:     ref.Digest,
+			Visibility: trivy.ImageVisibilityPrivate,
+		},
 		LastModificationTime: trivy.Time{Time: time.Now()},
 	}
 

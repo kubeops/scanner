@@ -217,6 +217,7 @@ API rule violation: names_match,k8s.io/apimachinery/pkg/util/intstr,IntOrString,
 API rule violation: names_match,kmodules.xyz/client-go/api/v1,CertificateSpec,URIs
 API rule violation: names_match,kmodules.xyz/client-go/api/v1,TimeOfDay,Time
 API rule violation: names_match,kubeops.dev/scanner/apis/reports/v1alpha1,VulnerabilityInfo,CVEs
+API rule violation: names_match,kubeops.dev/scanner/apis/trivy,BackendResponse,ImageDetails
 API rule violation: names_match,kubeops.dev/scanner/apis/trivy,ImageRootfs,DiffIds
 API rule violation: names_match,kubeops.dev/scanner/apis/trivy,Time,Time
 API rule violation: names_match,kubeops.dev/scanner/apis/trivy,VulnerabilityDataSource,ID

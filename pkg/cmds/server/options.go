@@ -49,17 +49,20 @@ type ExtraOptions struct {
 	TrivyDBCacherImage string
 	FileServerAddr     string
 	ScanInCluster      bool
+
+	GarbageCollectionPeriod time.Duration
 }
 
 func NewExtraOptions() *ExtraOptions {
 	return &ExtraOptions{
-		ResyncPeriod:         10 * time.Minute,
-		QPS:                  1e6,
-		Burst:                1e6,
-		NATSAddr:             "this-is-nats.appcode.ninja:4222",
-		FileServerPathPrefix: "files",
-		FileServerFilesDir:   "/var/data/files",
-		TrivyImage:           "aquasec/trivy",
+		ResyncPeriod:            10 * time.Minute,
+		QPS:                     1e6,
+		Burst:                   1e6,
+		NATSAddr:                "this-is-nats.appcode.ninja:4222",
+		FileServerPathPrefix:    "files",
+		FileServerFilesDir:      "/var/data/files",
+		TrivyImage:              "aquasec/trivy",
+		GarbageCollectionPeriod: time.Hour * 24,
 	}
 }
 
@@ -81,6 +84,8 @@ func (s *ExtraOptions) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVar(&s.TrivyImage, "trivy-image", s.TrivyImage, "The image used for Trivy cli")
 	fs.StringVar(&s.TrivyDBCacherImage, "trivydb-cacher-image", s.TrivyDBCacherImage, "The image used for TrivyDB caching")
 	fs.BoolVar(&s.ScanInCluster, "scan-public-image-incluster", s.ScanInCluster, "If true public images will be scanned in cluster. Set true for air-gaped cluster")
+
+	fs.DurationVar(&s.GarbageCollectionPeriod, "garbage-collection-period", s.GarbageCollectionPeriod, "ImageScanRequest older than this period will be garbage collected")
 }
 
 func (s *ExtraOptions) ApplyTo(cfg *apiserver.ExtraConfig) error {
@@ -97,6 +102,7 @@ func (s *ExtraOptions) ApplyTo(cfg *apiserver.ExtraConfig) error {
 	cfg.ClientConfig.QPS = float32(s.QPS)
 	cfg.ClientConfig.Burst = s.Burst
 	cfg.ResyncPeriod = s.ResyncPeriod
+	cfg.GarbageCollectionPeriod = s.GarbageCollectionPeriod
 
 	var err error
 	if cfg.KubeClient, err = kubernetes.NewForConfig(cfg.ClientConfig); err != nil {

@@ -65,7 +65,7 @@ func Router(prefix, dir string) http.Handler {
 	return r
 }
 
-const MaxUploadSize = 100 << 20 // 100 MB
+const MaxUploadSize = 100 << 30 // 100 MB
 
 // FileSave fetches the file and saves to disk
 func FileSave(prefix, dir string, r *http.Request) error {

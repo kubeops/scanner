@@ -376,6 +376,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"kubeops.dev/scanner/apis/trivy.BackendResponse":                     schema_kubeopsdev_scanner_apis_trivy_BackendResponse(ref),
 		"kubeops.dev/scanner/apis/trivy.CVSSScore":                           schema_kubeopsdev_scanner_apis_trivy_CVSSScore(ref),
 		"kubeops.dev/scanner/apis/trivy.ImageConfig":                         schema_kubeopsdev_scanner_apis_trivy_ImageConfig(ref),
+		"kubeops.dev/scanner/apis/trivy.ImageDetails":                        schema_kubeopsdev_scanner_apis_trivy_ImageDetails(ref),
 		"kubeops.dev/scanner/apis/trivy.ImageHistory":                        schema_kubeopsdev_scanner_apis_trivy_ImageHistory(ref),
 		"kubeops.dev/scanner/apis/trivy.ImageMetadata":                       schema_kubeopsdev_scanner_apis_trivy_ImageMetadata(ref),
 		"kubeops.dev/scanner/apis/trivy.ImageOS":                             schema_kubeopsdev_scanner_apis_trivy_ImageOS(ref),
@@ -18212,11 +18213,10 @@ func schema_kubeopsdev_scanner_apis_trivy_BackendResponse(ref common.ReferenceCa
 							Ref:     ref("kubeops.dev/scanner/apis/trivy.Version"),
 						},
 					},
-					"visibility": {
+					"image_details": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Default: map[string]interface{}{},
+							Ref:     ref("kubeops.dev/scanner/apis/trivy.ImageDetails"),
 						},
 					},
 					"lastModificationTime": {
@@ -18226,11 +18226,11 @@ func schema_kubeopsdev_scanner_apis_trivy_BackendResponse(ref common.ReferenceCa
 						},
 					},
 				},
-				Required: []string{"report", "trivyVersion", "visibility", "lastModificationTime"},
+				Required: []string{"report", "trivyVersion", "image_details", "lastModificationTime"},
 			},
 		},
 		Dependencies: []string{
-			"kubeops.dev/scanner/apis/trivy.SingleReport", "kubeops.dev/scanner/apis/trivy.Time", "kubeops.dev/scanner/apis/trivy.Version"},
+			"kubeops.dev/scanner/apis/trivy.ImageDetails", "kubeops.dev/scanner/apis/trivy.SingleReport", "kubeops.dev/scanner/apis/trivy.Time", "kubeops.dev/scanner/apis/trivy.Version"},
 	}
 }
 
@@ -18345,6 +18345,43 @@ func schema_kubeopsdev_scanner_apis_trivy_ImageConfig(ref common.ReferenceCallba
 		},
 		Dependencies: []string{
 			"kubeops.dev/scanner/apis/trivy.ImageHistory", "kubeops.dev/scanner/apis/trivy.ImageRootfs", "kubeops.dev/scanner/apis/trivy.ImageRuntimeConfig", "kubeops.dev/scanner/apis/trivy.Time"},
+	}
+}
+
+func schema_kubeopsdev_scanner_apis_trivy_ImageDetails(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"name": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"tag": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Tag & Digest is optional field. One of these fields may not present",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"digest": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"visibility": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+				},
+			},
+		},
 	}
 }
 
@@ -18997,20 +19034,8 @@ func schema_kubeopsdev_scanner_apis_trivy_VulnerabilityDBStruct(ref common.Refer
 							Ref:     ref("kubeops.dev/scanner/apis/trivy.Time"),
 						},
 					},
-					"downloadedAt": {
-						SchemaProps: spec.SchemaProps{
-							Default: map[string]interface{}{},
-							Ref:     ref("kubeops.dev/scanner/apis/trivy.Time"),
-						},
-					},
-					"nextUpdate": {
-						SchemaProps: spec.SchemaProps{
-							Default: map[string]interface{}{},
-							Ref:     ref("kubeops.dev/scanner/apis/trivy.Time"),
-						},
-					},
 				},
-				Required: []string{"version", "updatedAt", "downloadedAt", "nextUpdate"},
+				Required: []string{"version", "updatedAt"},
 			},
 		},
 		Dependencies: []string{

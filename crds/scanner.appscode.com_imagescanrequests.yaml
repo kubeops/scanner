@@ -107,11 +107,6 @@ spec:
                 type: string
               reportRef:
                 properties:
-                  lastChecked:
-                    description: When the referred image was checked for the last
-                      time
-                    format: date-time
-                    type: string
                   name:
                     type: string
                 required:

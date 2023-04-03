@@ -45,9 +45,9 @@ type ImageReference struct {
 }
 
 type ImageScanReportStatus struct {
-	LastChecked    trivy.Time
-	TrivyDBVersion string
-	Report         trivy.SingleReport
+	LastChecked trivy.Time
+	Version     trivy.Version
+	Report      trivy.SingleReport
 }
 
 // +genclient:nonNamespaced

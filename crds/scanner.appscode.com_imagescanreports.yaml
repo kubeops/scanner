@@ -273,9 +273,27 @@ spec:
                 - results
                 - schemaVersion
                 type: object
-              trivyDBVersion:
-                description: which TrivyDBVersion was used when the last check
-                type: string
+              version:
+                description: which Version was used when the last check
+                properties:
+                  version:
+                    type: string
+                  vulnerabilityDB:
+                    properties:
+                      updatedAt:
+                        format: date-time
+                        type: string
+                      version:
+                        format: int32
+                        type: integer
+                    required:
+                    - updatedAt
+                    - version
+                    type: object
+                required:
+                - version
+                - vulnerabilityDB
+                type: object
             type: object
         type: object
     served: true

@@ -23,15 +23,15 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	kutil "kmodules.xyz/client-go"
 	cu "kmodules.xyz/client-go/client"
-	"kmodules.xyz/go-containerregistry/name"
+	kname "kmodules.xyz/go-containerregistry/name"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func (r *RequestReconciler) setDefaultStatus() error {
 	_, _, err := cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
 		in := obj.(*api.ImageScanRequest)
-		in.Status.Image = &api.ImageDetails{
-			Name: r.req.Spec.Image, // should be the image name expected by the report
+		in.Status.Image = &trivy.ImageDetails{
+			Name: r.req.Spec.Image,
 		}
 		in.Status.Phase = api.ImageScanRequestPhasePending
 		return in
@@ -40,7 +40,7 @@ func (r *RequestReconciler) setDefaultStatus() error {
 }
 
 func (r *RequestReconciler) updateStatusWithImageDetails(vis trivy.ImageVisibility) error {
-	img, err := name.ParseReference(r.req.Spec.Image)
+	img, err := kname.ParseReference(r.req.Spec.Image)
 	if err != nil {
 		return err
 	}
@@ -61,7 +61,6 @@ func (r *RequestReconciler) updateStatusWithJobName(jobName string, vt kutil.Ver
 		in := obj.(*api.ImageScanRequest)
 		in.Status.JobName = jobName
 		if vt == kutil.VerbCreated {
-			// For Outdated private image, reportRef should explicitly be set to nil, to meet the `job is still running` case in Reconcile()
 			in.Status.ReportRef = nil
 		}
 		return in
@@ -72,9 +71,14 @@ func (r *RequestReconciler) updateStatusWithJobName(jobName string, vt kutil.Ver
 func (r *RequestReconciler) updateStatusAsReportEnsured(rep *api.ImageScanReport) error {
 	_, _, err := cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
 		in := obj.(*api.ImageScanRequest)
+		if in.Status.Image == nil {
+			in.Status.Image = &trivy.ImageDetails{}
+		}
+		if in.Status.Image.Digest == "" {
+			in.Status.Image.Digest = rep.Spec.Image.Digest
+		}
 		in.Status.ReportRef = &api.ScanReportRef{
-			Name:        rep.GetName(),
-			LastChecked: rep.Status.LastChecked,
+			Name: rep.GetName(),
 		}
 		in.Status.Phase = api.ImageScanRequestPhaseCurrent
 		return in
@@ -92,7 +96,7 @@ func (r *RequestReconciler) updateStatusAsOutdated() error {
 }
 
 func (r *RequestReconciler) updateStatusWithReportDetails() error {
-	img, err := name.ParseReference(r.req.Spec.Image)
+	img, err := kname.ParseReference(r.req.Spec.Image)
 	if err != nil {
 		return err
 	}
@@ -108,8 +112,7 @@ func (r *RequestReconciler) updateStatusWithReportDetails() error {
 	_, _, err = cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
 		in := obj.(*api.ImageScanRequest)
 		in.Status.ReportRef = &api.ScanReportRef{
-			Name:        rep.Name,
-			LastChecked: rep.Status.LastChecked,
+			Name: rep.Name,
 		}
 		in.Status.Phase = api.ImageScanRequestPhaseCurrent
 		return in

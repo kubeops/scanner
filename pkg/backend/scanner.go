@@ -34,6 +34,7 @@ import (
 	"gomodules.xyz/blobfs"
 	shell "gomodules.xyz/go-sh"
 	"k8s.io/klog/v2"
+	kname "kmodules.xyz/go-containerregistry/name"
 )
 
 func NewBlobFS() blobfs.Interface {
@@ -135,18 +136,28 @@ func UploadReport(fs blobfs.Interface, img string) error {
 		return err
 	}
 
-	resp := trivy.BackendResponse{
-		Report:               *rep,
-		TrivyVersion:         *ver,
-		Visibility:           trivy.ImageVisibilityPublic,
-		LastModificationTime: trivy.Time{Time: time.Now()},
-	}
-	marshaledResp, err := trivy.JSON.Marshal(&resp)
+	repo, digest, err := parseReference(img)
 	if err != nil {
 		return err
 	}
 
-	repo, digest, err := parseReference(img)
+	ref, err := kname.ParseReference(img)
+	if err != nil {
+		return err
+	}
+
+	resp := trivy.BackendResponse{
+		Report:       *rep,
+		TrivyVersion: *ver,
+		ImageDetails: trivy.ImageDetails{
+			Name:       ref.Name,
+			Tag:        ref.Tag,
+			Digest:     digest,
+			Visibility: trivy.ImageVisibilityPublic,
+		},
+		LastModificationTime: trivy.Time{Time: time.Now()},
+	}
+	marshaledResp, err := trivy.JSON.Marshal(&resp)
 	if err != nil {
 		return err
 	}

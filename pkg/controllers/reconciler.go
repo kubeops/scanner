@@ -27,7 +27,6 @@ import (
 	"github.com/nats-io/nats.go"
 	batch "k8s.io/api/batch/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -36,12 +35,14 @@ import (
 
 type Reconciler struct {
 	client.Client
-	ctx                context.Context
-	nc                 *nats.Conn
-	scannerImage       string
-	trivyImage         string
-	trivyDBCacherImage string
-	fileServerAddr     string
+	ctx                     context.Context
+	nc                      *nats.Conn
+	scannerImage            string
+	trivyImage              string
+	trivyDBCacherImage      string
+	fileServerAddr          string
+	fileServerDir           string
+	garbageCollectionPeriod time.Duration
 }
 
 type RequestReconciler struct {
@@ -49,14 +50,16 @@ type RequestReconciler struct {
 	req *api.ImageScanRequest
 }
 
-func NewImageScanRequestReconciler(kc client.Client, nc *nats.Conn, scannedImage, trivyImage, trivyDBCacherImage, fsAddr string) *Reconciler {
+func NewImageScanRequestReconciler(kc client.Client, nc *nats.Conn, scannedImage, trivyImage, trivyDBCacherImage, fsAddr, fsDir string, garbageCol time.Duration) *Reconciler {
 	return &Reconciler{
-		Client:             kc,
-		nc:                 nc,
-		scannerImage:       scannedImage,
-		trivyImage:         trivyImage,
-		trivyDBCacherImage: trivyDBCacherImage,
-		fileServerAddr:     fsAddr,
+		Client:                  kc,
+		nc:                      nc,
+		scannerImage:            scannedImage,
+		trivyImage:              trivyImage,
+		trivyDBCacherImage:      trivyDBCacherImage,
+		fileServerAddr:          fsAddr,
+		fileServerDir:           fsDir,
+		garbageCollectionPeriod: garbageCol,
 	}
 }
 
@@ -78,17 +81,18 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		req:        &scanreq,
 	}
 
-	if !rr.isReconciliationNeeded() {
-		return ctrl.Result{RequeueAfter: backend.TrivyRefreshPeriod}, nil
+	if time.Since(scanreq.CreationTimestamp.Time) > r.garbageCollectionPeriod {
+		return ctrl.Result{}, r.Delete(r.ctx, &scanreq)
 	}
-	if scanreq.Status.JobName != "" { // Only for Private Images
-		job, err := rr.getScannerJob()
-		if err != nil && !errors.IsNotFound(err) {
-			return ctrl.Result{}, err
-		}
 
-		if rr.isRunning(job) && job.Status.Succeeded > 0 {
-			return ctrl.Result{RequeueAfter: backend.TrivyRefreshPeriod}, rr.updateStatusWithReportDetails()
+	if needed, err := rr.isReconciliationNeeded(); err != nil || !needed {
+		return ctrl.Result{}, err
+	}
+
+	if scanreq.Status.JobName != "" { // Only for Private Images
+		cont, err := rr.doStuffsForPrivateImage()
+		if err != nil || !cont {
+			return ctrl.Result{}, err
 		}
 	}
 
@@ -99,92 +103,88 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	// We are here means, Phase is Pending or Outdated
-	rc, err := rr.scan()
+	return rr.scan()
+}
+
+func (r *RequestReconciler) isReconciliationNeeded() (bool, error) {
+	report := r.req.Status.ReportRef
+	if report == nil {
+		return true, nil
+	}
+
+	isrp, err := getReport(r.Client, report.Name)
+	if err != nil {
+		return true, err
+	} else if isrp == nil {
+		return true, nil
+	}
+
+	ver, err := readFromFileServer(r.fileServerDir)
+	if err != nil {
+		return true, err
+	}
+
+	if isrp.Status.Version.VulnerabilityDB.UpdatedAt.Time.Sub(ver.UpdatedAt.Time) > backend.TrivyRefreshPeriod {
+		_ = r.updateStatusAsOutdated()
+		return true, nil
+	}
+	return false, nil
+}
+
+func (r *RequestReconciler) doStuffsForPrivateImage() (bool, error) {
+	job, err := r.getPrivateImageScannerJob()
+	if err != nil && !errors.IsNotFound(err) {
+		return false, err
+	}
+
+	if job != nil {
+		digest, err := r.getDigestForPrivateImage(job)
+		if err != nil {
+			return false, err
+		}
+
+		err = r.ensureDigestInRequestAndReport(digest)
+		if err != nil {
+			return false, err
+		}
+	}
+
+	if job != nil && job.Status.Succeeded > 0 { // job succeeded
+		return false, r.updateStatusWithReportDetails()
+	}
+	return true, nil // true means, we need to continue
+}
+
+func (r *RequestReconciler) scan() (ctrl.Result, error) {
+	resp, err := backend.GetResponseFromBackend(r.nc, r.req.Spec.Image)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
-	return returnAccordingToRequeueCode(rc), nil
-}
-
-func (r *RequestReconciler) isReconciliationNeeded() bool {
-	report := r.req.Status.ReportRef
-	if report == nil {
-		return true
-	}
-	if time.Since(report.LastChecked.Time) > backend.TrivyRefreshPeriod {
-		// report is older than 6 hours
-		_ = r.updateStatusAsOutdated()
-		return true
-	}
-	return false
-}
-
-func (r *RequestReconciler) getScannerJob() (*batch.Job, error) {
-	var job batch.Job
-	err := r.Get(r.ctx, types.NamespacedName{
-		Name:      r.req.Status.JobName,
-		Namespace: r.req.Spec.Namespace,
-	}, &job)
-	if err != nil {
-		klog.Errorf("error %v on getting %v/%v job \n", err, r.req.Spec.Namespace, r.req.Status.JobName)
-		return nil, err
-	}
-	return &job, nil
-}
-
-func (r *RequestReconciler) isRunning(job *batch.Job) bool {
-	if r.req.Status.ReportRef == nil {
-		return true
-	}
-	if job == nil {
-		return false
-	}
-	if r.req.Status.Phase == api.ImageScanRequestPhaseOutdated && time.Since(job.CreationTimestamp.Time) < time.Minute*10 {
-		return true
-	}
-	return false
-}
-
-func (r *RequestReconciler) scan() (requeueCode, error) {
-	resp, err := backend.GetResponseFromBackend(r.nc, r.req.Spec.Image)
-	if err != nil {
-		return requeueCodeNone, err
-	}
-	if resp.Visibility == trivy.ImageVisibilityUnknown {
+	if resp.ImageDetails.Visibility == trivy.ImageVisibilityUnknown {
 		klog.Infof("visibility of %s image is unknown \n", r.req.Spec.Image)
-		return requeueCodeNone, nil
+		return ctrl.Result{}, nil
 	}
 
-	err = r.updateStatusWithImageDetails(resp.Visibility)
+	err = r.updateStatusWithImageDetails(resp.ImageDetails.Visibility)
 	if err != nil {
-		return requeueCodeNone, err
+		return ctrl.Result{}, err
 	}
 
-	if resp.Visibility == trivy.ImageVisibilityPrivate {
-		return requeueCodeNone, r.ScanForPrivateImage()
+	if resp.ImageDetails.Visibility == trivy.ImageVisibilityPrivate {
+		return ctrl.Result{}, r.ScanForPrivateImage()
 	}
 
 	// if the report is not generated yet (just submitted for scanning)
 	if resp.Report.ArtifactName == "" { // `ArtifactName` is just a random field to check whether the report generated
-		return requeueCodeFaster, nil
+		return ctrl.Result{RequeueAfter: time.Minute}, nil
 	}
 
 	// Report related stuffs for private image will be done by `scanner upload-report` command in job's container.
 	rep, err := EnsureScanReport(r.Client, r.req.Spec.Image, resp)
 	if err != nil {
-		return requeueCodeNone, err
+		return ctrl.Result{}, err
 	}
-	return requeueCodeDelay, r.updateStatusAsReportEnsured(rep)
-}
-
-func returnAccordingToRequeueCode(rc requeueCode) ctrl.Result {
-	if rc == requeueCodeFaster {
-		return ctrl.Result{RequeueAfter: time.Minute}
-	}
-	if rc == requeueCodeDelay {
-		return ctrl.Result{RequeueAfter: backend.TrivyRefreshPeriod}
-	}
-	return ctrl.Result{}
+	return ctrl.Result{}, r.updateStatusAsReportEnsured(rep)
 }
 
 // SetupWithManager sets up the controller with the Manager.
