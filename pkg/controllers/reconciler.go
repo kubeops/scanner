@@ -28,6 +28,7 @@ import (
 	batch "k8s.io/api/batch/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/klog/v2"
+	cu "kmodules.xyz/client-go/client"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -86,12 +87,15 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		req:        &scanreq,
 	}
 
-	if scanreq.Complete() &&
-		time.Since(scanreq.CreationTimestamp.Time) > r.garbageCollectionPeriod {
-		return ctrl.Result{}, r.Delete(ctx, &scanreq)
+	if scanreq.Complete() {
+		if time.Since(scanreq.CreationTimestamp.Time) > r.garbageCollectionPeriod {
+			return ctrl.Result{}, r.Delete(ctx, &scanreq)
+		} else {
+			return ctrl.Result{}, nil
+		}
 	}
 
-	if needed, err := rr.isReconciliationNeeded(); err != nil || !needed {
+	if needed, err := rr.freshScanRequired(); err != nil || !needed {
 		return ctrl.Result{}, err
 	}
 
@@ -112,29 +116,43 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	return rr.scan()
 }
 
-func (r *RequestReconciler) isReconciliationNeeded() (bool, error) {
+func (r *RequestReconciler) freshScanRequired() (bool, error) {
 	report := r.req.Status.ReportRef
 	if report == nil {
 		return true, nil
 	}
 
 	isrp, err := getReport(r.Client, report.Name)
-	if err != nil {
-		return true, err
-	} else if isrp == nil {
-		return true, nil
-	}
-
-	ver, err := readFromFileServer(r.fileServerDir)
-	if err != nil {
+	if err != nil || isrp == nil {
 		return true, err
 	}
 
-	if isrp.Status.Version.VulnerabilityDB.UpdatedAt.Time.Sub(ver.UpdatedAt.Time) > backend.TrivyRefreshPeriod {
+	dbTimestamp, err := vulnerabilityDBLastUpdatedAt(r.fileServerDir)
+	if err != nil {
+		return true, err
+	}
+
+	if dbTimestamp.After(isrp.Status.Version.VulnerabilityDB.UpdatedAt.Time) {
+		// updated trivy db found in file server, since the report was generated
 		_ = r.updateStatusAsOutdated()
 		return true, nil
 	}
-	return false, nil
+
+	_, _, err = cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
+		in := obj.(*api.ImageScanRequest)
+		in.Status.ReportRef = &api.ScanReportRef{
+			Name: isrp.Name,
+		}
+		in.Status.Image = &trivy.ImageDetails{
+			Name:       isrp.Spec.Image.Name,
+			Tag:        isrp.Spec.Image.Tag,
+			Digest:     isrp.Spec.Image.Digest,
+			Visibility: trivy.ImageVisibilityUnknown, // existing report, so we don't know visibility
+		}
+		in.Status.Phase = api.ImageScanRequestPhaseCurrent
+		return in
+	})
+	return false, err
 }
 
 func (r *RequestReconciler) doStuffsForPrivateImage() (bool, error) {

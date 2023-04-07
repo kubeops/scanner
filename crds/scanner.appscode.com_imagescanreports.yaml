@@ -51,10 +51,6 @@ spec:
             description: Status holds all the SingleReport-related details of the
               specified image
             properties:
-              lastChecked:
-                description: When the referred image was checked for the last time
-                format: date-time
-                type: string
               report:
                 description: This is the actual trivy Report
                 properties:
@@ -274,7 +270,7 @@ spec:
                 - schemaVersion
                 type: object
               version:
-                description: which Version was used when the last check
+                description: which TrivyDBVersion was used when the last check
                 properties:
                   version:
                     type: string
@@ -283,12 +279,8 @@ spec:
                       updatedAt:
                         format: date-time
                         type: string
-                      version:
-                        format: int32
-                        type: integer
                     required:
                     - updatedAt
-                    - version
                     type: object
                 required:
                 - version

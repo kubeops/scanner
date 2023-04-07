@@ -285,7 +285,6 @@ func Convert_scanner_ImageScanReportSpec_To_v1alpha1_ImageScanReportSpec(in *sca
 }
 
 func autoConvert_v1alpha1_ImageScanReportStatus_To_scanner_ImageScanReportStatus(in *ImageScanReportStatus, out *scanner.ImageScanReportStatus, s conversion.Scope) error {
-	out.LastChecked = in.LastChecked
 	out.Version = in.Version
 	out.Report = in.Report
 	return nil
@@ -297,7 +296,6 @@ func Convert_v1alpha1_ImageScanReportStatus_To_scanner_ImageScanReportStatus(in 
 }
 
 func autoConvert_scanner_ImageScanReportStatus_To_v1alpha1_ImageScanReportStatus(in *scanner.ImageScanReportStatus, out *ImageScanReportStatus, s conversion.Scope) error {
-	out.LastChecked = in.LastChecked
 	out.Version = in.Version
 	out.Report = in.Report
 	return nil

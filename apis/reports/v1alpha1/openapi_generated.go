@@ -18219,18 +18219,12 @@ func schema_kubeopsdev_scanner_apis_trivy_BackendResponse(ref common.ReferenceCa
 							Ref:     ref("kubeops.dev/scanner/apis/trivy.ImageDetails"),
 						},
 					},
-					"lastModificationTime": {
-						SchemaProps: spec.SchemaProps{
-							Default: map[string]interface{}{},
-							Ref:     ref("kubeops.dev/scanner/apis/trivy.Time"),
-						},
-					},
 				},
-				Required: []string{"report", "trivyVersion", "image_details", "lastModificationTime"},
+				Required: []string{"report", "trivyVersion", "image_details"},
 			},
 		},
 		Dependencies: []string{
-			"kubeops.dev/scanner/apis/trivy.ImageDetails", "kubeops.dev/scanner/apis/trivy.SingleReport", "kubeops.dev/scanner/apis/trivy.Time", "kubeops.dev/scanner/apis/trivy.Version"},
+			"kubeops.dev/scanner/apis/trivy.ImageDetails", "kubeops.dev/scanner/apis/trivy.SingleReport", "kubeops.dev/scanner/apis/trivy.Version"},
 	}
 }
 
@@ -19021,13 +19015,6 @@ func schema_kubeopsdev_scanner_apis_trivy_VulnerabilityDBStruct(ref common.Refer
 			SchemaProps: spec.SchemaProps{
 				Type: []string{"object"},
 				Properties: map[string]spec.Schema{
-					"version": {
-						SchemaProps: spec.SchemaProps{
-							Default: 0,
-							Type:    []string{"integer"},
-							Format:  "int32",
-						},
-					},
 					"updatedAt": {
 						SchemaProps: spec.SchemaProps{
 							Default: map[string]interface{}{},
@@ -19035,7 +19022,7 @@ func schema_kubeopsdev_scanner_apis_trivy_VulnerabilityDBStruct(ref common.Refer
 						},
 					},
 				},
-				Required: []string{"version", "updatedAt"},
+				Required: []string{"updatedAt"},
 			},
 		},
 		Dependencies: []string{

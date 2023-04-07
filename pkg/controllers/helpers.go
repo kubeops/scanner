@@ -69,7 +69,6 @@ func EnsureScanReport(kc client.Client, imageRef string, resp trivy.BackendRespo
 		},
 	}, func(obj client.Object) client.Object {
 		rep := obj.(*api.ImageScanReport)
-		rep.Status.LastChecked = resp.LastModificationTime
 		rep.Status.Version = resp.TrivyVersion
 		rep.Status.Report = resp.Report
 		return rep
@@ -125,7 +124,7 @@ func getReportName(imgName string) string {
 	return fmt.Sprintf("%x", md5.Sum([]byte(imgName)))
 }
 
-func readFromFileServer(fsDir string) (*trivy.VulnerabilityDBStruct, error) {
+func vulnerabilityDBLastUpdatedAt(fsDir string) (*trivy.Time, error) {
 	dir := filepath.Join(fsDir, "trivy")
 	fsdata, err := fs.ReadFile(os.DirFS(dir), "metadata.json")
 	if err != nil {
@@ -137,5 +136,5 @@ func readFromFileServer(fsDir string) (*trivy.VulnerabilityDBStruct, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &ver, nil
+	return &ver.UpdatedAt, nil
 }

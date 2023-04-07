@@ -57,10 +57,6 @@ type ImageReference struct {
 }
 
 type ImageScanReportStatus struct {
-	// When the referred image was checked for the last time
-	// +optional
-	LastChecked trivy.Time `json:"lastChecked,omitempty"`
-
 	// which TrivyDBVersion was used when the last check
 	// +optional
 	Version trivy.Version `json:"version,omitempty"`

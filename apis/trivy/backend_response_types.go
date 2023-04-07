@@ -17,10 +17,9 @@ limitations under the License.
 package trivy
 
 type BackendResponse struct {
-	Report               SingleReport `json:"report"`
-	TrivyVersion         Version      `json:"trivyVersion"`
-	ImageDetails         ImageDetails `json:"image_details"`
-	LastModificationTime Time         `json:"lastModificationTime"`
+	Report       SingleReport `json:"report"`
+	TrivyVersion Version      `json:"trivyVersion"`
+	ImageDetails ImageDetails `json:"image_details"`
 }
 
 type ImageDetails struct {

@@ -22,6 +22,5 @@ type Version struct {
 }
 
 type VulnerabilityDBStruct struct {
-	Version   int32 `json:"version" tv:"Version"`
-	UpdatedAt Time  `json:"updatedAt" tv:"UpdatedAt"`
+	UpdatedAt Time `json:"updatedAt" tv:"UpdatedAt"`
 }

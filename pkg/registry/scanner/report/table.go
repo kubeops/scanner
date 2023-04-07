@@ -79,7 +79,7 @@ func (c defaultTableConvertor) ConvertToTable(ctx context.Context, object runtim
 			critical = stats["CRITICAL"]
 			high = stats["HIGH"]
 			medium = stats["MEDIUM"]
-			lastScannedTimestamp = convertToHumanReadableDateType(o.Status.LastChecked.Time)
+			lastScannedTimestamp = convertToHumanReadableDateType(o.Status.Version.VulnerabilityDB.UpdatedAt.Time)
 		}
 
 		table.Rows = append(table.Rows, metav1.TableRow{

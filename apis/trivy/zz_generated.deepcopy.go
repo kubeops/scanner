@@ -27,7 +27,6 @@ func (in *BackendResponse) DeepCopyInto(out *BackendResponse) {
 	in.Report.DeepCopyInto(&out.Report)
 	in.TrivyVersion.DeepCopyInto(&out.TrivyVersion)
 	out.ImageDetails = in.ImageDetails
-	in.LastModificationTime.DeepCopyInto(&out.LastModificationTime)
 	return
 }
 

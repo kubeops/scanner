@@ -115,10 +115,12 @@ func ExistsReport(fs blobfs.Interface, img string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	if time.Since(res.LastModificationTime.Time) > TrivyRefreshPeriod {
-		return false, nil
+
+	ver, err := getVersionInfo()
+	if err != nil {
+		return false, err
 	}
-	return true, nil
+	return res.TrivyVersion.VulnerabilityDB.UpdatedAt.Time.After(ver.VulnerabilityDB.UpdatedAt.Time), nil
 }
 
 func UploadReport(fs blobfs.Interface, img string) error {
@@ -146,7 +148,6 @@ func UploadReport(fs blobfs.Interface, img string) error {
 			Digest:     ref.Digest,
 			Visibility: trivy.ImageVisibilityPublic,
 		},
-		LastModificationTime: trivy.Time{Time: time.Now()},
 	}
 	marshaledResp, err := trivy.JSON.Marshal(&resp)
 	if err != nil {

@@ -18,5 +18,6 @@ package v1alpha1
 
 func (req ImageScanRequest) Complete() bool {
 	return req.Status.Phase == ImageScanRequestPhaseCurrent ||
+		req.Status.Phase == ImageScanRequestPhaseOutdated ||
 		req.Status.Phase == ImageScanRequestPhaseFailed
 }
