@@ -17,15 +17,11 @@ limitations under the License.
 package backend
 
 import (
-	"strings"
-
 	"kubeops.dev/scanner/apis/trivy"
 
-	"github.com/google/go-containerregistry/pkg/authn"
-	"github.com/google/go-containerregistry/pkg/name"
-	"github.com/google/go-containerregistry/pkg/v1/remote"
 	"github.com/nats-io/nats.go"
 	"k8s.io/klog/v2"
+	"kmodules.xyz/go-containerregistry/name"
 )
 
 func (mgr *Manager) getMessageQueueHandler() func(msg *nats.Msg) {
@@ -97,7 +93,7 @@ func (mgr *Manager) getMessageQueueHandler() func(msg *nats.Msg) {
 			return
 		}
 
-		private, err := checkPrivateImage(img)
+		private, err := name.IsPrivateImage(img)
 		if err != nil {
 			errorOnPrivateCheckingFunc(msg, img)
 			return
@@ -117,24 +113,4 @@ func (mgr *Manager) getMessageQueueHandler() func(msg *nats.Msg) {
 		}
 		submitForPublicFunc(msg, img)
 	}
-}
-
-func checkPrivateImage(img string) (bool, error) {
-	reference, err := name.ParseReference(img)
-	if err != nil {
-		return false, err
-	}
-
-	_, err = remote.Get(reference, remote.WithAuthFromKeychain(authn.DefaultKeychain))
-	if err == nil {
-		return false, nil
-	}
-	if strings.Contains(err.Error(), "UNAUTHORIZED") {
-		return true, nil
-	}
-	if strings.Contains(err.Error(), "MANIFEST_UNKNOWN") { // If the image is kind loaded (not available online)
-		return true, nil
-	}
-
-	return true, err
 }

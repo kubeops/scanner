@@ -33,12 +33,12 @@ import (
 	"k8s.io/klog/v2"
 	kutil "kmodules.xyz/client-go"
 	cu "kmodules.xyz/client-go/client"
-	kname "kmodules.xyz/go-containerregistry/name"
+	"kmodules.xyz/go-containerregistry/name"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func EnsureScanReport(kc client.Client, imageRef string, resp trivy.BackendResponse) (*api.ImageScanReport, error) {
-	img, err := kname.ParseReference(imageRef)
+	img, err := name.ParseReference(imageRef)
 	if err != nil {
 		return nil, err
 	}

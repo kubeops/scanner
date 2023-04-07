@@ -39,7 +39,7 @@ import (
 	core_util "kmodules.xyz/client-go/core/v1"
 	coreapi "kmodules.xyz/client-go/core/v1"
 	coreutil "kmodules.xyz/client-go/core/v1"
-	kname "kmodules.xyz/go-containerregistry/name"
+	"kmodules.xyz/go-containerregistry/name"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -249,7 +249,7 @@ func (r *RequestReconciler) ensureDigestInRequestAndReport(digest string) error 
 	if digest == "" {
 		return nil
 	}
-	img, err := kname.ParseReference(r.req.Spec.Image)
+	img, err := name.ParseReference(r.req.Spec.Image)
 	if err != nil {
 		return err
 	}

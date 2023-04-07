@@ -29,7 +29,7 @@ import (
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/klog/v2"
 	"k8s.io/klog/v2/klogr"
-	kname "kmodules.xyz/go-containerregistry/name"
+	"kmodules.xyz/go-containerregistry/name"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
@@ -86,7 +86,7 @@ func uploadReport(imageRef, trivyFile, reportFile string) error {
 		return err
 	}
 
-	ref, err := kname.ParseReference(imageRef)
+	ref, err := name.ParseReference(imageRef)
 	if err != nil {
 		return err
 	}

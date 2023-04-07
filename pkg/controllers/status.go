@@ -23,7 +23,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	kutil "kmodules.xyz/client-go"
 	cu "kmodules.xyz/client-go/client"
-	kname "kmodules.xyz/go-containerregistry/name"
+	"kmodules.xyz/go-containerregistry/name"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -40,7 +40,7 @@ func (r *RequestReconciler) setDefaultStatus() error {
 }
 
 func (r *RequestReconciler) updateStatusWithImageDetails(vis trivy.ImageVisibility) error {
-	img, err := kname.ParseReference(r.req.Spec.Image)
+	img, err := name.ParseReference(r.req.Spec.Image)
 	if err != nil {
 		return err
 	}
@@ -96,7 +96,7 @@ func (r *RequestReconciler) updateStatusAsOutdated() error {
 }
 
 func (r *RequestReconciler) updateStatusWithReportDetails() error {
-	img, err := kname.ParseReference(r.req.Spec.Image)
+	img, err := name.ParseReference(r.req.Spec.Image)
 	if err != nil {
 		return err
 	}
