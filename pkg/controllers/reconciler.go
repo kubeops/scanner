@@ -35,7 +35,6 @@ import (
 
 type Reconciler struct {
 	client.Client
-	ctx                     context.Context
 	nc                      *nats.Conn
 	scannerImage            string
 	trivyImage              string
@@ -47,10 +46,16 @@ type Reconciler struct {
 
 type RequestReconciler struct {
 	*Reconciler
+	ctx context.Context
 	req *api.ImageScanRequest
 }
 
-func NewImageScanRequestReconciler(kc client.Client, nc *nats.Conn, scannedImage, trivyImage, trivyDBCacherImage, fsAddr, fsDir string, garbageCol time.Duration) *Reconciler {
+func NewImageScanRequestReconciler(
+	kc client.Client,
+	nc *nats.Conn,
+	scannedImage, trivyImage, trivyDBCacherImage, fsAddr, fsDir string,
+	garbageCol time.Duration,
+) *Reconciler {
 	return &Reconciler{
 		Client:                  kc,
 		nc:                      nc,
@@ -64,13 +69,12 @@ func NewImageScanRequestReconciler(kc client.Client, nc *nats.Conn, scannedImage
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	r.ctx = ctx
-	wlog := log.FromContext(ctx)
+	log := log.FromContext(ctx)
 
-	wlog.Info("Reconciling for ", "req", req)
+	log.Info("Reconciling for ", "req", req)
 	var scanreq api.ImageScanRequest
 	if err := r.Get(ctx, req.NamespacedName, &scanreq); err != nil {
-		wlog.Error(err, "unable to fetch imageScanRequest object")
+		log.Error(err, "unable to fetch imageScanRequest object")
 		// we'll ignore not-found errors, since they can't be fixed by an immediate
 		// requeue (we'll need to wait for a new notification), and we can get them
 		// on deleted requests.
@@ -78,11 +82,12 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 	rr := RequestReconciler{
 		Reconciler: r,
+		ctx:        ctx,
 		req:        &scanreq,
 	}
 
 	if time.Since(scanreq.CreationTimestamp.Time) > r.garbageCollectionPeriod {
-		return ctrl.Result{}, r.Delete(r.ctx, &scanreq)
+		return ctrl.Result{}, r.Delete(ctx, &scanreq)
 	}
 
 	if needed, err := rr.isReconciliationNeeded(); err != nil || !needed {
