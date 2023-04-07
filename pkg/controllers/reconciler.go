@@ -86,7 +86,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		req:        &scanreq,
 	}
 
-	if time.Since(scanreq.CreationTimestamp.Time) > r.garbageCollectionPeriod {
+	if scanreq.Complete() &&
+		time.Since(scanreq.CreationTimestamp.Time) > r.garbageCollectionPeriod {
 		return ctrl.Result{}, r.Delete(ctx, &scanreq)
 	}
 
