@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package controllers
+package scanrequest
 
 import (
 	"context"
@@ -23,6 +23,7 @@ import (
 	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
 	"kubeops.dev/scanner/apis/trivy"
 	"kubeops.dev/scanner/pkg/backend"
+	"kubeops.dev/scanner/pkg/fileserver"
 
 	"github.com/nats-io/nats.go"
 	batch "k8s.io/api/batch/v1"
@@ -127,7 +128,7 @@ func (r *RequestReconciler) freshScanRequired() (bool, error) {
 		return true, err
 	}
 
-	dbTimestamp, err := vulnerabilityDBLastUpdatedAt(r.fileServerDir)
+	dbTimestamp, err := fileserver.VulnerabilityDBLastUpdatedAt(r.fileServerDir)
 	if err != nil {
 		return true, err
 	}

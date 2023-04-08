@@ -21,12 +21,15 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"net/http"
 	"os"
 	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"kubeops.dev/scanner/apis/trivy"
 
 	"github.com/dustin/go-humanize"
 	_ "github.com/dustin/go-humanize"
@@ -127,4 +130,19 @@ func getSize(content io.Seeker) (int64, error) {
 		return 0, err
 	}
 	return size, nil
+}
+
+func VulnerabilityDBLastUpdatedAt(fsDir string) (*trivy.Time, error) {
+	dir := filepath.Join(fsDir, "trivy")
+	fsdata, err := fs.ReadFile(os.DirFS(dir), "metadata.json")
+	if err != nil {
+		return nil, err
+	}
+
+	var ver trivy.VulnerabilityDBStruct
+	err = json.Unmarshal(fsdata, &ver)
+	if err != nil {
+		return nil, err
+	}
+	return &ver.UpdatedAt, nil
 }

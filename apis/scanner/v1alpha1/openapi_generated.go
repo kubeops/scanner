@@ -17785,6 +17785,13 @@ func schema_scanner_apis_scanner_v1alpha1_ImageScanReportStatus(ref common.Refer
 			SchemaProps: spec.SchemaProps{
 				Type: []string{"object"},
 				Properties: map[string]spec.Schema{
+					"phase": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Specifies the current phase of the report",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 					"version": {
 						SchemaProps: spec.SchemaProps{
 							Description: "which TrivyDBVersion was used when the last check",

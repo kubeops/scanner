@@ -14,16 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package controllers
+package scanrequest
 
 import (
 	"context"
 	"crypto/md5"
-	"encoding/json"
 	"fmt"
-	"io/fs"
-	"os"
-	"path/filepath"
 
 	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
 	"kubeops.dev/scanner/apis/trivy"
@@ -122,19 +118,4 @@ func getReport(kc client.Client, name string) (*api.ImageScanReport, error) {
 
 func getReportName(imgName string) string {
 	return fmt.Sprintf("%x", md5.Sum([]byte(imgName)))
-}
-
-func vulnerabilityDBLastUpdatedAt(fsDir string) (*trivy.Time, error) {
-	dir := filepath.Join(fsDir, "trivy")
-	fsdata, err := fs.ReadFile(os.DirFS(dir), "metadata.json")
-	if err != nil {
-		return nil, err
-	}
-
-	var ver trivy.VulnerabilityDBStruct
-	err = json.Unmarshal(fsdata, &ver)
-	if err != nil {
-		return nil, err
-	}
-	return &ver.UpdatedAt, nil
 }

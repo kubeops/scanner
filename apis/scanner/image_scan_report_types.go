@@ -45,9 +45,17 @@ type ImageReference struct {
 }
 
 type ImageScanReportStatus struct {
+	Phase   ImageScanReportPhase
 	Version trivy.Version
 	Report  trivy.SingleReport
 }
+
+type ImageScanReportPhase string
+
+const (
+	ImageScanReportPhaseCurrent  ImageScanReportPhase = "Current"
+	ImageScanReportPhaseOutdated ImageScanReportPhase = "Outdated"
+)
 
 // +genclient:nonNamespaced
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

@@ -51,6 +51,13 @@ spec:
             description: Status holds all the SingleReport-related details of the
               specified image
             properties:
+              phase:
+                default: Current
+                description: Specifies the current phase of the report
+                enum:
+                - Current
+                - Outdated
+                type: string
               report:
                 description: This is the actual trivy Report
                 properties:

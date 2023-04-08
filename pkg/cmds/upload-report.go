@@ -21,7 +21,7 @@ import (
 
 	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
 	"kubeops.dev/scanner/apis/trivy"
-	"kubeops.dev/scanner/pkg/controllers"
+	"kubeops.dev/scanner/pkg/controllers/scanrequest"
 
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -101,7 +101,7 @@ func uploadReport(imageRef, trivyFile, reportFile string) error {
 		},
 	}
 
-	_, err = controllers.EnsureScanReport(kc, imageRef, resp)
+	_, err = scanrequest.EnsureScanReport(kc, imageRef, resp)
 	return err
 }
 

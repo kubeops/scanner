@@ -57,6 +57,11 @@ type ImageReference struct {
 }
 
 type ImageScanReportStatus struct {
+	// Specifies the current phase of the report
+	// +optional
+	// +kubebuilder:default="Current"
+	Phase ImageScanReportPhase `json:"phase,omitempty"`
+
 	// which TrivyDBVersion was used when the last check
 	// +optional
 	Version trivy.Version `json:"version,omitempty"`
@@ -65,6 +70,14 @@ type ImageScanReportStatus struct {
 	// +optional
 	Report trivy.SingleReport `json:"report,omitempty"`
 }
+
+// +kubebuilder:validation:Enum=Current;Outdated
+type ImageScanReportPhase string
+
+const (
+	ImageScanReportPhaseCurrent  ImageScanReportPhase = "Current"
+	ImageScanReportPhaseOutdated ImageScanReportPhase = "Outdated"
+)
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 

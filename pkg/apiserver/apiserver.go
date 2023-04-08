@@ -27,7 +27,8 @@ import (
 	"kubeops.dev/scanner/apis/scanner/install"
 	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
 	"kubeops.dev/scanner/pkg/backend"
-	"kubeops.dev/scanner/pkg/controllers"
+	"kubeops.dev/scanner/pkg/controllers/scanreport"
+	"kubeops.dev/scanner/pkg/controllers/scanrequest"
 	"kubeops.dev/scanner/pkg/fileserver"
 	reportstorage "kubeops.dev/scanner/pkg/registry/scanner/report"
 	requeststorage "kubeops.dev/scanner/pkg/registry/scanner/request"
@@ -224,7 +225,7 @@ func (c completedConfig) New(ctx context.Context) (*ScannerServer, error) {
 		}
 	}
 
-	if err = (controllers.NewImageScanRequestReconciler(
+	if err = (scanrequest.NewImageScanRequestReconciler(
 		mgr.GetClient(),
 		nc,
 		c.ExtraConfig.ScannerImage,
@@ -235,6 +236,14 @@ func (c completedConfig) New(ctx context.Context) (*ScannerServer, error) {
 		c.ExtraConfig.GarbageCollectionPeriod,
 	)).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "ImageScanRequest")
+		os.Exit(1)
+	}
+	if err = (&scanreport.ImageScanReportReconciler{
+		Client:        mgr.GetClient(),
+		Scheme:        mgr.GetScheme(),
+		FileServerDir: c.ExtraConfig.FileServerFilesDir,
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "ImageScanReport")
 		os.Exit(1)
 	}
 
