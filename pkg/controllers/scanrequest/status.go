@@ -21,14 +21,13 @@ import (
 	"kubeops.dev/scanner/apis/trivy"
 
 	"k8s.io/apimachinery/pkg/types"
-	kutil "kmodules.xyz/client-go"
 	cu "kmodules.xyz/client-go/client"
 	"kmodules.xyz/go-containerregistry/name"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func (r *RequestReconciler) setDefaultStatus() error {
-	_, _, err := cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
+	req, _, err := cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
 		in := obj.(*api.ImageScanRequest)
 		in.Status.Image = &trivy.ImageDetails{
 			Name: r.req.Spec.Image,
@@ -36,7 +35,11 @@ func (r *RequestReconciler) setDefaultStatus() error {
 		in.Status.Phase = api.ImageScanRequestPhasePending
 		return in
 	})
-	return err
+	if err != nil {
+		return err
+	}
+	r.req = req.(*api.ImageScanRequest)
+	return nil
 }
 
 func (r *RequestReconciler) updateStatusWithImageDetails(vis trivy.ImageVisibility) error {
@@ -45,35 +48,38 @@ func (r *RequestReconciler) updateStatusWithImageDetails(vis trivy.ImageVisibili
 		return err
 	}
 
-	_, _, err = cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
+	req, _, err := cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
 		in := obj.(*api.ImageScanRequest)
 		in.Status.Image.Visibility = vis
+		in.Status.Image.Name = img.Name
 		in.Status.Image.Tag = img.Tag
 		in.Status.Image.Digest = img.Digest
 		in.Status.Phase = api.ImageScanRequestPhaseInProgress
 		return in
 	})
-	return err
+	if err != nil {
+		return err
+	}
+	r.req = req.(*api.ImageScanRequest)
+	return nil
 }
 
-func (r *RequestReconciler) updateStatusWithJobName(jobName string, vt kutil.VerbType) error {
-	_, _, err := cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
+func (r *RequestReconciler) updateStatusWithJobName(jobName string) error {
+	req, _, err := cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
 		in := obj.(*api.ImageScanRequest)
 		in.Status.JobName = jobName
-		if vt == kutil.VerbCreated {
-			in.Status.ReportRef = nil
-		}
 		return in
 	})
-	return err
+	if err != nil {
+		return err
+	}
+	r.req = req.(*api.ImageScanRequest)
+	return nil
 }
 
 func (r *RequestReconciler) updateStatusAsReportEnsured(rep *api.ImageScanReport) error {
-	_, _, err := cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
+	req, _, err := cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
 		in := obj.(*api.ImageScanRequest)
-		if in.Status.Image == nil {
-			in.Status.Image = &trivy.ImageDetails{}
-		}
 		if in.Status.Image.Digest == "" {
 			in.Status.Image.Digest = rep.Spec.Image.Digest
 		}
@@ -83,16 +89,47 @@ func (r *RequestReconciler) updateStatusAsReportEnsured(rep *api.ImageScanReport
 		in.Status.Phase = api.ImageScanRequestPhaseCurrent
 		return in
 	})
-	return err
+	if err != nil {
+		return err
+	}
+	r.req = req.(*api.ImageScanRequest)
+	return nil
 }
 
-func (r *RequestReconciler) updateStatusAsOutdated() error {
-	_, _, err := cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
+func (r *RequestReconciler) updateStatusAsReportAlreadyExists(isrp *api.ImageScanReport) error {
+	req, _, err := cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
 		in := obj.(*api.ImageScanRequest)
-		in.Status.Phase = api.ImageScanRequestPhaseOutdated
+		in.Status.ReportRef = &api.ScanReportRef{
+			Name: isrp.Name,
+		}
+		in.Status.Image = &trivy.ImageDetails{
+			Name:       isrp.Spec.Image.Name,
+			Tag:        isrp.Spec.Image.Tag,
+			Digest:     isrp.Spec.Image.Digest,
+			Visibility: trivy.ImageVisibilityUnknown, // existing report, so we don't know visibility
+		}
+		in.Status.Phase = api.ImageScanRequestPhaseCurrent
 		return in
 	})
-	return err
+	if err != nil {
+		return err
+	}
+	r.req = req.(*api.ImageScanRequest)
+	return nil
+}
+
+func (r *RequestReconciler) updateStatusAsFailed(msg string) error {
+	req, _, err := cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
+		in := obj.(*api.ImageScanRequest)
+		in.Status.Phase = api.ImageScanRequestPhaseFailed
+		in.Status.Reason = msg
+		return in
+	})
+	if err != nil {
+		return err
+	}
+	r.req = req.(*api.ImageScanRequest)
+	return nil
 }
 
 func (r *RequestReconciler) updateStatusWithReportDetails() error {

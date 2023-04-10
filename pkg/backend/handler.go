@@ -33,12 +33,13 @@ func (mgr *Manager) getMessageQueueHandler() func(msg *nats.Msg) {
 		return ret, nil
 	}
 
-	errorOnPrivateCheckingFunc := func(msg *nats.Msg, img string) {
+	errorOnPrivateCheckingFunc := func(msg *nats.Msg, img string, err error) {
 		klog.Infof("Image %s is not pullable from scanner backend side", img)
 		resp, err := getMarshalledResponse(&trivy.BackendResponse{
 			ImageDetails: trivy.ImageDetails{
 				Visibility: trivy.ImageVisibilityUnknown,
 			},
+			ErrorMessage: err.Error(),
 		})
 		if err != nil {
 			return
@@ -95,7 +96,7 @@ func (mgr *Manager) getMessageQueueHandler() func(msg *nats.Msg) {
 
 		private, err := name.IsPrivateImage(img)
 		if err != nil {
-			errorOnPrivateCheckingFunc(msg, img)
+			errorOnPrivateCheckingFunc(msg, img, err)
 			return
 		}
 		if private {

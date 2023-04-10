@@ -120,7 +120,7 @@ func ExistsReport(fs blobfs.Interface, img string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	return res.TrivyVersion.VulnerabilityDB.UpdatedAt.Time.After(ver.VulnerabilityDB.UpdatedAt.Time), nil
+	return !res.TrivyVersion.VulnerabilityDB.UpdatedAt.Time.Before(ver.VulnerabilityDB.UpdatedAt.Time), nil
 }
 
 func UploadReport(fs blobfs.Interface, img string) error {

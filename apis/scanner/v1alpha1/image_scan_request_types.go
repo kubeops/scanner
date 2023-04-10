@@ -79,7 +79,7 @@ type ImageScanRequestStatus struct {
 	Reason string `json:"reason,omitempty"`
 }
 
-// +kubebuilder:validation:Enum=Pending;InProgress;Current;Failed;Outdated
+// +kubebuilder:validation:Enum=Pending;InProgress;Current;Failed
 type ImageScanRequestPhase string
 
 const (
@@ -87,7 +87,6 @@ const (
 	ImageScanRequestPhaseInProgress ImageScanRequestPhase = "InProgress"
 	ImageScanRequestPhaseCurrent    ImageScanRequestPhase = "Current"
 	ImageScanRequestPhaseFailed     ImageScanRequestPhase = "Failed"
-	ImageScanRequestPhaseOutdated   ImageScanRequestPhase = "Outdated"
 )
 
 type ScanReportRef struct {

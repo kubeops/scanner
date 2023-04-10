@@ -23,13 +23,13 @@ import (
 	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
 	"kubeops.dev/scanner/apis/trivy"
 	"kubeops.dev/scanner/pkg/backend"
-	"kubeops.dev/scanner/pkg/fileserver"
 
 	"github.com/nats-io/nats.go"
 	batch "k8s.io/api/batch/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
+	kerr "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2"
-	cu "kmodules.xyz/client-go/client"
+	"kmodules.xyz/go-containerregistry/name"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -42,7 +42,6 @@ type Reconciler struct {
 	trivyImage              string
 	trivyDBCacherImage      string
 	fileServerAddr          string
-	fileServerDir           string
 	garbageCollectionPeriod time.Duration
 }
 
@@ -55,7 +54,7 @@ type RequestReconciler struct {
 func NewImageScanRequestReconciler(
 	kc client.Client,
 	nc *nats.Conn,
-	scannedImage, trivyImage, trivyDBCacherImage, fsAddr, fsDir string,
+	scannedImage, trivyImage, trivyDBCacherImage, fsAddr string,
 	garbageCol time.Duration,
 ) *Reconciler {
 	return &Reconciler{
@@ -65,7 +64,6 @@ func NewImageScanRequestReconciler(
 		trivyImage:              trivyImage,
 		trivyDBCacherImage:      trivyDBCacherImage,
 		fileServerAddr:          fsAddr,
-		fileServerDir:           fsDir,
 		garbageCollectionPeriod: garbageCol,
 	}
 }
@@ -88,23 +86,23 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		req:        &scanreq,
 	}
 
-	if scanreq.Complete() {
+	if scanreq.IsComplete() {
 		if time.Since(scanreq.CreationTimestamp.Time) > r.garbageCollectionPeriod {
 			return ctrl.Result{}, r.Delete(ctx, &scanreq)
 		} else {
+			// We don't want to reconcile, after the ImageScanRequest is Completed
 			return ctrl.Result{}, nil
 		}
 	}
 
-	if needed, err := rr.freshScanRequired(); err != nil || !needed {
-		return ctrl.Result{}, err
+	if scanreq.Status.JobName != "" { // Only for Private Images
+		// as the job has already been created, & phase is not Current/Outdated yet,
+		// So, we are here to ensure digest, update report details & request's Phase;  Not for scanning
+		return ctrl.Result{}, rr.doStuffsForPrivateImage()
 	}
 
-	if scanreq.Status.JobName != "" { // Only for Private Images
-		cont, err := rr.doStuffsForPrivateImage()
-		if err != nil || !cont {
-			return ctrl.Result{}, err
-		}
+	if needed, err := rr.freshScanRequired(); err != nil || !needed {
+		return ctrl.Result{}, err
 	}
 
 	if scanreq.Status.Phase == "" {
@@ -113,71 +111,71 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		}
 	}
 
-	// We are here means, Phase is Pending or Outdated
+	// We are here means, Phase is Pending or InProgress
 	return rr.scan()
 }
 
 func (r *RequestReconciler) freshScanRequired() (bool, error) {
-	report := r.req.Status.ReportRef
-	if report == nil {
-		return true, nil
-	}
-
-	isrp, err := getReport(r.Client, report.Name)
-	if err != nil || isrp == nil {
-		return true, err
-	}
-
-	dbTimestamp, err := fileserver.VulnerabilityDBLastUpdatedAt(r.fileServerDir)
+	repName, err := func() (string, error) {
+		if r.req.Status.ReportRef != nil {
+			return r.req.Status.ReportRef.Name, nil
+		}
+		var ref *name.Image
+		ref, err := name.ParseReference(r.req.Spec.Image)
+		if err != nil {
+			return "", err
+		}
+		return getReportName(ref.Name), nil
+	}()
 	if err != nil {
 		return true, err
 	}
-
-	if dbTimestamp.After(isrp.Status.Version.VulnerabilityDB.UpdatedAt.Time) {
-		// updated trivy db found in file server, since the report was generated
-		_ = r.updateStatusAsOutdated()
+	var isrp api.ImageScanReport
+	err = r.Get(r.ctx, types.NamespacedName{
+		Name: repName,
+	}, &isrp)
+	if err != nil && !kerr.IsNotFound(err) {
+		return true, err
+	} else if kerr.IsNotFound(err) {
 		return true, nil
 	}
-
-	_, _, err = cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
-		in := obj.(*api.ImageScanRequest)
-		in.Status.ReportRef = &api.ScanReportRef{
-			Name: isrp.Name,
-		}
-		in.Status.Image = &trivy.ImageDetails{
-			Name:       isrp.Spec.Image.Name,
-			Tag:        isrp.Spec.Image.Tag,
-			Digest:     isrp.Spec.Image.Digest,
-			Visibility: trivy.ImageVisibilityUnknown, // existing report, so we don't know visibility
-		}
-		in.Status.Phase = api.ImageScanRequestPhaseCurrent
-		return in
-	})
-	return false, err
+	if isrp.Status.Phase == api.ImageScanReportPhaseOutdated {
+		return true, nil
+	}
+	return false, r.updateStatusAsReportAlreadyExists(&isrp)
 }
 
-func (r *RequestReconciler) doStuffsForPrivateImage() (bool, error) {
+func (r *RequestReconciler) doStuffsForPrivateImage() error {
 	job, err := r.getPrivateImageScannerJob()
-	if err != nil && !errors.IsNotFound(err) {
-		return false, err
+	if err != nil && !kerr.IsNotFound(err) {
+		return err
 	}
 
-	if job != nil {
-		digest, err := r.getDigestForPrivateImage(job)
-		if err != nil {
-			return false, err
-		}
-
-		err = r.ensureDigestInRequestAndReport(digest)
-		if err != nil {
-			return false, err
-		}
+	if kerr.IsNotFound(err) {
+		return nil
+	}
+	pod, err := r.getPrivateImageScannerPod(job)
+	if err != nil || pod == nil {
+		return err
 	}
 
-	if job != nil && job.Status.Succeeded > 0 { // job succeeded
-		return false, r.updateStatusWithReportDetails()
+	digest, err := r.getDigestForPrivateImage(pod)
+	if err != nil {
+		return err
 	}
-	return true, nil // true means, we need to continue
+
+	err = r.ensureDigestInRequestAndReport(digest)
+	if err != nil {
+		return err
+	}
+
+	if job.Status.Succeeded > 0 {
+		return r.updateStatusWithReportDetails()
+	}
+	if job.Status.Failed > 0 {
+		return r.updateStatusAsFailed(pod.Status.Message)
+	}
+	return nil
 }
 
 func (r *RequestReconciler) scan() (ctrl.Result, error) {
@@ -187,7 +185,7 @@ func (r *RequestReconciler) scan() (ctrl.Result, error) {
 	}
 	if resp.ImageDetails.Visibility == trivy.ImageVisibilityUnknown {
 		klog.Infof("visibility of %s image is unknown \n", r.req.Spec.Image)
-		return ctrl.Result{}, nil
+		return ctrl.Result{}, r.updateStatusAsFailed(resp.ErrorMessage)
 	}
 
 	err = r.updateStatusWithImageDetails(resp.ImageDetails.Visibility)

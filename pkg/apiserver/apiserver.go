@@ -232,7 +232,6 @@ func (c completedConfig) New(ctx context.Context) (*ScannerServer, error) {
 		c.ExtraConfig.TrivyImage,
 		c.ExtraConfig.TrivyDBCacherImage,
 		c.ExtraConfig.FileServerAddr,
-		c.ExtraConfig.FileServerFilesDir,
 		c.ExtraConfig.GarbageCollectionPeriod,
 	)).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "ImageScanRequest")

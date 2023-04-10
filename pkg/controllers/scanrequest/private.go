@@ -17,7 +17,6 @@ limitations under the License.
 package scanrequest
 
 import (
-	"context"
 	"crypto/md5"
 	"fmt"
 	"strings"
@@ -68,7 +67,7 @@ func (r *RequestReconciler) ScanForPrivateImage() error {
 		}
 	}
 
-	obj, vt, err := cu.CreateOrPatch(context.TODO(), r.Client, &batch.Job{
+	obj, vt, err := cu.CreateOrPatch(r.ctx, r.Client, &batch.Job{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Job",
 			APIVersion: batch.SchemeGroupVersion.String(),
@@ -163,7 +162,7 @@ func (r *RequestReconciler) ScanForPrivateImage() error {
 	if vt == kutil.VerbCreated {
 		klog.Infof("Scanner job %v/%v created", obj.GetNamespace(), obj.GetName())
 	}
-	return r.updateStatusWithJobName(obj.GetName(), vt)
+	return r.updateStatusWithJobName(obj.GetName())
 }
 
 func (r *RequestReconciler) getPrivateImageScannerJob() (*batch.Job, error) {
@@ -217,12 +216,7 @@ func (r *RequestReconciler) getPrivateImageScannerInitContainer(pod *corev1.Pod)
 	return container, containerStatus, found
 }
 
-func (r *RequestReconciler) getDigestForPrivateImage(job *batch.Job) (string, error) {
-	pod, err := r.getPrivateImageScannerPod(job)
-	if err != nil {
-		return "", err
-	}
-
+func (r *RequestReconciler) getDigestForPrivateImage(pod *core.Pod) (string, error) {
 	c, cs, found := r.getPrivateImageScannerInitContainer(pod)
 	if !found { // pod has just been created, so we need to wait
 		return "", nil
@@ -249,7 +243,7 @@ func (r *RequestReconciler) ensureDigestInRequestAndReport(digest string) error 
 		return err
 	}
 
-	_, _, err = cu.PatchStatus(context.TODO(), r.Client, &api.ImageScanRequest{
+	req, _, err := cu.PatchStatus(r.ctx, r.Client, &api.ImageScanRequest{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: r.req.Name,
 		},
@@ -269,8 +263,9 @@ func (r *RequestReconciler) ensureDigestInRequestAndReport(digest string) error 
 	if err != nil {
 		return err
 	}
+	r.req = req.(*api.ImageScanRequest)
 
-	_, _, err = cu.CreateOrPatch(context.TODO(), r.Client, &api.ImageScanReport{
+	_, _, err = cu.CreateOrPatch(r.ctx, r.Client, &api.ImageScanReport{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: getReportName(img.Name),
 		},

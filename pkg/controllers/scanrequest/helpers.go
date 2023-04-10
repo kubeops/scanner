@@ -25,7 +25,6 @@ import (
 	"kubeops.dev/scanner/apis/trivy"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2"
 	kutil "kmodules.xyz/client-go"
 	cu "kmodules.xyz/client-go/client"
@@ -106,14 +105,6 @@ func upsertCVEs(kc client.Client, r trivy.SingleReport) error {
 		klog.Infof("Vulnerability %s has been %s\n", vul.VulnerabilityID, vt)
 	}
 	return nil
-}
-
-func getReport(kc client.Client, name string) (*api.ImageScanReport, error) {
-	var isrp api.ImageScanReport
-	err := kc.Get(context.TODO(), types.NamespacedName{
-		Name: name,
-	}, &isrp)
-	return &isrp, err
 }
 
 func getReportName(imgName string) string {

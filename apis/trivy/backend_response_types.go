@@ -20,6 +20,7 @@ type BackendResponse struct {
 	Report       SingleReport `json:"report"`
 	TrivyVersion Version      `json:"trivyVersion"`
 	ImageDetails ImageDetails `json:"image_details"`
+	ErrorMessage string       `json:"error_message"`
 }
 
 type ImageDetails struct {
