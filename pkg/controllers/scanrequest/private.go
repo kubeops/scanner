@@ -54,11 +54,6 @@ const (
 	containerUploader = "uploader"
 )
 
-var podSelectors = map[string]string{
-	"created-for": "image-scanning",
-	"created-by":  "appscode-scanner",
-}
-
 func (r *RequestReconciler) ScanForPrivateImage() error {
 	ensureVolumeMounts := func(pt *core.PodTemplateSpec) {
 		mount := core.VolumeMount{
@@ -85,7 +80,6 @@ func (r *RequestReconciler) ScanForPrivateImage() error {
 	}, func(obj client.Object, createOp bool) client.Object {
 		job := obj.(*batch.Job)
 		if createOp {
-			job.Spec.Template.SetLabels(podSelectors)
 			// set the Owner reference to the created job
 			coreutil.EnsureOwnerReference(&job.ObjectMeta, metav1.NewControllerRef(r.req, api.SchemeGroupVersion.WithKind(r.req.Kind)))
 
@@ -183,6 +177,7 @@ func (r *RequestReconciler) getPrivateImageScannerJob() (*batch.Job, error) {
 
 func (r *RequestReconciler) getPrivateImageScannerPod(job *batch.Job) (*corev1.Pod, error) {
 	var podList corev1.PodList
+	podSelectors := job.Spec.Template.Labels
 	err := r.List(r.ctx, &podList, &client.ListOptions{
 		LabelSelector: labels.Set(podSelectors).AsSelector(),
 		Namespace:     job.Namespace,
