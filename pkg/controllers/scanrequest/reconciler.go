@@ -26,7 +26,6 @@ import (
 
 	"github.com/nats-io/nats.go"
 	batch "k8s.io/api/batch/v1"
-	kerr "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2"
 	"kmodules.xyz/go-containerregistry/name"
@@ -87,7 +86,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	if scanreq.IsComplete() {
-		if time.Since(scanreq.CreationTimestamp.Time) > r.scanRequestTTLPeriod {
+		if time.Since(scanreq.CreationTimestamp.Time) >= r.scanRequestTTLPeriod {
 			return ctrl.Result{}, r.Delete(ctx, &scanreq)
 		} else {
 			// We don't want to reconcile, after the ImageScanRequest is Completed
@@ -116,7 +115,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 }
 
 func (r *RequestReconciler) freshScanRequired() (bool, error) {
-	repName, err := func() (string, error) {
+	reportName, err := func() (string, error) {
 		if r.req.Status.ReportRef != nil {
 			return r.req.Status.ReportRef.Name, nil
 		}
@@ -131,13 +130,9 @@ func (r *RequestReconciler) freshScanRequired() (bool, error) {
 		return true, err
 	}
 	var isrp api.ImageScanReport
-	err = r.Get(r.ctx, types.NamespacedName{
-		Name: repName,
-	}, &isrp)
-	if err != nil && !kerr.IsNotFound(err) {
-		return true, err
-	} else if kerr.IsNotFound(err) {
-		return true, nil
+	err = r.Get(r.ctx, types.NamespacedName{Name: reportName}, &isrp)
+	if err != nil {
+		return true, client.IgnoreNotFound(err)
 	}
 	if isrp.Status.Phase == api.ImageScanReportPhaseOutdated {
 		return true, nil
@@ -147,12 +142,8 @@ func (r *RequestReconciler) freshScanRequired() (bool, error) {
 
 func (r *RequestReconciler) doStuffsForPrivateImage() error {
 	job, err := r.getPrivateImageScannerJob()
-	if err != nil && !kerr.IsNotFound(err) {
-		return err
-	}
-
-	if kerr.IsNotFound(err) {
-		return nil
+	if err != nil {
+		return client.IgnoreNotFound(err)
 	}
 	pod, err := r.getPrivateImageScannerPod(job)
 	if err != nil || pod == nil {
