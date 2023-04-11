@@ -17,7 +17,6 @@ limitations under the License.
 package scanrequest
 
 import (
-	"crypto/md5"
 	"fmt"
 	"strings"
 
@@ -73,7 +72,7 @@ func (r *RequestReconciler) ScanForPrivateImage() error {
 			APIVersion: batch.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-%x", ScannerJobName, md5.Sum([]byte(r.req.Spec.Image))),
+			Name:      fmt.Sprintf("%s-%x", ScannerJobName, api.GetReportName(r.req.Spec.Image)),
 			Namespace: r.req.Spec.Namespace,
 		},
 	}, func(obj client.Object, createOp bool) client.Object {
@@ -267,7 +266,7 @@ func (r *RequestReconciler) ensureDigestInRequestAndReport(digest string) error 
 
 	_, _, err = cu.CreateOrPatch(r.ctx, r.Client, &api.ImageScanReport{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: getReportName(img.Name),
+			Name: api.GetReportName(img.Name),
 		},
 	}, func(obj client.Object, createOp bool) client.Object {
 		rep := obj.(*api.ImageScanReport)

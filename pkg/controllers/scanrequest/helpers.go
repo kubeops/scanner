@@ -18,8 +18,6 @@ package scanrequest
 
 import (
 	"context"
-	"crypto/md5"
-	"fmt"
 
 	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
 	"kubeops.dev/scanner/apis/trivy"
@@ -40,7 +38,7 @@ func EnsureScanReport(kc client.Client, imageRef string, resp trivy.BackendRespo
 
 	obj, vt, err := cu.CreateOrPatch(context.TODO(), kc, &api.ImageScanReport{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: getReportName(img.Name),
+			Name: api.GetReportName(img.Name),
 		},
 	}, func(obj client.Object, createOp bool) client.Object {
 		rep := obj.(*api.ImageScanReport)
@@ -60,7 +58,7 @@ func EnsureScanReport(kc client.Client, imageRef string, resp trivy.BackendRespo
 
 	_, _, err = cu.PatchStatus(context.TODO(), kc, &api.ImageScanReport{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: getReportName(img.Name),
+			Name: api.GetReportName(img.Name),
 		},
 	}, func(obj client.Object) client.Object {
 		rep := obj.(*api.ImageScanReport)
@@ -105,8 +103,4 @@ func upsertCVEs(kc client.Client, r trivy.SingleReport) error {
 		klog.Infof("Vulnerability %s has been %s\n", vul.VulnerabilityID, vt)
 	}
 	return nil
-}
-
-func getReportName(imgName string) string {
-	return fmt.Sprintf("%x", md5.Sum([]byte(imgName)))
 }

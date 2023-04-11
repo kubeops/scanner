@@ -125,7 +125,7 @@ func (r *RequestReconciler) freshScanRequired() (bool, error) {
 		if err != nil {
 			return "", err
 		}
-		return getReportName(ref.Name), nil
+		return api.GetReportName(ref.Name), nil
 	}()
 	if err != nil {
 		return true, err

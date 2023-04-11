@@ -140,7 +140,7 @@ func (r *RequestReconciler) updateStatusWithReportDetails() error {
 
 	var rep api.ImageScanReport
 	err = r.Get(r.ctx, types.NamespacedName{
-		Name: getReportName(img.Name),
+		Name: api.GetReportName(img.Name),
 	}, &rep)
 	if err != nil {
 		return err
