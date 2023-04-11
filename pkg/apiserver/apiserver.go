@@ -89,22 +89,22 @@ func init() {
 
 // ExtraConfig holds custom apiserver config
 type ExtraConfig struct {
-	ClientConfig            *restclient.Config
-	KubeClient              kubernetes.Interface
-	KubeInformerFactory     informers.SharedInformerFactory
-	ResyncPeriod            time.Duration
-	LicenseFile             string
-	License                 v1alpha1.License
-	CacheDir                string
-	NATSAddr                string
-	NATSCredFile            string
-	FileServerPathPrefix    string
-	FileServerFilesDir      string
-	ScannerImage            string
-	TrivyImage              string
-	TrivyDBCacherImage      string
-	FileServerAddr          string
-	GarbageCollectionPeriod time.Duration
+	ClientConfig         *restclient.Config
+	KubeClient           kubernetes.Interface
+	KubeInformerFactory  informers.SharedInformerFactory
+	ResyncPeriod         time.Duration
+	LicenseFile          string
+	License              v1alpha1.License
+	CacheDir             string
+	NATSAddr             string
+	NATSCredFile         string
+	FileServerPathPrefix string
+	FileServerFilesDir   string
+	ScannerImage         string
+	TrivyImage           string
+	TrivyDBCacherImage   string
+	FileServerAddr       string
+	ScanRequestTTLPeriod time.Duration
 }
 
 func (c ExtraConfig) LicenseProvided() bool {
@@ -232,7 +232,7 @@ func (c completedConfig) New(ctx context.Context) (*ScannerServer, error) {
 		c.ExtraConfig.TrivyImage,
 		c.ExtraConfig.TrivyDBCacherImage,
 		c.ExtraConfig.FileServerAddr,
-		c.ExtraConfig.GarbageCollectionPeriod,
+		c.ExtraConfig.ScanRequestTTLPeriod,
 	)).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "ImageScanRequest")
 		os.Exit(1)

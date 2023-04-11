@@ -37,12 +37,12 @@ import (
 
 type Reconciler struct {
 	client.Client
-	nc                      *nats.Conn
-	scannerImage            string
-	trivyImage              string
-	trivyDBCacherImage      string
-	fileServerAddr          string
-	garbageCollectionPeriod time.Duration
+	nc                   *nats.Conn
+	scannerImage         string
+	trivyImage           string
+	trivyDBCacherImage   string
+	fileServerAddr       string
+	scanRequestTTLPeriod time.Duration
 }
 
 type RequestReconciler struct {
@@ -58,13 +58,13 @@ func NewImageScanRequestReconciler(
 	garbageCol time.Duration,
 ) *Reconciler {
 	return &Reconciler{
-		Client:                  kc,
-		nc:                      nc,
-		scannerImage:            scannedImage,
-		trivyImage:              trivyImage,
-		trivyDBCacherImage:      trivyDBCacherImage,
-		fileServerAddr:          fsAddr,
-		garbageCollectionPeriod: garbageCol,
+		Client:               kc,
+		nc:                   nc,
+		scannerImage:         scannedImage,
+		trivyImage:           trivyImage,
+		trivyDBCacherImage:   trivyDBCacherImage,
+		fileServerAddr:       fsAddr,
+		scanRequestTTLPeriod: garbageCol,
 	}
 }
 
@@ -87,7 +87,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	if scanreq.IsComplete() {
-		if time.Since(scanreq.CreationTimestamp.Time) > r.garbageCollectionPeriod {
+		if time.Since(scanreq.CreationTimestamp.Time) > r.scanRequestTTLPeriod {
 			return ctrl.Result{}, r.Delete(ctx, &scanreq)
 		} else {
 			// We don't want to reconcile, after the ImageScanRequest is Completed
