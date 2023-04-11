@@ -14,24 +14,30 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package controllers
+package scanrequest
 
 import (
-	"context"
-	"crypto/md5"
 	"fmt"
+	"strings"
 
 	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
+	"kubeops.dev/scanner/apis/trivy"
 
 	batch "k8s.io/api/batch/v1"
 	core "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2"
 	"k8s.io/utils/pointer"
 	kutil "kmodules.xyz/client-go"
 	cu "kmodules.xyz/client-go/client"
+	"kmodules.xyz/client-go/client/apiutil"
 	core_util "kmodules.xyz/client-go/core/v1"
+	coreapi "kmodules.xyz/client-go/core/v1"
 	coreutil "kmodules.xyz/client-go/core/v1"
+	"kmodules.xyz/go-containerregistry/name"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -60,13 +66,13 @@ func (r *RequestReconciler) ScanForPrivateImage() error {
 		}
 	}
 
-	obj, vt, err := cu.CreateOrPatch(context.TODO(), r.Client, &batch.Job{
+	obj, vt, err := cu.CreateOrPatch(r.ctx, r.Client, &batch.Job{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Job",
 			APIVersion: batch.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-%x", ScannerJobName, md5.Sum([]byte(r.req.Spec.Image))),
+			Name:      fmt.Sprintf("%s-%x", ScannerJobName, api.GetReportName(r.req.Spec.Image)),
 			Namespace: r.req.Spec.Namespace,
 		},
 	}, func(obj client.Object, createOp bool) client.Object {
@@ -155,5 +161,117 @@ func (r *RequestReconciler) ScanForPrivateImage() error {
 	if vt == kutil.VerbCreated {
 		klog.Infof("Scanner job %v/%v created", obj.GetNamespace(), obj.GetName())
 	}
-	return r.updateStatusWithJobName(obj.GetName(), vt)
+	return r.updateStatusWithJobName(obj.GetName())
+}
+
+func (r *RequestReconciler) getPrivateImageScannerJob() (*batch.Job, error) {
+	var job batch.Job
+	err := r.Get(r.ctx, types.NamespacedName{
+		Name:      r.req.Status.JobName,
+		Namespace: r.req.Spec.Namespace,
+	}, &job)
+	return &job, err
+}
+
+func (r *RequestReconciler) getPrivateImageScannerPod(job *batch.Job) (*corev1.Pod, error) {
+	var podList corev1.PodList
+	podSelectors := job.Spec.Template.Labels
+	err := r.List(r.ctx, &podList, &client.ListOptions{
+		LabelSelector: labels.Set(podSelectors).AsSelector(),
+		Namespace:     job.Namespace,
+	})
+	if err != nil {
+		return nil, err
+	}
+	for _, pod := range podList.Items {
+		owned, _ := coreapi.IsOwnedBy(&pod, job)
+		if owned {
+			return &pod, nil
+		}
+	}
+	return nil, nil
+}
+
+func (r *RequestReconciler) getPrivateImageScannerInitContainer(pod *corev1.Pod) (corev1.Container, corev1.ContainerStatus, bool) {
+	var (
+		container       corev1.Container
+		containerStatus corev1.ContainerStatus
+		found           bool
+	)
+	if pod == nil {
+		return container, containerStatus, found
+	}
+	for _, c := range pod.Spec.InitContainers {
+		if c.Name == containerScanner {
+			container = c
+		}
+	}
+	for _, c := range pod.Status.InitContainerStatuses {
+		if c.Name == containerScanner {
+			containerStatus = c
+			found = true
+		}
+	}
+	return container, containerStatus, found
+}
+
+func (r *RequestReconciler) getDigestForPrivateImage(pod *core.Pod) (string, error) {
+	c, cs, found := r.getPrivateImageScannerInitContainer(pod)
+	if !found { // pod has just been created, so we need to wait
+		return "", nil
+	}
+	ref, err := apiutil.GetImageRef(c.Image, cs.Image, cs.ImageID)
+	if err != nil {
+		return "", err
+	}
+
+	splits := strings.Split(ref, "@")
+	if len(splits) == 2 { // this will be true for all the images except for the kind-loaded ones
+		return splits[1], nil
+	}
+	// TODO: What if it is a kind-loaded image ? For now, returning empty string
+	return "", nil
+}
+
+func (r *RequestReconciler) ensureDigestInRequestAndReport(digest string) error {
+	if digest == "" {
+		return nil
+	}
+	img, err := name.ParseReference(r.req.Spec.Image)
+	if err != nil {
+		return err
+	}
+
+	req, _, err := cu.PatchStatus(r.ctx, r.Client, &api.ImageScanRequest{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: r.req.Name,
+		},
+	}, func(obj client.Object) client.Object {
+		req := obj.(*api.ImageScanRequest)
+		if req.Status.Image == nil {
+			req.Status.Image = &trivy.ImageDetails{
+				Name:       img.Name,
+				Tag:        img.Tag,
+				Digest:     img.Digest,
+				Visibility: trivy.ImageVisibilityPrivate,
+			}
+		}
+		req.Status.Image.Digest = digest
+		return req
+	})
+	if err != nil {
+		return err
+	}
+	r.req = req.(*api.ImageScanRequest)
+
+	_, _, err = cu.CreateOrPatch(r.ctx, r.Client, &api.ImageScanReport{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: api.GetReportName(img.Name),
+		},
+	}, func(obj client.Object, createOp bool) client.Object {
+		rep := obj.(*api.ImageScanReport)
+		rep.Spec.Image.Digest = digest
+		return rep
+	})
+	return err
 }

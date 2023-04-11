@@ -21,12 +21,15 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"net/http"
 	"os"
 	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"kubeops.dev/scanner/apis/trivy"
 
 	"github.com/dustin/go-humanize"
 	_ "github.com/dustin/go-humanize"
@@ -65,7 +68,7 @@ func Router(prefix, dir string) http.Handler {
 	return r
 }
 
-const MaxUploadSize = 100 << 20 // 100 MB
+const MaxUploadSize = 100 << 30 // 1 GB
 
 // FileSave fetches the file and saves to disk
 func FileSave(prefix, dir string, r *http.Request) error {
@@ -127,4 +130,19 @@ func getSize(content io.Seeker) (int64, error) {
 		return 0, err
 	}
 	return size, nil
+}
+
+func VulnerabilityDBLastUpdatedAt(fsDir string) (*trivy.Time, error) {
+	dir := filepath.Join(fsDir, "trivy")
+	fsdata, err := fs.ReadFile(os.DirFS(dir), "metadata.json")
+	if err != nil {
+		return nil, err
+	}
+
+	var ver trivy.VulnerabilityDBStruct
+	err = json.Unmarshal(fsdata, &ver)
+	if err != nil {
+		return nil, err
+	}
+	return &ver.UpdatedAt, nil
 }

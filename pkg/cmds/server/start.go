@@ -115,11 +115,12 @@ func (o *ScannerServerOptions) Config() (*apiserver.Config, error) {
 	}
 
 	extraConfig := apiserver.ExtraConfig{
-		ClientConfig:       serverConfig.ClientConfig,
-		ScannerImage:       o.ExtraOptions.ScannerImage,
-		TrivyImage:         o.ExtraOptions.TrivyImage,
-		TrivyDBCacherImage: o.ExtraOptions.TrivyDBCacherImage,
-		FileServerAddr:     o.ExtraOptions.FileServerAddr,
+		ClientConfig:         serverConfig.ClientConfig,
+		ScannerImage:         o.ExtraOptions.ScannerImage,
+		TrivyImage:           o.ExtraOptions.TrivyImage,
+		TrivyDBCacherImage:   o.ExtraOptions.TrivyDBCacherImage,
+		FileServerAddr:       o.ExtraOptions.FileServerAddr,
+		ScanRequestTTLPeriod: o.ExtraOptions.ScanRequestTTLPeriod,
 	}
 	if err := o.ExtraOptions.ApplyTo(&extraConfig); err != nil {
 		return nil, err

@@ -27,7 +27,8 @@ import (
 	"kubeops.dev/scanner/apis/scanner/install"
 	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
 	"kubeops.dev/scanner/pkg/backend"
-	"kubeops.dev/scanner/pkg/controllers"
+	"kubeops.dev/scanner/pkg/controllers/scanreport"
+	"kubeops.dev/scanner/pkg/controllers/scanrequest"
 	"kubeops.dev/scanner/pkg/fileserver"
 	reportstorage "kubeops.dev/scanner/pkg/registry/scanner/report"
 	requeststorage "kubeops.dev/scanner/pkg/registry/scanner/request"
@@ -103,6 +104,7 @@ type ExtraConfig struct {
 	TrivyImage           string
 	TrivyDBCacherImage   string
 	FileServerAddr       string
+	ScanRequestTTLPeriod time.Duration
 }
 
 func (c ExtraConfig) LicenseProvided() bool {
@@ -223,15 +225,24 @@ func (c completedConfig) New(ctx context.Context) (*ScannerServer, error) {
 		}
 	}
 
-	if err = (controllers.NewImageScanRequestReconciler(
+	if err = (scanrequest.NewImageScanRequestReconciler(
 		mgr.GetClient(),
 		nc,
 		c.ExtraConfig.ScannerImage,
 		c.ExtraConfig.TrivyImage,
 		c.ExtraConfig.TrivyDBCacherImage,
 		c.ExtraConfig.FileServerAddr,
+		c.ExtraConfig.ScanRequestTTLPeriod,
 	)).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "ImageScanRequest")
+		os.Exit(1)
+	}
+	if err = (&scanreport.ImageScanReportReconciler{
+		Client:        mgr.GetClient(),
+		Scheme:        mgr.GetScheme(),
+		FileServerDir: c.ExtraConfig.FileServerFilesDir,
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "ImageScanReport")
 		os.Exit(1)
 	}
 

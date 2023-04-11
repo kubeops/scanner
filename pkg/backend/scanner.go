@@ -22,18 +22,15 @@ import (
 	"net/http"
 	"os"
 	"path"
-	"strings"
 	"time"
 
 	"kubeops.dev/scanner/apis/trivy"
 
-	"github.com/google/go-containerregistry/pkg/authn"
-	"github.com/google/go-containerregistry/pkg/crane"
-	"github.com/google/go-containerregistry/pkg/name"
 	_ "gocloud.dev/blob/s3blob"
 	"gomodules.xyz/blobfs"
 	shell "gomodules.xyz/go-sh"
 	"k8s.io/klog/v2"
+	"kmodules.xyz/go-containerregistry/name"
 )
 
 func NewBlobFS() blobfs.Interface {
@@ -91,25 +88,25 @@ func (mgr *Manager) getBucketResponse(img string) (*trivy.BackendResponse, error
 const reportFileName = "report.json"
 
 func ReadFromBucket(fs blobfs.Interface, img string) ([]byte, error) {
-	repo, digest, err := parseReference(img)
+	ref, err := name.ParseOrExtractDigest(img)
 	if err != nil {
 		return nil, err
 	}
-	return fs.ReadFile(context.TODO(), path.Join(repo, digest, reportFileName))
+	return fs.ReadFile(context.TODO(), path.Join(ref.Registry, ref.Repository, ref.Digest, reportFileName))
 }
 
 func ExistsReport(fs blobfs.Interface, img string) (bool, error) {
-	repo, digest, err := parseReference(img)
+	ref, err := name.ParseOrExtractDigest(img)
 	if err != nil {
 		return false, err
 	}
-	exists, err := fs.Exists(context.TODO(), path.Join(repo, digest, reportFileName))
+	exists, err := fs.Exists(context.TODO(), path.Join(ref.Registry, ref.Repository, ref.Digest, reportFileName))
 	if err != nil || !exists {
 		return false, err
 	}
 
 	// If file exists, & it is more than 6 hours old, We consider it as if it doesn't exist.
-	read, err := fs.ReadFile(context.TODO(), path.Join(repo, digest, reportFileName))
+	read, err := fs.ReadFile(context.TODO(), path.Join(ref.Registry, ref.Repository, ref.Digest, reportFileName))
 	if err != nil {
 		return false, err
 	}
@@ -118,10 +115,12 @@ func ExistsReport(fs blobfs.Interface, img string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	if time.Since(res.LastModificationTime.Time) > TrivyRefreshPeriod {
-		return false, nil
+
+	ver, err := getVersionInfo()
+	if err != nil {
+		return false, err
 	}
-	return true, nil
+	return !res.TrivyVersion.VulnerabilityDB.UpdatedAt.Time.Before(ver.VulnerabilityDB.UpdatedAt.Time), nil
 }
 
 func UploadReport(fs blobfs.Interface, img string) error {
@@ -135,23 +134,27 @@ func UploadReport(fs blobfs.Interface, img string) error {
 		return err
 	}
 
+	ref, err := name.ParseOrExtractDigest(img)
+	if err != nil {
+		return err
+	}
+
 	resp := trivy.BackendResponse{
-		Report:               *rep,
-		TrivyVersion:         *ver,
-		Visibility:           trivy.ImageVisibilityPublic,
-		LastModificationTime: trivy.Time{Time: time.Now()},
+		Report:       *rep,
+		TrivyVersion: *ver,
+		ImageDetails: trivy.ImageDetails{
+			Name:       ref.Name,
+			Tag:        ref.Tag,
+			Digest:     ref.Digest,
+			Visibility: trivy.ImageVisibilityPublic,
+		},
 	}
 	marshaledResp, err := trivy.JSON.Marshal(&resp)
 	if err != nil {
 		return err
 	}
 
-	repo, digest, err := parseReference(img)
-	if err != nil {
-		return err
-	}
-
-	return fs.WriteFile(context.TODO(), path.Join(repo, digest, reportFileName), marshaledResp)
+	return fs.WriteFile(context.TODO(), path.Join(ref.Registry, ref.Repository, ref.Digest, reportFileName), marshaledResp)
 }
 
 // trivy image ubuntu --security-checks vuln --format json --quiet
@@ -205,18 +208,4 @@ func getNewShell() *shell.Session {
 	sh.Stdout = os.Stdout
 	sh.Stderr = os.Stderr
 	return sh
-}
-
-func parseReference(img string) (repo string, digest string, err error) {
-	ref, err := name.ParseReference(img)
-	if err != nil {
-		return
-	}
-	repo = ref.Context().String()
-	if strings.HasPrefix(ref.Identifier(), "sha256:") {
-		digest = ref.Identifier()
-		return
-	}
-	digest, err = crane.Digest(img, crane.WithAuthFromKeychain(authn.DefaultKeychain))
-	return
 }

@@ -58,6 +58,7 @@ func (c defaultTableConvertor) ConvertToTable(ctx context.Context, object runtim
 			high                 int
 			medium               int
 			lastScannedTimestamp string
+			status               string
 		)
 		if o, ok := obj.(*scanner.ImageScanReport); ok {
 			name = o.GetName()
@@ -79,7 +80,8 @@ func (c defaultTableConvertor) ConvertToTable(ctx context.Context, object runtim
 			critical = stats["CRITICAL"]
 			high = stats["HIGH"]
 			medium = stats["MEDIUM"]
-			lastScannedTimestamp = convertToHumanReadableDateType(o.Status.LastChecked.Time)
+			lastScannedTimestamp = convertToHumanReadableDateType(o.Status.Version.VulnerabilityDB.UpdatedAt.Time)
+			status = string(o.Status.Phase)
 		}
 
 		table.Rows = append(table.Rows, metav1.TableRow{
@@ -90,6 +92,7 @@ func (c defaultTableConvertor) ConvertToTable(ctx context.Context, object runtim
 				high,
 				medium,
 				lastScannedTimestamp,
+				status,
 			},
 			Object: runtime.RawExtension{Object: obj},
 		})
@@ -122,6 +125,7 @@ func (c defaultTableConvertor) ConvertToTable(ctx context.Context, object runtim
 			{Name: "High", Type: "string", Description: ""},
 			{Name: "Medium", Type: "string", Description: ""},
 			{Name: "Last Scanned", Type: "string", Description: ""},
+			{Name: "Status", Type: "string", Description: ""},
 		}
 	}
 	return &table, nil

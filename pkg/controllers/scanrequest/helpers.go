@@ -14,12 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package controllers
+package scanrequest
 
 import (
 	"context"
-	"crypto/md5"
-	"fmt"
 
 	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
 	"kubeops.dev/scanner/apis/trivy"
@@ -40,14 +38,14 @@ func EnsureScanReport(kc client.Client, imageRef string, resp trivy.BackendRespo
 
 	obj, vt, err := cu.CreateOrPatch(context.TODO(), kc, &api.ImageScanReport{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: getReportName(img.Name),
+			Name: api.GetReportName(img.Name),
 		},
 	}, func(obj client.Object, createOp bool) client.Object {
 		rep := obj.(*api.ImageScanReport)
 		rep.Spec.Image = api.ImageReference{
-			Name:   img.Name,
-			Tag:    img.Tag,
-			Digest: img.Digest,
+			Name:   resp.ImageDetails.Name,
+			Tag:    resp.ImageDetails.Tag,
+			Digest: resp.ImageDetails.Digest,
 		}
 		return rep
 	})
@@ -58,15 +56,13 @@ func EnsureScanReport(kc client.Client, imageRef string, resp trivy.BackendRespo
 		klog.Infof("%v ImageScanReport has been created\n", obj.GetName())
 	}
 
-	// TODO: Is a single CreateOrPatch is able to modify the status too ?
 	_, _, err = cu.PatchStatus(context.TODO(), kc, &api.ImageScanReport{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: getReportName(img.Name),
+			Name: api.GetReportName(img.Name),
 		},
 	}, func(obj client.Object) client.Object {
 		rep := obj.(*api.ImageScanReport)
-		rep.Status.LastChecked = resp.LastModificationTime
-		rep.Status.TrivyDBVersion = resp.TrivyVersion.Version
+		rep.Status.Version = resp.TrivyVersion
 		rep.Status.Report = resp.Report
 		return rep
 	})
@@ -108,15 +104,3 @@ func upsertCVEs(kc client.Client, r trivy.SingleReport) error {
 	}
 	return nil
 }
-
-func getReportName(imgName string) string {
-	return fmt.Sprintf("%x", md5.Sum([]byte(imgName)))
-}
-
-type requeueCode int
-
-const (
-	requeueCodeNone   = 0
-	requeueCodeFaster = 1
-	requeueCodeDelay  = 2
-)

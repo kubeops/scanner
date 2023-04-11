@@ -51,9 +51,12 @@ spec:
             description: Status holds all the SingleReport-related details of the
               specified image
             properties:
-              lastChecked:
-                description: When the referred image was checked for the last time
-                format: date-time
+              phase:
+                default: Current
+                description: Specifies the current phase of the report
+                enum:
+                - Current
+                - Outdated
                 type: string
               report:
                 description: This is the actual trivy Report
@@ -273,9 +276,23 @@ spec:
                 - results
                 - schemaVersion
                 type: object
-              trivyDBVersion:
+              version:
                 description: which TrivyDBVersion was used when the last check
-                type: string
+                properties:
+                  version:
+                    type: string
+                  vulnerabilityDB:
+                    properties:
+                      updatedAt:
+                        format: date-time
+                        type: string
+                    required:
+                    - updatedAt
+                    type: object
+                required:
+                - version
+                - vulnerabilityDB
+                type: object
             type: object
         type: object
     served: true
