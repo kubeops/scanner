@@ -99,7 +99,6 @@ spec:
                 - InProgress
                 - Current
                 - Failed
-                - Outdated
                 type: string
               reason:
                 description: A brief CamelCase message indicating details about why
