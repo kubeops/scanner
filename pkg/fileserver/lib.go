@@ -31,6 +31,7 @@ import (
 
 	"kubeops.dev/scanner/apis/trivy"
 
+	securejoin "github.com/cyphar/filepath-securejoin"
 	"github.com/dustin/go-humanize"
 	_ "github.com/dustin/go-humanize"
 	"github.com/go-chi/chi/v5"
@@ -105,7 +106,14 @@ func FileSave(prefix, dir string, r *http.Request) error {
 		return errors.New("missing file name")
 	}
 
-	fullPath := filepath.Join(dir, strings.TrimPrefix(r.URL.Path, prefix), filename)
+	dir, err = securejoin.SecureJoin(dir, strings.TrimPrefix(r.URL.Path, prefix))
+	if err != nil {
+		return err
+	}
+	fullPath, err := securejoin.SecureJoin(dir, filename)
+	if err != nil {
+		return err
+	}
 	_ = os.MkdirAll(filepath.Dir(fullPath), 0o755)
 	file, err := os.OpenFile(fullPath, os.O_WRONLY|os.O_CREATE, 0o644)
 	if err != nil {
