@@ -72,8 +72,8 @@ func (r *RequestReconciler) ScanForPrivateImage() error {
 			APIVersion: batch.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-%x", ScannerJobName, api.GetReportName(r.req.Spec.Image)),
-			Namespace: r.req.Spec.Namespace,
+			GenerateName: ScannerJobName,
+			Namespace:    r.req.Spec.Namespace,
 		},
 	}, func(obj client.Object, createOp bool) client.Object {
 		job := obj.(*batch.Job)
