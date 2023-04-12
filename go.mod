@@ -3,6 +3,7 @@ module kubeops.dev/scanner
 go 1.18
 
 require (
+	github.com/cyphar/filepath-securejoin v0.2.3
 	github.com/dustin/go-humanize v1.0.1-0.20220316001817-d5090ed65664
 	github.com/go-chi/chi/v5 v5.0.8
 	github.com/google/go-containerregistry v0.14.0
