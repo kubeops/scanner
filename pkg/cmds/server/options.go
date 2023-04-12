@@ -51,6 +51,7 @@ type ExtraOptions struct {
 	ScanInCluster      bool
 
 	ScanRequestTTLPeriod time.Duration
+	ScanReportTTLPeriod  time.Duration
 }
 
 func NewExtraOptions() *ExtraOptions {
@@ -63,6 +64,7 @@ func NewExtraOptions() *ExtraOptions {
 		FileServerFilesDir:   "/var/data/files",
 		TrivyImage:           "aquasec/trivy",
 		ScanRequestTTLPeriod: time.Hour * 12,
+		ScanReportTTLPeriod:  time.Hour * 168,
 	}
 }
 
@@ -86,6 +88,7 @@ func (s *ExtraOptions) AddFlags(fs *pflag.FlagSet) {
 	fs.BoolVar(&s.ScanInCluster, "scan-public-image-incluster", s.ScanInCluster, "If true public images will be scanned in cluster. Set true for air-gaped cluster")
 
 	fs.DurationVar(&s.ScanRequestTTLPeriod, "scan-request-ttl-after-finished", s.ScanRequestTTLPeriod, "ImageScanRequest older than this period will be garbage collected")
+	fs.DurationVar(&s.ScanReportTTLPeriod, "scan-report-ttl-after-outdated", s.ScanReportTTLPeriod, "Outdated ImageScanReport older than this period will be garbage collected")
 }
 
 func (s *ExtraOptions) ApplyTo(cfg *apiserver.ExtraConfig) error {
@@ -103,6 +106,7 @@ func (s *ExtraOptions) ApplyTo(cfg *apiserver.ExtraConfig) error {
 	cfg.ClientConfig.Burst = s.Burst
 	cfg.ResyncPeriod = s.ResyncPeriod
 	cfg.ScanRequestTTLPeriod = s.ScanRequestTTLPeriod
+	cfg.ScanReportTTLPeriod = s.ScanReportTTLPeriod
 
 	var err error
 	if cfg.KubeClient, err = kubernetes.NewForConfig(cfg.ClientConfig); err != nil {

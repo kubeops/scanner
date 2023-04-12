@@ -105,6 +105,7 @@ type ExtraConfig struct {
 	TrivyDBCacherImage   string
 	FileServerAddr       string
 	ScanRequestTTLPeriod time.Duration
+	ScanReportTTLPeriod  time.Duration
 }
 
 func (c ExtraConfig) LicenseProvided() bool {
@@ -179,7 +180,8 @@ func (c completedConfig) New(ctx context.Context) (*ScannerServer, error) {
 		ClientDisableCacheFor: []client.Object{
 			&core.Pod{},
 		},
-		NewClient: cu.NewClient,
+		NewClient:  cu.NewClient,
+		SyncPeriod: &c.ExtraConfig.ResyncPeriod,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("unable to start manager, reason: %v", err)
@@ -241,6 +243,7 @@ func (c completedConfig) New(ctx context.Context) (*ScannerServer, error) {
 		Client:        mgr.GetClient(),
 		Scheme:        mgr.GetScheme(),
 		FileServerDir: c.ExtraConfig.FileServerFilesDir,
+		ReportTTL:     c.ExtraConfig.ScanReportTTLPeriod,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "ImageScanReport")
 		os.Exit(1)

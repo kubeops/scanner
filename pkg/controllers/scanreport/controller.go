@@ -18,6 +18,7 @@ package scanreport
 
 import (
 	"context"
+	"time"
 
 	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
 	"kubeops.dev/scanner/pkg/fileserver"
@@ -34,17 +35,9 @@ type ImageScanReportReconciler struct {
 	client.Client
 	Scheme        *runtime.Scheme
 	FileServerDir string
+	ReportTTL     time.Duration
 }
 
-// Reconcile is part of the main kubernetes reconciliation loop which aims to
-// move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the ImageScanReport object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.14.1/pkg/reconcile
 func (r *ImageScanReportReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := log.FromContext(ctx)
 
@@ -65,6 +58,13 @@ func (r *ImageScanReportReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 
 	if dbTimestamp.After(isrp.Status.Version.VulnerabilityDB.UpdatedAt.Time) {
 		status.Phase = api.ImageScanReportPhaseOutdated
+		later := isrp.CreationTimestamp.Time
+		if isrp.CreationTimestamp.Time.Before(isrp.Status.Version.VulnerabilityDB.UpdatedAt.Time) {
+			later = isrp.Status.Version.VulnerabilityDB.UpdatedAt.Time
+		}
+		if time.Since(later) >= r.ReportTTL {
+			return ctrl.Result{}, r.Delete(ctx, &isrp)
+		}
 	} else {
 		status.Phase = api.ImageScanReportPhaseCurrent
 	}
