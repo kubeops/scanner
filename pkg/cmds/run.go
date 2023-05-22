@@ -29,12 +29,12 @@ import (
 )
 
 func NewCmdRun(ctx context.Context, out, errOut io.Writer) *cobra.Command {
-	o := server.NewUIServerOptions(out, errOut)
+	o := server.NewScannerServerOptions(out, errOut)
 
 	cmd := &cobra.Command{
 		Use:               "run",
-		Short:             "Launch a UI API server",
-		Long:              "Launch a UI API server",
+		Short:             "Launch a scanner server",
+		Long:              "Launch a scanner server",
 		DisableAutoGenTag: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			klog.Infof("Starting ui server version %s+%s ...", v.Version.Version, v.Version.CommitHash)

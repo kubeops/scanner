@@ -1582,10 +1582,10 @@ go.bytebuilders.dev/audit v0.0.27 h1:d9kYia/S17JhkauRXw/ERXAtfuujkGDGjpeQcAurmkY
 go.bytebuilders.dev/audit v0.0.27/go.mod h1:88UkSOMKSKShknE5c6V1HtBHCXArIO/LHio61OSzaww=
 go.bytebuilders.dev/license-proxyserver v0.0.3 h1:vAFMBWfrlmFKNspjBm2KfPXnxYnC17xLwZiHmVzUmzs=
 go.bytebuilders.dev/license-proxyserver v0.0.3/go.mod h1:iMJbPzDf2R2EJOZwRi7ziEr5DBMfT9Cm75/XfPb/QnU=
-go.bytebuilders.dev/license-verifier v0.13.0 h1:VyI8XydrZbzClSk45rPcjz9dVhyL0EfpWW4T08SXMGo=
-go.bytebuilders.dev/license-verifier v0.13.0/go.mod h1:PTTlWgokzoisBezn2zt+JeGkhTJZ0flvLzdhHVBy86M=
-go.bytebuilders.dev/license-verifier/kubernetes v0.13.0 h1:LdorijUEYANOz79FBpfLXrNB2NqWD2CY8+169L8SGCM=
-go.bytebuilders.dev/license-verifier/kubernetes v0.13.0/go.mod h1:NTztQXT6YwU3t2jmeFDbCQPnuw5g9o50UE94gcuR/Oo=
+go.bytebuilders.dev/license-verifier v0.13.1 h1:O0V5a91f2LO7g561NUOGu1dJQiq8ajj7m4IswnmrfnQ=
+go.bytebuilders.dev/license-verifier v0.13.1/go.mod h1:PTTlWgokzoisBezn2zt+JeGkhTJZ0flvLzdhHVBy86M=
+go.bytebuilders.dev/license-verifier/kubernetes v0.13.1 h1:zSylZxnaV0Nx2v8cauBUAxNIo4hSOaocl/n0jYilacw=
+go.bytebuilders.dev/license-verifier/kubernetes v0.13.1/go.mod h1:A2LcHiri4JeveGGfzR3dZgrgR2l/hEh1x8+/Efha+TY=
 go.etcd.io/bbolt v1.3.2/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
 go.etcd.io/bbolt v1.3.3/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
 go.etcd.io/bbolt v1.3.5/go.mod h1:G5EMThwa9y8QZGBClrRx5EY+Yw9kAhnjy3bSjsnlVTQ=
@@ -2589,8 +2589,8 @@ k8s.io/utils v0.0.0-20221012122500-cfd413dd9e85 h1:cTdVh7LYu82xeClmfzGtgyspNh6Ux
 k8s.io/utils v0.0.0-20221012122500-cfd413dd9e85/go.mod h1:OLgZIPagt7ERELqWJFomSt595RzquPNLL48iOWgYOg0=
 kmodules.xyz/apiversion v0.2.0 h1:vAQYqZFm4xu4pbB1cAdHbFEPES6EQkcR4wc06xdTOWk=
 kmodules.xyz/apiversion v0.2.0/go.mod h1:oPX8g8LvlPdPX3Yc5YvCzJHQnw3YF/X4/jdW0b1am80=
-kmodules.xyz/client-go v0.25.21 h1:AMceuEeOl4hoh4p3rtGcrcrbwHg9j5IpnHTUd4vjecc=
-kmodules.xyz/client-go v0.25.21/go.mod h1:KWVpgjAj/VNzCzj/BihpJkY39aWIqe8qMp5RuPsuSJA=
+kmodules.xyz/client-go v0.25.22 h1:gtRyVl5Ar87zzKj4g7Nx+0QSeWq9yTKADoasZP+brZg=
+kmodules.xyz/client-go v0.25.22/go.mod h1:KWVpgjAj/VNzCzj/BihpJkY39aWIqe8qMp5RuPsuSJA=
 kmodules.xyz/custom-resources v0.25.1 h1:0qHPTxbT/q0afl2GCOnwPFaoxKziRIPXgVu77YwrCa4=
 kmodules.xyz/custom-resources v0.25.1/go.mod h1:ULwzvLmOqZJcPSXKI7iLclYL5eYRlKx8Nbex28Ht19E=
 kmodules.xyz/go-containerregistry v0.0.11 h1:eZ7dz5QvszqoedOQLyqf5lkDa+S3Bds4EHHhb6jrLMc=

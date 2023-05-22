@@ -50,8 +50,8 @@ type ScannerServerOptions struct {
 	StdErr io.Writer
 }
 
-// NewUIServerOptions returns a new ScannerServerOptions
-func NewUIServerOptions(out, errOut io.Writer) *ScannerServerOptions {
+// NewScannerServerOptions returns a new ScannerServerOptions
+func NewScannerServerOptions(out, errOut io.Writer) *ScannerServerOptions {
 	_ = feature.DefaultMutableFeatureGate.Set(fmt.Sprintf("%s=false", features.APIPriorityAndFairness))
 	o := &ScannerServerOptions{
 		RecommendedOptions: genericoptions.NewRecommendedOptions(

@@ -15,8 +15,8 @@ require (
 	github.com/spf13/pflag v1.0.5
 	go.bytebuilders.dev/audit v0.0.27
 	go.bytebuilders.dev/license-proxyserver v0.0.3
-	go.bytebuilders.dev/license-verifier v0.13.0
-	go.bytebuilders.dev/license-verifier/kubernetes v0.13.0
+	go.bytebuilders.dev/license-verifier v0.13.1
+	go.bytebuilders.dev/license-verifier/kubernetes v0.13.1
 	go.uber.org/automaxprocs v1.5.2
 	go.wandrs.dev/http v0.0.2
 	gocloud.dev v0.27.0
@@ -35,7 +35,7 @@ require (
 	k8s.io/klog/v2 v2.80.1
 	k8s.io/kube-openapi v0.0.0-20221012153701-172d655c2280
 	k8s.io/utils v0.0.0-20221012122500-cfd413dd9e85
-	kmodules.xyz/client-go v0.25.21
+	kmodules.xyz/client-go v0.25.22
 	kmodules.xyz/go-containerregistry v0.0.11
 	kubedb.dev/apimachinery v0.32.0
 	sigs.k8s.io/controller-runtime v0.13.1
