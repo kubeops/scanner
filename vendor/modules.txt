@@ -561,13 +561,13 @@ go.bytebuilders.dev/license-proxyserver/apis/proxyserver/v1alpha1
 go.bytebuilders.dev/license-proxyserver/client/clientset/versioned
 go.bytebuilders.dev/license-proxyserver/client/clientset/versioned/scheme
 go.bytebuilders.dev/license-proxyserver/client/clientset/versioned/typed/proxyserver/v1alpha1
-# go.bytebuilders.dev/license-verifier v0.13.1
+# go.bytebuilders.dev/license-verifier v0.13.2
 ## explicit; go 1.18
 go.bytebuilders.dev/license-verifier
 go.bytebuilders.dev/license-verifier/apis/licenses
 go.bytebuilders.dev/license-verifier/apis/licenses/v1alpha1
 go.bytebuilders.dev/license-verifier/info
-# go.bytebuilders.dev/license-verifier/kubernetes v0.13.1
+# go.bytebuilders.dev/license-verifier/kubernetes v0.13.2
 ## explicit; go 1.18
 go.bytebuilders.dev/license-verifier/kubernetes
 # go.etcd.io/etcd/api/v3 v3.5.4
@@ -809,8 +809,8 @@ gomodules.xyz/flags
 # gomodules.xyz/go-sh v0.1.0
 ## explicit; go 1.15
 gomodules.xyz/go-sh
-# gomodules.xyz/jsonpatch/v2 v2.2.0
-## explicit; go 1.12
+# gomodules.xyz/jsonpatch/v2 v2.3.0
+## explicit; go 1.20
 gomodules.xyz/jsonpatch/v2
 # gomodules.xyz/logs v0.0.6
 ## explicit; go 1.16
@@ -1578,7 +1578,7 @@ k8s.io/utils/trace
 # kmodules.xyz/apiversion v0.2.0
 ## explicit; go 1.14
 kmodules.xyz/apiversion
-# kmodules.xyz/client-go v0.25.22
+# kmodules.xyz/client-go v0.25.23
 ## explicit; go 1.18
 kmodules.xyz/client-go
 kmodules.xyz/client-go/api/v1
