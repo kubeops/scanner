@@ -1,6 +1,5 @@
 [![Go Report Card](https://goreportcard.com/badge/kubeops.dev/scanner)](https://goreportcard.com/report/kubeops.dev/scanner)
 [![Build Status](https://github.com/kubeops/scanner/workflows/CI/badge.svg)](https://github.com/kubeops/scanner/actions?workflow=CI)
-[![Docker Pulls](https://img.shields.io/docker/pulls/appscode/scanner.svg)](https://hub.docker.com/r/appscode/scanner/)
 [![Twitter](https://img.shields.io/twitter/follow/kubeops.svg?style=social&logo=twitter&label=Follow)](https://twitter.com/intent/follow?screen_name=Kubeops)
 
 # scanner
