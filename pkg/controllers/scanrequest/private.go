@@ -123,10 +123,19 @@ func (r *RequestReconciler) ScanForPrivateImage() error {
 						"./tv rootfs --skip-db-update --skip-java-db-update --offline-scan --security-checks vuln --format json / > report.json && ./tv version --format json > trivy.json",
 					},
 					SecurityContext: &core.SecurityContext{
+						AllowPrivilegeEscalation: pointer.Bool(false),
+						Capabilities: &core.Capabilities{
+							Drop: []core.Capability{
+								"ALL",
+							},
+						},
+						ReadOnlyRootFilesystem: pointer.Bool(true),
 						RunAsUser:              pointer.Int64(0),
 						RunAsGroup:             pointer.Int64(0),
 						RunAsNonRoot:           nil,
-						ReadOnlyRootFilesystem: pointer.Bool(true),
+						SeccompProfile: &core.SeccompProfile{
+							Type: core.SeccompProfileTypeRuntimeDefault,
+						},
 					},
 					ImagePullPolicy: core.PullIfNotPresent,
 				},
