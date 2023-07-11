@@ -31,12 +31,10 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2"
 	"k8s.io/utils/pointer"
-	kutil "kmodules.xyz/client-go"
 	cu "kmodules.xyz/client-go/client"
 	"kmodules.xyz/client-go/client/apiutil"
 	core_util "kmodules.xyz/client-go/core/v1"
 	coreapi "kmodules.xyz/client-go/core/v1"
-	coreutil "kmodules.xyz/client-go/core/v1"
 	"kmodules.xyz/go-containerregistry/name"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -52,7 +50,19 @@ const (
 	containerUploader = "uploader"
 )
 
-func (r *RequestReconciler) ScanForPrivateImage() error {
+func (r *RequestReconciler) ensureJob(sa string, pullSecrets []corev1.LocalObjectReference) (*batch.Job, error) {
+	if r.req.Status.JobName != "" {
+		var job batch.Job
+		err := r.Client.Get(r.ctx, types.NamespacedName{
+			Name:      r.req.Status.JobName,
+			Namespace: r.workspace,
+		}, &job)
+		if err != nil {
+			return nil, err
+		}
+		return &job, nil
+	}
+
 	ensureVolumeMounts := func(pt *core.PodTemplateSpec) {
 		mount := core.VolumeMount{
 			MountPath: WorkDir,
@@ -66,21 +76,18 @@ func (r *RequestReconciler) ScanForPrivateImage() error {
 		}
 	}
 
-	obj, vt, err := cu.CreateOrPatch(r.ctx, r.Client, &batch.Job{
+	obj, _, err := cu.CreateOrPatch(r.ctx, r.Client, &batch.Job{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Job",
 			APIVersion: batch.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: ScannerJobName,
-			Namespace:    r.req.Spec.Namespace,
+			Namespace:    r.workspace,
 		},
 	}, func(obj client.Object, createOp bool) client.Object {
 		job := obj.(*batch.Job)
 		if createOp {
-			// set the Owner reference to the created job
-			coreutil.EnsureOwnerReference(&job.ObjectMeta, metav1.NewControllerRef(r.req, api.SchemeGroupVersion.WithKind(r.req.Kind)))
-
 			job.Spec.Template.Spec.Volumes = core_util.UpsertVolume(job.Spec.Template.Spec.Volumes, core.Volume{
 				Name: SharedVolumeName,
 				VolumeSource: core.VolumeSource{
@@ -123,16 +130,9 @@ func (r *RequestReconciler) ScanForPrivateImage() error {
 						"./tv rootfs --skip-db-update --skip-java-db-update --offline-scan --security-checks vuln --format json / > report.json && ./tv version --format json > trivy.json",
 					},
 					SecurityContext: &core.SecurityContext{
-						AllowPrivilegeEscalation: pointer.Bool(false),
-						Capabilities: &core.Capabilities{
-							Drop: []core.Capability{
-								"ALL",
-							},
-						},
-						ReadOnlyRootFilesystem: pointer.Bool(true),
-						RunAsUser:              pointer.Int64(0),
-						RunAsGroup:             pointer.Int64(0),
-						RunAsNonRoot:           nil,
+						RunAsUser:    pointer.Int64(0),
+						RunAsGroup:   pointer.Int64(0),
+						RunAsNonRoot: nil,
 						SeccompProfile: &core.SeccompProfile{
 							Type: core.SeccompProfileTypeRuntimeDefault,
 						},
@@ -157,27 +157,38 @@ func (r *RequestReconciler) ScanForPrivateImage() error {
 		}
 		job.Spec.Template.Spec.AutomountServiceAccountToken = pointer.Bool(true)
 		job.Spec.Template.Spec.RestartPolicy = core.RestartPolicyNever
-		job.Spec.Template.Spec.ImagePullSecrets = r.req.Spec.PullSecrets
-		if r.req.Spec.ServiceAccountName != "" {
-			job.Spec.Template.Spec.ServiceAccountName = r.req.Spec.ServiceAccountName
-		}
+		job.Spec.Template.Spec.ImagePullSecrets = pullSecrets
+		job.Spec.Template.Spec.ServiceAccountName = sa
 		job.Spec.TTLSecondsAfterFinished = pointer.Int32(600)
 		return job
 	})
 	if err != nil {
+		return nil, err
+	}
+
+	klog.Infof("Scanner job %v/%v created", obj.GetNamespace(), obj.GetName())
+	return obj.(*batch.Job), r.updateStatusWithJobName(obj.GetName())
+}
+
+func (r *RequestReconciler) ScanForPrivateImage() error {
+	sa, pullSecrets, err := r.copyRequiredObjects()
+	if err != nil {
 		return err
 	}
-	if vt == kutil.VerbCreated {
-		klog.Infof("Scanner job %v/%v created", obj.GetNamespace(), obj.GetName())
+
+	job, err := r.ensureJob(sa, pullSecrets)
+	if err != nil {
+		return err
 	}
-	return r.updateStatusWithJobName(obj.GetName())
+
+	return r.setOwnerRefToCopiedObjects(job, sa, pullSecrets)
 }
 
 func (r *RequestReconciler) getPrivateImageScannerJob() (*batch.Job, error) {
 	var job batch.Job
 	err := r.Get(r.ctx, types.NamespacedName{
 		Name:      r.req.Status.JobName,
-		Namespace: r.req.Spec.Namespace,
+		Namespace: r.workspace,
 	}, &job)
 	return &job, err
 }

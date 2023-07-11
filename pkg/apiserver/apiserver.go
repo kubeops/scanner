@@ -106,6 +106,7 @@ type ExtraConfig struct {
 	FileServerAddr       string
 	ScanRequestTTLPeriod time.Duration
 	ScanReportTTLPeriod  time.Duration
+	Workspace            string
 }
 
 func (c ExtraConfig) LicenseProvided() bool {
@@ -235,6 +236,7 @@ func (c completedConfig) New(ctx context.Context) (*ScannerServer, error) {
 		c.ExtraConfig.TrivyDBCacherImage,
 		c.ExtraConfig.FileServerAddr,
 		c.ExtraConfig.ScanRequestTTLPeriod,
+		c.ExtraConfig.Workspace,
 	)).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "ImageScanRequest")
 		os.Exit(1)

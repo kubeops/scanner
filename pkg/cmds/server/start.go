@@ -121,6 +121,7 @@ func (o *ScannerServerOptions) Config() (*apiserver.Config, error) {
 		TrivyDBCacherImage:   o.ExtraOptions.TrivyDBCacherImage,
 		FileServerAddr:       o.ExtraOptions.FileServerAddr,
 		ScanRequestTTLPeriod: o.ExtraOptions.ScanRequestTTLPeriod,
+		Workspace:            o.ExtraOptions.Workspace,
 	}
 	if err := o.ExtraOptions.ApplyTo(&extraConfig); err != nil {
 		return nil, err
