@@ -70,7 +70,7 @@ func (r *RequestReconciler) copySecrets(secrets []corev1.LocalObjectReference) (
 			return nil, err
 		}
 
-		newSec, _, err := cu.CreateOrPatch(r.ctx, r.Client, &corev1.Secret{
+		newSec := &corev1.Secret{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: corev1.SchemeGroupVersion.String(),
 				Kind:       "Secret",
@@ -79,7 +79,8 @@ func (r *RequestReconciler) copySecrets(secrets []corev1.LocalObjectReference) (
 				GenerateName: "pull-secret-",
 				Namespace:    r.workspace,
 			},
-		}, func(obj client.Object, createOp bool) client.Object {
+		}
+		_, err = cu.CreateOrPatch(r.ctx, r.Client, newSec, func(obj client.Object, createOp bool) client.Object {
 			s := obj.(*corev1.Secret)
 			if createOp {
 				s.Immutable = sec.Immutable
@@ -98,7 +99,7 @@ func (r *RequestReconciler) copySecrets(secrets []corev1.LocalObjectReference) (
 }
 
 func (r *RequestReconciler) copyServiceAccount(saPullSecrets []corev1.LocalObjectReference, sa corev1.ServiceAccount) (string, error) {
-	newSA, _, err := cu.CreateOrPatch(r.ctx, r.Client, &corev1.ServiceAccount{
+	newSA := &corev1.ServiceAccount{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: corev1.SchemeGroupVersion.String(),
 			Kind:       "ServiceAccount",
@@ -107,7 +108,8 @@ func (r *RequestReconciler) copyServiceAccount(saPullSecrets []corev1.LocalObjec
 			GenerateName: "sa-",
 			Namespace:    r.workspace,
 		},
-	}, func(obj client.Object, createOp bool) client.Object {
+	}
+	_, err := cu.CreateOrPatch(r.ctx, r.Client, newSA, func(obj client.Object, createOp bool) client.Object {
 		s := obj.(*corev1.ServiceAccount)
 		if createOp {
 			s.Secrets = sa.Secrets
@@ -124,7 +126,7 @@ func (r *RequestReconciler) copyServiceAccount(saPullSecrets []corev1.LocalObjec
 
 func (r *RequestReconciler) setOwnerRefToCopiedObjects(job *batch.Job, sa string, pullSecrets []corev1.LocalObjectReference) error {
 	for i := range pullSecrets {
-		_, _, err := cu.CreateOrPatch(r.ctx, r.Client, &corev1.Secret{
+		_, err := cu.CreateOrPatch(r.ctx, r.Client, &corev1.Secret{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: corev1.SchemeGroupVersion.String(),
 				Kind:       "Secret",
@@ -145,7 +147,7 @@ func (r *RequestReconciler) setOwnerRefToCopiedObjects(job *batch.Job, sa string
 	if sa == "" {
 		return nil
 	}
-	_, _, err := cu.CreateOrPatch(r.ctx, r.Client, &corev1.ServiceAccount{
+	_, err := cu.CreateOrPatch(r.ctx, r.Client, &corev1.ServiceAccount{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: corev1.SchemeGroupVersion.String(),
 			Kind:       "ServiceAccount",

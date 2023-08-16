@@ -27,7 +27,7 @@ import (
 )
 
 func (r *RequestReconciler) setDefaultStatus() error {
-	req, _, err := cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
+	_, err := cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
 		in := obj.(*api.ImageScanRequest)
 		in.Status.Image = &trivy.ImageDetails{
 			Name: r.req.Spec.Image,
@@ -35,11 +35,7 @@ func (r *RequestReconciler) setDefaultStatus() error {
 		in.Status.Phase = api.ImageScanRequestPhasePending
 		return in
 	})
-	if err != nil {
-		return err
-	}
-	r.req = req.(*api.ImageScanRequest)
-	return nil
+	return err
 }
 
 func (r *RequestReconciler) updateStatusWithImageDetails(vis trivy.ImageVisibility) error {
@@ -48,7 +44,7 @@ func (r *RequestReconciler) updateStatusWithImageDetails(vis trivy.ImageVisibili
 		return err
 	}
 
-	req, _, err := cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
+	_, err = cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
 		in := obj.(*api.ImageScanRequest)
 		in.Status.Image.Visibility = vis
 		in.Status.Image.Name = img.Name
@@ -57,28 +53,20 @@ func (r *RequestReconciler) updateStatusWithImageDetails(vis trivy.ImageVisibili
 		in.Status.Phase = api.ImageScanRequestPhaseInProgress
 		return in
 	})
-	if err != nil {
-		return err
-	}
-	r.req = req.(*api.ImageScanRequest)
-	return nil
+	return err
 }
 
 func (r *RequestReconciler) updateStatusWithJobName(jobName string) error {
-	req, _, err := cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
+	_, err := cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
 		in := obj.(*api.ImageScanRequest)
 		in.Status.JobName = jobName
 		return in
 	})
-	if err != nil {
-		return err
-	}
-	r.req = req.(*api.ImageScanRequest)
-	return nil
+	return err
 }
 
 func (r *RequestReconciler) updateStatusAsReportEnsured(rep *api.ImageScanReport) error {
-	req, _, err := cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
+	_, err := cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
 		in := obj.(*api.ImageScanRequest)
 		if in.Status.Image.Digest == "" {
 			in.Status.Image.Digest = rep.Spec.Image.Digest
@@ -89,15 +77,11 @@ func (r *RequestReconciler) updateStatusAsReportEnsured(rep *api.ImageScanReport
 		in.Status.Phase = api.ImageScanRequestPhaseCurrent
 		return in
 	})
-	if err != nil {
-		return err
-	}
-	r.req = req.(*api.ImageScanRequest)
-	return nil
+	return err
 }
 
 func (r *RequestReconciler) updateStatusAsReportAlreadyExists(isrp *api.ImageScanReport) error {
-	req, _, err := cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
+	_, err := cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
 		in := obj.(*api.ImageScanRequest)
 		in.Status.ReportRef = &api.ScanReportRef{
 			Name: isrp.Name,
@@ -111,25 +95,17 @@ func (r *RequestReconciler) updateStatusAsReportAlreadyExists(isrp *api.ImageSca
 		in.Status.Phase = api.ImageScanRequestPhaseCurrent
 		return in
 	})
-	if err != nil {
-		return err
-	}
-	r.req = req.(*api.ImageScanRequest)
-	return nil
+	return err
 }
 
 func (r *RequestReconciler) updateStatusAsFailed(msg string) error {
-	req, _, err := cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
+	_, err := cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
 		in := obj.(*api.ImageScanRequest)
 		in.Status.Phase = api.ImageScanRequestPhaseFailed
 		in.Status.Reason = msg
 		return in
 	})
-	if err != nil {
-		return err
-	}
-	r.req = req.(*api.ImageScanRequest)
-	return nil
+	return err
 }
 
 func (r *RequestReconciler) updateStatusWithReportDetails() error {
@@ -146,7 +122,7 @@ func (r *RequestReconciler) updateStatusWithReportDetails() error {
 		return err
 	}
 
-	_, _, err = cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
+	_, err = cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
 		in := obj.(*api.ImageScanRequest)
 		in.Status.ReportRef = &api.ScanReportRef{
 			Name: rep.Name,

@@ -76,7 +76,7 @@ func (r *RequestReconciler) ensureJob(sa string, pullSecrets []corev1.LocalObjec
 		}
 	}
 
-	obj, _, err := cu.CreateOrPatch(r.ctx, r.Client, &batch.Job{
+	obj := &batch.Job{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Job",
 			APIVersion: batch.SchemeGroupVersion.String(),
@@ -85,7 +85,8 @@ func (r *RequestReconciler) ensureJob(sa string, pullSecrets []corev1.LocalObjec
 			GenerateName: ScannerJobName,
 			Namespace:    r.workspace,
 		},
-	}, func(obj client.Object, createOp bool) client.Object {
+	}
+	_, err := cu.CreateOrPatch(r.ctx, r.Client, obj, func(obj client.Object, createOp bool) client.Object {
 		job := obj.(*batch.Job)
 		if createOp {
 			job.Spec.Template.Spec.Volumes = core_util.UpsertVolume(job.Spec.Template.Spec.Volumes, core.Volume{
@@ -167,7 +168,7 @@ func (r *RequestReconciler) ensureJob(sa string, pullSecrets []corev1.LocalObjec
 	}
 
 	klog.Infof("Scanner job %v/%v created", obj.GetNamespace(), obj.GetName())
-	return obj.(*batch.Job), r.updateStatusWithJobName(obj.GetName())
+	return obj, r.updateStatusWithJobName(obj.GetName())
 }
 
 func (r *RequestReconciler) ScanForPrivateImage() error {
@@ -262,11 +263,12 @@ func (r *RequestReconciler) ensureDigestInRequestAndReport(digest string) error 
 		return err
 	}
 
-	req, _, err := cu.PatchStatus(r.ctx, r.Client, &api.ImageScanRequest{
+	r.req = &api.ImageScanRequest{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: r.req.Name,
 		},
-	}, func(obj client.Object) client.Object {
+	}
+	_, err = cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
 		req := obj.(*api.ImageScanRequest)
 		if req.Status.Image == nil {
 			req.Status.Image = &trivy.ImageDetails{
@@ -282,9 +284,8 @@ func (r *RequestReconciler) ensureDigestInRequestAndReport(digest string) error 
 	if err != nil {
 		return err
 	}
-	r.req = req.(*api.ImageScanRequest)
 
-	_, _, err = cu.CreateOrPatch(r.ctx, r.Client, &api.ImageScanReport{
+	_, err = cu.CreateOrPatch(r.ctx, r.Client, &api.ImageScanReport{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: api.GetReportName(img.Name),
 		},
