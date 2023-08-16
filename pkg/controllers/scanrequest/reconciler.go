@@ -31,7 +31,10 @@ import (
 	"kmodules.xyz/go-containerregistry/name"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
 type Reconciler struct {
@@ -42,6 +45,7 @@ type Reconciler struct {
 	trivyDBCacherImage   string
 	fileServerAddr       string
 	scanRequestTTLPeriod time.Duration
+	workspace            string
 }
 
 type RequestReconciler struct {
@@ -55,6 +59,7 @@ func NewImageScanRequestReconciler(
 	nc *nats.Conn,
 	scannedImage, trivyImage, trivyDBCacherImage, fsAddr string,
 	garbageCol time.Duration,
+	workspace string,
 ) *Reconciler {
 	return &Reconciler{
 		Client:               kc,
@@ -64,6 +69,7 @@ func NewImageScanRequestReconciler(
 		trivyDBCacherImage:   trivyDBCacherImage,
 		fileServerAddr:       fsAddr,
 		scanRequestTTLPeriod: garbageCol,
+		workspace:            workspace,
 	}
 }
 
@@ -205,6 +211,35 @@ func (r *RequestReconciler) scan() (ctrl.Result, error) {
 func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&api.ImageScanRequest{}).
-		Owns(&batch.Job{}).
+		Watches(&source.Kind{Type: &batch.Job{}}, handler.EnqueueRequestsFromMapFunc(r.watcherFuncForJob())).
 		Complete(r)
+}
+
+func (r *Reconciler) watcherFuncForJob() handler.MapFunc {
+	return func(object client.Object) []reconcile.Request {
+		job := object.(*batch.Job)
+		var scanReqs api.ImageScanRequestList
+		var reqs []reconcile.Request
+
+		if job.Namespace != r.workspace {
+			return reqs
+		}
+
+		err := r.Client.List(context.TODO(), &scanReqs, &client.ListOptions{})
+		if err != nil {
+			return reqs
+		}
+		for _, s := range scanReqs.Items {
+			if s.Status.JobName == job.Name {
+				// Yes , We have got the required Job object, so this scanReq should be requeue
+				reqs = append(reqs, reconcile.Request{
+					NamespacedName: types.NamespacedName{
+						Name:      s.Name,
+						Namespace: s.Namespace,
+					},
+				})
+			}
+		}
+		return reqs
+	}
 }

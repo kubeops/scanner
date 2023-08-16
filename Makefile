@@ -484,6 +484,8 @@ NATS_PASSWORD ?= $(THIS_IS_NATS_PASSWORD)
 .PHONY: install
 install:
 	@cd ../installer; \
+	kubectl create ns $(KUBE_NAMESPACE) || true; \
+	kubectl label ns $(KUBE_NAMESPACE) pod-security.kubernetes.io/enforce=restricted; \
 	helm upgrade -i scanner charts/scanner --wait \
 		--namespace=$(KUBE_NAMESPACE) --create-namespace \
 		--set app.tag=$(TAG_PROD) \

@@ -49,6 +49,7 @@ type ExtraOptions struct {
 	TrivyDBCacherImage string
 	FileServerAddr     string
 	ScanInCluster      bool
+	Workspace          string
 
 	ScanRequestTTLPeriod time.Duration
 	ScanReportTTLPeriod  time.Duration
@@ -86,6 +87,7 @@ func (s *ExtraOptions) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVar(&s.TrivyImage, "trivy-image", s.TrivyImage, "The image used for Trivy cli")
 	fs.StringVar(&s.TrivyDBCacherImage, "trivydb-cacher-image", s.TrivyDBCacherImage, "The image used for TrivyDB caching")
 	fs.BoolVar(&s.ScanInCluster, "scan-public-image-incluster", s.ScanInCluster, "If true public images will be scanned in cluster. Set true for air-gaped cluster")
+	fs.StringVar(&s.Workspace, "workspace-namespace", s.Workspace, "The namespace for creating the jobs to scan private images")
 
 	fs.DurationVar(&s.ScanRequestTTLPeriod, "scan-request-ttl-after-finished", s.ScanRequestTTLPeriod, "ImageScanRequest older than this period will be garbage collected")
 	fs.DurationVar(&s.ScanReportTTLPeriod, "scan-report-ttl-after-outdated", s.ScanReportTTLPeriod, "Outdated ImageScanReport older than this period will be garbage collected")
@@ -105,6 +107,7 @@ func (s *ExtraOptions) ApplyTo(cfg *apiserver.ExtraConfig) error {
 	cfg.ClientConfig.QPS = float32(s.QPS)
 	cfg.ClientConfig.Burst = s.Burst
 	cfg.ResyncPeriod = s.ResyncPeriod
+	cfg.Workspace = s.Workspace
 	cfg.ScanRequestTTLPeriod = s.ScanRequestTTLPeriod
 	cfg.ScanReportTTLPeriod = s.ScanReportTTLPeriod
 
