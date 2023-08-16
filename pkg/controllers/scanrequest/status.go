@@ -46,6 +46,9 @@ func (r *RequestReconciler) updateStatusWithImageDetails(vis trivy.ImageVisibili
 
 	_, err = cu.PatchStatus(r.ctx, r.Client, r.req, func(obj client.Object) client.Object {
 		in := obj.(*api.ImageScanRequest)
+		if in.Status.Image == nil {
+			in.Status.Image = new(trivy.ImageDetails)
+		}
 		in.Status.Image.Visibility = vis
 		in.Status.Image.Name = img.Name
 		in.Status.Image.Tag = img.Tag
