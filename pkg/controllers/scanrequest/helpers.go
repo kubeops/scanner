@@ -36,11 +36,12 @@ func EnsureScanReport(kc client.Client, imageRef string, resp trivy.BackendRespo
 		return nil, err
 	}
 
-	obj, vt, err := cu.CreateOrPatch(context.TODO(), kc, &api.ImageScanReport{
+	obj := &api.ImageScanReport{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: api.GetReportName(img.Name),
 		},
-	}, func(obj client.Object, createOp bool) client.Object {
+	}
+	vt, err := cu.CreateOrPatch(context.TODO(), kc, obj, func(obj client.Object, createOp bool) client.Object {
 		rep := obj.(*api.ImageScanReport)
 		rep.Spec.Image = api.ImageReference{
 			Name:   resp.ImageDetails.Name,
@@ -56,7 +57,7 @@ func EnsureScanReport(kc client.Client, imageRef string, resp trivy.BackendRespo
 		klog.Infof("%v ImageScanReport has been created\n", obj.GetName())
 	}
 
-	_, _, err = cu.PatchStatus(context.TODO(), kc, &api.ImageScanReport{
+	_, err = cu.PatchStatus(context.TODO(), kc, &api.ImageScanReport{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: api.GetReportName(img.Name),
 		},
@@ -75,7 +76,7 @@ func EnsureScanReport(kc client.Client, imageRef string, resp trivy.BackendRespo
 		return nil, err
 	}
 
-	return obj.(*api.ImageScanReport), nil
+	return obj, nil
 }
 
 func upsertCVEs(kc client.Client, r trivy.SingleReport) error {
@@ -88,7 +89,7 @@ func upsertCVEs(kc client.Client, r trivy.SingleReport) error {
 	}
 
 	for _, vul := range vuls {
-		_, vt, err := cu.CreateOrPatch(context.TODO(), kc, &api.Vulnerability{
+		vt, err := cu.CreateOrPatch(context.TODO(), kc, &api.Vulnerability{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: vul.VulnerabilityID,
 			},

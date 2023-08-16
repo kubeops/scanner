@@ -35,7 +35,7 @@ require (
 	k8s.io/klog/v2 v2.80.1
 	k8s.io/kube-openapi v0.0.0-20221012153701-172d655c2280
 	k8s.io/utils v0.0.0-20221012122500-cfd413dd9e85
-	kmodules.xyz/client-go v0.25.23
+	kmodules.xyz/client-go v0.25.30-0.20230816023640-cf58432a4653
 	kmodules.xyz/go-containerregistry v0.0.11
 	kubedb.dev/apimachinery v0.32.0
 	sigs.k8s.io/controller-runtime v0.13.1
@@ -179,7 +179,8 @@ require (
 	gomodules.xyz/clock v0.0.0-20200817085942-06523dba733f // indirect
 	gomodules.xyz/encoding v0.0.7 // indirect
 	gomodules.xyz/flags v0.1.3 // indirect
-	gomodules.xyz/jsonpatch/v2 v2.3.0 // indirect
+	gomodules.xyz/jsonpatch/v2 v2.4.0 // indirect
+	gomodules.xyz/jsonpath v0.0.2 // indirect
 	gomodules.xyz/mergo v0.3.13 // indirect
 	gomodules.xyz/pointer v0.1.0 // indirect
 	gomodules.xyz/sync v0.1.0 // indirect
@@ -208,9 +209,13 @@ require (
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
 
+replace github.com/Masterminds/sprig/v3 => github.com/gomodules/sprig/v3 v3.2.3-0.20220405051441-0a8a99bac1b8
+
+replace sigs.k8s.io/controller-runtime => github.com/kmodules/controller-runtime v0.13.1-0.20230725210630-f8273f9c4412
+
 replace github.com/imdario/mergo => github.com/imdario/mergo v0.3.6
 
-replace k8s.io/apiserver => github.com/kmodules/apiserver v0.25.2-0.20220917044909-4ac5fceca518
+replace k8s.io/apiserver => github.com/kmodules/apiserver v0.25.2-0.20230712090038-ce87ebac4a3d
 
 replace k8s.io/kubernetes => github.com/kmodules/kubernetes v1.26.0-alpha.0.0.20220917022409-54ac9f3f1315
 

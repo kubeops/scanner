@@ -69,7 +69,7 @@ func (r *ImageScanReportReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		status.Phase = api.ImageScanReportPhaseCurrent
 	}
 
-	_, _, err = cu.PatchStatus(ctx, r.Client, &isrp, func(obj client.Object) client.Object {
+	_, err = cu.PatchStatus(ctx, r.Client, &isrp, func(obj client.Object) client.Object {
 		in := obj.(*api.ImageScanReport)
 		in.Status = *status
 		return in
