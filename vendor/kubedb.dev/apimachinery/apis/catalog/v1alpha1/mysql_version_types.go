@@ -72,8 +72,8 @@ type MySQLVersionSpec struct {
 	InitContainer MySQLVersionInitContainer `json:"initContainer"`
 	// PSP names
 	PodSecurityPolicies MySQLVersionPodSecurityPolicy `json:"podSecurityPolicies"`
-	// upgrade constraints
-	UpgradeConstraints MySQLUpgradeConstraints `json:"upgradeConstraints,omitempty"`
+	// update constraints
+	UpdateConstraints MySQLUpdateConstraints `json:"updateConstraints,omitempty"`
 	// Stash defines backup and restore task definitions.
 	// +optional
 	Stash appcat.StashAddonSpec `json:"stash,omitempty"`
@@ -82,6 +82,8 @@ type MySQLVersionSpec struct {
 	Router MySQLVersionRouter `json:"router,omitempty"`
 	// +optional
 	RouterInitContainer MySQLVersionRouterInitContainer `json:"routerInitContainer,omitempty"`
+	// +optional
+	GitSyncer GitSyncer `json:"gitSyncer,omitempty"`
 }
 
 // MySQLVersionDatabase is the MySQL Database image
@@ -120,7 +122,7 @@ type MySQLVersionPodSecurityPolicy struct {
 	DatabasePolicyName string `json:"databasePolicyName"`
 }
 
-type MySQLUpgradeConstraints struct {
+type MySQLUpdateConstraints struct {
 	// List of all accepted versions for upgrade request
 	Allowlist MySQLVersionAllowlist `json:"allowlist,omitempty"`
 	// List of all rejected versions for upgrade request

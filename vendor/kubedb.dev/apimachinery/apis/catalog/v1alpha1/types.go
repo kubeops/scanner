@@ -21,12 +21,18 @@ type ReplicationModeDetector struct {
 	Image string `json:"image"`
 }
 
-// UpgradeConstraints specifies the constraints that need to be considered during version upgrade
-type UpgradeConstraints struct {
+// UpdateConstraints specifies the constraints that need to be considered during version upgrade
+type UpdateConstraints struct {
 	// List of all accepted versions for upgrade request.
 	// An empty list indicates all versions are accepted except the denylist.
 	Allowlist []string `json:"allowlist,omitempty"`
 	// List of all rejected versions for upgrade request.
 	// An empty list indicates no version is rejected.
 	Denylist []string `json:"denylist,omitempty"`
+}
+
+// GitSyncer is the image for the kubernetes/git-sync
+// https://github.com/kubernetes/git-sync
+type GitSyncer struct {
+	Image string `json:"image"`
 }
