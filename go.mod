@@ -3,7 +3,7 @@ module kubeops.dev/scanner
 go 1.18
 
 require (
-	github.com/cyphar/filepath-securejoin v0.2.3
+	github.com/cyphar/filepath-securejoin v0.2.4
 	github.com/dustin/go-humanize v1.0.1-0.20220316001817-d5090ed65664
 	github.com/go-chi/chi/v5 v5.0.8
 	github.com/google/go-containerregistry v0.13.0
@@ -14,9 +14,9 @@ require (
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/pflag v1.0.5
 	go.bytebuilders.dev/audit v0.0.27
-	go.bytebuilders.dev/license-proxyserver v0.0.5
-	go.bytebuilders.dev/license-verifier v0.13.2
-	go.bytebuilders.dev/license-verifier/kubernetes v0.13.2
+	go.bytebuilders.dev/license-proxyserver v0.0.6-0.20230923074105-42d7c1a02dca
+	go.bytebuilders.dev/license-verifier v0.13.3
+	go.bytebuilders.dev/license-verifier/kubernetes v0.13.3
 	go.uber.org/automaxprocs v1.5.2
 	go.wandrs.dev/http v0.0.2
 	gocloud.dev v0.27.0
@@ -35,9 +35,9 @@ require (
 	k8s.io/klog/v2 v2.80.1
 	k8s.io/kube-openapi v0.0.0-20221012153701-172d655c2280
 	k8s.io/utils v0.0.0-20221012122500-cfd413dd9e85
-	kmodules.xyz/client-go v0.25.30
+	kmodules.xyz/client-go v0.25.37
 	kmodules.xyz/go-containerregistry v0.0.11
-	kubedb.dev/apimachinery v0.35.0
+	kubedb.dev/apimachinery v0.35.1
 	sigs.k8s.io/controller-runtime v0.13.1
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3
 )
@@ -168,13 +168,13 @@ require (
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
 	go.uber.org/zap v1.21.0 // indirect
-	golang.org/x/crypto v0.9.0 // indirect
-	golang.org/x/net v0.10.0 // indirect
+	golang.org/x/crypto v0.13.0 // indirect
+	golang.org/x/net v0.15.0 // indirect
 	golang.org/x/oauth2 v0.5.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/sys v0.8.0 // indirect
-	golang.org/x/term v0.8.0 // indirect
-	golang.org/x/text v0.9.0 // indirect
+	golang.org/x/sys v0.12.0 // indirect
+	golang.org/x/term v0.12.0 // indirect
+	golang.org/x/text v0.13.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	gomodules.xyz/clock v0.0.0-20200817085942-06523dba733f // indirect
@@ -216,7 +216,7 @@ replace sigs.k8s.io/controller-runtime => github.com/kmodules/controller-runtime
 
 replace github.com/imdario/mergo => github.com/imdario/mergo v0.3.6
 
-replace k8s.io/apiserver => github.com/kmodules/apiserver v0.25.2-0.20230712090038-ce87ebac4a3d
+replace k8s.io/apiserver => github.com/kmodules/apiserver v0.25.2-0.20230817060727-aa2afd31b825
 
 replace k8s.io/kubernetes => github.com/kmodules/kubernetes v1.26.0-alpha.0.0.20220917022409-54ac9f3f1315
 
