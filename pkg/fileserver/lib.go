@@ -154,3 +154,9 @@ func VulnerabilityDBLastUpdatedAt(fsDir string) (*trivy.Time, error) {
 	}
 	return &ver.UpdatedAt, nil
 }
+
+func MetadataFileExists(fsDir string) bool {
+	fileName := filepath.Join(fsDir, "trivy", "metadata.json")
+	_, err := os.Stat(fileName)
+	return !os.IsNotExist(err)
+}

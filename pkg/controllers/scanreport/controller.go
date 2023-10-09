@@ -39,6 +39,9 @@ type ImageScanReportReconciler struct {
 }
 
 func (r *ImageScanReportReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	if !fileserver.MetadataFileExists(r.FileServerDir) {
+		return ctrl.Result{RequeueAfter: time.Minute}, nil
+	}
 	log := log.FromContext(ctx)
 
 	var isrp api.ImageScanReport
