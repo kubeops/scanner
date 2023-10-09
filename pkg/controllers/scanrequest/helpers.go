@@ -57,11 +57,7 @@ func EnsureScanReport(kc client.Client, imageRef string, resp trivy.BackendRespo
 		klog.Infof("%v ImageScanReport has been created\n", obj.GetName())
 	}
 
-	_, err = cu.PatchStatus(context.TODO(), kc, &api.ImageScanReport{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: api.GetReportName(img.Name),
-		},
-	}, func(obj client.Object) client.Object {
+	_, err = cu.PatchStatus(context.TODO(), kc, obj, func(obj client.Object) client.Object {
 		rep := obj.(*api.ImageScanReport)
 		rep.Status.Version = resp.TrivyVersion
 		rep.Status.Report = resp.Report

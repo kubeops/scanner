@@ -23,6 +23,7 @@ import (
 	api "kubeops.dev/scanner/apis/scanner/v1alpha1"
 	"kubeops.dev/scanner/apis/trivy"
 	"kubeops.dev/scanner/pkg/backend"
+	"kubeops.dev/scanner/pkg/fileserver"
 
 	"github.com/nats-io/nats.go"
 	batch "k8s.io/api/batch/v1"
@@ -44,6 +45,7 @@ type Reconciler struct {
 	trivyImage           string
 	trivyDBCacherImage   string
 	fileServerAddr       string
+	fileServerDir        string
 	scanRequestTTLPeriod time.Duration
 	workspace            string
 }
@@ -57,7 +59,7 @@ type RequestReconciler struct {
 func NewImageScanRequestReconciler(
 	kc client.Client,
 	nc *nats.Conn,
-	scannedImage, trivyImage, trivyDBCacherImage, fsAddr string,
+	scannedImage, trivyImage, trivyDBCacherImage, fsAddr, fileServerDir string,
 	garbageCol time.Duration,
 	workspace string,
 ) *Reconciler {
@@ -68,12 +70,17 @@ func NewImageScanRequestReconciler(
 		trivyImage:           trivyImage,
 		trivyDBCacherImage:   trivyDBCacherImage,
 		fileServerAddr:       fsAddr,
+		fileServerDir:        fileServerDir,
 		scanRequestTTLPeriod: garbageCol,
 		workspace:            workspace,
 	}
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	if !fileserver.MetadataFileExists(r.fileServerDir) {
+		return ctrl.Result{RequeueAfter: time.Minute}, nil
+	}
+
 	log := log.FromContext(ctx)
 
 	log.Info("Reconciling for ", "req", req)
@@ -140,7 +147,7 @@ func (r *RequestReconciler) freshScanRequired() (bool, error) {
 	if err != nil {
 		return true, client.IgnoreNotFound(err)
 	}
-	if isrp.Status.Phase == api.ImageScanReportPhaseOutdated {
+	if isrp.Status.Phase == api.ImageScanReportPhaseOutdated || isrp.Status.Phase == "" {
 		return true, nil
 	}
 	return false, r.updateStatusAsReportAlreadyExists(&isrp)

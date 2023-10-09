@@ -235,6 +235,7 @@ func (c completedConfig) New(ctx context.Context) (*ScannerServer, error) {
 		c.ExtraConfig.TrivyImage,
 		c.ExtraConfig.TrivyDBCacherImage,
 		c.ExtraConfig.FileServerAddr,
+		c.ExtraConfig.FileServerFilesDir,
 		c.ExtraConfig.ScanRequestTTLPeriod,
 		c.ExtraConfig.Workspace,
 	)).SetupWithManager(mgr); err != nil {
