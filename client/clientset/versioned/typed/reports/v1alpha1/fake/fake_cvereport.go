@@ -22,7 +22,6 @@ import (
 	"context"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	testing "k8s.io/client-go/testing"
 	v1alpha1 "kubeops.dev/scanner/apis/reports/v1alpha1"
 )
@@ -32,9 +31,9 @@ type FakeCVEReports struct {
 	Fake *FakeReportsV1alpha1
 }
 
-var cvereportsResource = schema.GroupVersionResource{Group: "reports.scanner.appscode.com", Version: "v1alpha1", Resource: "cvereports"}
+var cvereportsResource = v1alpha1.SchemeGroupVersion.WithResource("cvereports")
 
-var cvereportsKind = schema.GroupVersionKind{Group: "reports.scanner.appscode.com", Version: "v1alpha1", Kind: "CVEReport"}
+var cvereportsKind = v1alpha1.SchemeGroupVersion.WithKind("CVEReport")
 
 // Create takes the representation of a cVEReport and creates it.  Returns the server's representation of the cVEReport, and an error, if there is any.
 func (c *FakeCVEReports) Create(ctx context.Context, cVEReport *v1alpha1.CVEReport, opts v1.CreateOptions) (result *v1alpha1.CVEReport, err error) {

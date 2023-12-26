@@ -35,7 +35,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
 type Reconciler struct {
@@ -218,12 +217,12 @@ func (r *RequestReconciler) scan() (ctrl.Result, error) {
 func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&api.ImageScanRequest{}).
-		Watches(&source.Kind{Type: &batch.Job{}}, handler.EnqueueRequestsFromMapFunc(r.watcherFuncForJob())).
+		Watches(&batch.Job{}, handler.EnqueueRequestsFromMapFunc(r.watcherFuncForJob())).
 		Complete(r)
 }
 
 func (r *Reconciler) watcherFuncForJob() handler.MapFunc {
-	return func(object client.Object) []reconcile.Request {
+	return func(ctx context.Context, object client.Object) []reconcile.Request {
 		job := object.(*batch.Job)
 		var scanReqs api.ImageScanRequestList
 		var reqs []reconcile.Request
@@ -232,7 +231,7 @@ func (r *Reconciler) watcherFuncForJob() handler.MapFunc {
 			return reqs
 		}
 
-		err := r.Client.List(context.TODO(), &scanReqs, &client.ListOptions{})
+		err := r.Client.List(ctx, &scanReqs, &client.ListOptions{})
 		if err != nil {
 			return reqs
 		}

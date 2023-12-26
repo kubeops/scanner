@@ -30,7 +30,7 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 	cu "kmodules.xyz/client-go/client"
 	"kmodules.xyz/client-go/client/apiutil"
 	core_util "kmodules.xyz/client-go/core/v1"
@@ -131,8 +131,8 @@ func (r *RequestReconciler) ensureJob(sa string, pullSecrets []corev1.LocalObjec
 						"./tv rootfs --skip-db-update --skip-java-db-update --offline-scan --security-checks vuln --format json / > report.json && ./tv version --format json > trivy.json",
 					},
 					SecurityContext: &core.SecurityContext{
-						RunAsUser:    pointer.Int64(0),
-						RunAsGroup:   pointer.Int64(0),
+						RunAsUser:    ptr.To(int64(0)),
+						RunAsGroup:   ptr.To(int64(0)),
 						RunAsNonRoot: nil,
 						SeccompProfile: &core.SeccompProfile{
 							Type: core.SeccompProfileTypeRuntimeDefault,
@@ -156,11 +156,11 @@ func (r *RequestReconciler) ensureJob(sa string, pullSecrets []corev1.LocalObjec
 			})
 			ensureVolumeMounts(&job.Spec.Template)
 		}
-		job.Spec.Template.Spec.AutomountServiceAccountToken = pointer.Bool(true)
+		job.Spec.Template.Spec.AutomountServiceAccountToken = ptr.To(true)
 		job.Spec.Template.Spec.RestartPolicy = core.RestartPolicyNever
 		job.Spec.Template.Spec.ImagePullSecrets = pullSecrets
 		job.Spec.Template.Spec.ServiceAccountName = sa
-		job.Spec.TTLSecondsAfterFinished = pointer.Int32(600)
+		job.Spec.TTLSecondsAfterFinished = ptr.To(int32(600))
 		return job
 	})
 	if err != nil {
