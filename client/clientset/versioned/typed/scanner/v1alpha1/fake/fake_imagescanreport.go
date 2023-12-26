@@ -23,7 +23,6 @@ import (
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
-	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
 	testing "k8s.io/client-go/testing"
@@ -35,9 +34,9 @@ type FakeImageScanReports struct {
 	Fake *FakeScannerV1alpha1
 }
 
-var imagescanreportsResource = schema.GroupVersionResource{Group: "scanner.appscode.com", Version: "v1alpha1", Resource: "imagescanreports"}
+var imagescanreportsResource = v1alpha1.SchemeGroupVersion.WithResource("imagescanreports")
 
-var imagescanreportsKind = schema.GroupVersionKind{Group: "scanner.appscode.com", Version: "v1alpha1", Kind: "ImageScanReport"}
+var imagescanreportsKind = v1alpha1.SchemeGroupVersion.WithKind("ImageScanReport")
 
 // Get takes name of the imageScanReport, and returns the corresponding imageScanReport object, and an error if there is any.
 func (c *FakeImageScanReports) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.ImageScanReport, err error) {

@@ -26,6 +26,7 @@ import (
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/client-go/rest"
 	"k8s.io/klog/v2"
 	"k8s.io/klog/v2/klogr"
 	"kmodules.xyz/go-containerregistry/name"
@@ -122,12 +123,16 @@ func NewClient() (client.Client, error) {
 	_ = clientgoscheme.AddToScheme(scheme)
 	_ = api.AddToScheme(scheme)
 
-	ctrl.SetLogger(klogr.New())
+	ctrl.SetLogger(klogr.New()) // nolint:staticcheck
 	cfg := ctrl.GetConfigOrDie()
 	cfg.QPS = 100
 	cfg.Burst = 100
 
-	mapper, err := apiutil.NewDynamicRESTMapper(cfg)
+	hc, err := rest.HTTPClientFor(cfg)
+	if err != nil {
+		return nil, err
+	}
+	mapper, err := apiutil.NewDynamicRESTMapper(cfg, hc)
 	if err != nil {
 		return nil, err
 	}
