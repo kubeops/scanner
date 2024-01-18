@@ -57,10 +57,11 @@ func NewREST(scheme *runtime.Scheme, optsGetter generic.RESTOptionsGetter) (*RES
 	strategy := NewStrategy(scheme)
 
 	store := &genericregistry.Store{
-		NewFunc:                  func() runtime.Object { return &api.ImageScanRequest{} },
-		NewListFunc:              func() runtime.Object { return &api.ImageScanRequestList{} },
-		PredicateFunc:            MatchController,
-		DefaultQualifiedResource: api.Resource(v1alpha1.ResourceImageScanRequests),
+		NewFunc:                   func() runtime.Object { return &api.ImageScanRequest{} },
+		NewListFunc:               func() runtime.Object { return &api.ImageScanRequestList{} },
+		PredicateFunc:             MatchController,
+		DefaultQualifiedResource:  api.Resource(v1alpha1.ResourceImageScanRequests),
+		SingularQualifiedResource: api.Resource(v1alpha1.ResourceImageScanRequest),
 
 		CreateStrategy:      strategy,
 		UpdateStrategy:      strategy,
