@@ -56,6 +56,7 @@ spec:
                         enum:
                         - mongodb-addon
                         - postgres-addon
+                        - mysql-addon
                         type: string
                       tasks:
                         properties:
@@ -143,6 +144,9 @@ spec:
                 type: object
               securityContext:
                 properties:
+                  runAsGroup:
+                    format: int64
+                    type: integer
                   runAsUser:
                     format: int64
                     type: integer
