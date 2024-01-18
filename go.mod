@@ -13,7 +13,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/pflag v1.0.5
-	go.bytebuilders.dev/audit v0.0.29-0.20231225201242-3ff33160c6f0
+	go.bytebuilders.dev/audit v0.0.32-0.20240105184043-9cf3195203b7
 	go.bytebuilders.dev/license-proxyserver v0.0.6
 	go.bytebuilders.dev/license-verifier v0.13.4
 	go.bytebuilders.dev/license-verifier/kubernetes v0.13.4
@@ -37,7 +37,7 @@ require (
 	k8s.io/utils v0.0.0-20231127182322-b307cd553661
 	kmodules.xyz/client-go v0.29.6
 	kmodules.xyz/go-containerregistry v0.0.12
-	kubedb.dev/apimachinery v0.39.1-0.20231226050606-cdc6824e47f7
+	kubedb.dev/apimachinery v0.41.0-beta.0.0.20240117131030-72d44aef7411
 	sigs.k8s.io/controller-runtime v0.16.3
 	sigs.k8s.io/structured-merge-diff/v4 v4.4.1
 )
@@ -115,10 +115,12 @@ require (
 	github.com/imdario/mergo v0.3.13 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
+	github.com/jonboulle/clockwork v0.4.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/klauspost/compress v1.17.2 // indirect
 	github.com/liggitt/tabwriter v0.0.0-20181228230101-89fcab3d43de // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
+	github.com/mattn/go-isatty v0.0.18 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
@@ -175,6 +177,7 @@ require (
 	golang.org/x/time v0.5.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	gomodules.xyz/clock v0.0.0-20200817085942-06523dba733f // indirect
+	gomodules.xyz/counter v0.0.1 // indirect
 	gomodules.xyz/encoding v0.0.7 // indirect
 	gomodules.xyz/flags v0.1.3 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.4.0 // indirect
@@ -200,7 +203,7 @@ require (
 	kmodules.xyz/apiversion v0.2.0 // indirect
 	kmodules.xyz/custom-resources v0.29.0 // indirect
 	kmodules.xyz/offshoot-api v0.29.0 // indirect
-	kmodules.xyz/resource-metadata v0.18.1-0.20231225184845-c3650ae60818 // indirect
+	kmodules.xyz/resource-metadata v0.18.2-0.20240101021508-7630737cb0e6 // indirect
 	kmodules.xyz/resource-metrics v0.29.0 // indirect
 	sigs.k8s.io/apiserver-network-proxy/konnectivity-client v0.28.0 // indirect
 	sigs.k8s.io/cli-utils v0.34.0 // indirect

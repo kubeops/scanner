@@ -26,14 +26,12 @@ import (
 	"kubeops.dev/scanner/pkg/apiserver"
 
 	"github.com/spf13/pflag"
-	v "gomodules.xyz/x/version"
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 	"k8s.io/apiserver/pkg/endpoints/openapi"
 	"k8s.io/apiserver/pkg/features"
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	genericoptions "k8s.io/apiserver/pkg/server/options"
 	"k8s.io/apiserver/pkg/util/feature"
-	ou "kmodules.xyz/client-go/openapi"
 	"kmodules.xyz/client-go/tools/clientcmd"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -101,18 +99,26 @@ func (o *ScannerServerOptions) Config() (*apiserver.Config, error) {
 	// Fixes https://github.com/Azure/AKS/issues/522
 	clientcmd.Fix(serverConfig.ClientConfig)
 
-	serverConfig.OpenAPIConfig = genericapiserver.DefaultOpenAPIConfig(
-		ou.GetDefinitions(
-			api.GetOpenAPIDefinitions,
-		),
-		openapi.NewDefinitionNamer(apiserver.Scheme))
-	serverConfig.OpenAPIConfig.Info.Title = "scanner"
-	serverConfig.OpenAPIConfig.Info.Version = v.Version.Version
-	serverConfig.OpenAPIConfig.IgnorePrefixes = []string{
+	ignore := []string{
 		"/swaggerapi",
+		fmt.Sprintf("/apis/%s", api.SchemeGroupVersion),
 		fmt.Sprintf("/apis/%s/%s", api.SchemeGroupVersion, api.ResourceImageScanRequests),
 		fmt.Sprintf("/apis/%s/%s", api.SchemeGroupVersion, api.ResourceImageScanReports),
 	}
+
+	serverConfig.OpenAPIConfig = genericapiserver.DefaultOpenAPIConfig(
+		api.GetOpenAPIDefinitions,
+		openapi.NewDefinitionNamer(apiserver.Scheme))
+	serverConfig.OpenAPIConfig.Info.Title = "scanner"
+	serverConfig.OpenAPIConfig.Info.Version = api.SchemeGroupVersion.Version
+	serverConfig.OpenAPIConfig.IgnorePrefixes = ignore
+
+	serverConfig.OpenAPIV3Config = genericapiserver.DefaultOpenAPIV3Config(
+		api.GetOpenAPIDefinitions,
+		openapi.NewDefinitionNamer(apiserver.Scheme))
+	serverConfig.OpenAPIV3Config.Info.Title = "scanner"
+	serverConfig.OpenAPIV3Config.Info.Version = api.SchemeGroupVersion.Version
+	serverConfig.OpenAPIV3Config.IgnorePrefixes = ignore
 
 	extraConfig := apiserver.ExtraConfig{
 		ClientConfig:         serverConfig.ClientConfig,
