@@ -51,7 +51,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	restclient "k8s.io/client-go/rest"
-	"k8s.io/klog/v2/klogr"
+	"k8s.io/klog/v2"
 	cu "kmodules.xyz/client-go/client"
 	"kmodules.xyz/client-go/discovery"
 	"kmodules.xyz/client-go/tools/clusterid"
@@ -168,8 +168,7 @@ func (c completedConfig) New(ctx context.Context) (*ScannerServer, error) {
 		return nil, err
 	}
 
-	// ctrl.SetLogger(...)
-	log.SetLogger(klogr.New()) // nolint:staticcheck
+	log.SetLogger(klog.NewKlogr())
 	setupLog := log.Log.WithName("setup")
 
 	cfg := c.ExtraConfig.ClientConfig
@@ -206,7 +205,7 @@ func (c completedConfig) New(ctx context.Context) (*ScannerServer, error) {
 	// WARNING: https://stackoverflow.com/a/46275411/244009
 	var auditor *auditlib.EventPublisher
 	if c.ExtraConfig.LicenseProvided() {
-		cmeta, err := clusterid.ClusterMetadata(c.ExtraConfig.KubeClient.CoreV1().Namespaces())
+		cmeta, err := clusterid.ClusterMetadata(c.ExtraConfig.KubeClient)
 		if err != nil {
 			return nil, fmt.Errorf("failed to extract cluster metadata, reason: %v", err)
 		}
@@ -214,7 +213,7 @@ func (c completedConfig) New(ctx context.Context) (*ScannerServer, error) {
 			Mapper:          mapper,
 			ClusterMetadata: cmeta,
 		}
-		auditor = auditlib.NewResilientEventPublisher(func() (*auditlib.NatsConfig, error) {
+		auditor = auditlib.NewResilientEventPublisher(func() (*auditlib.NatsConfig, auditlib.LicenseIDGetter, error) {
 			return auditlib.NewNatsConfig(c.ExtraConfig.ClientConfig, cmeta.UID, c.ExtraConfig.LicenseFile)
 		}, mapper, fn.CreateEvent)
 		nc, err = auditor.NatsClient()
