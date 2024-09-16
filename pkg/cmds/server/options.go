@@ -117,7 +117,7 @@ func (s *ExtraOptions) ApplyTo(cfg *apiserver.ExtraConfig) error {
 	}
 	cfg.KubeInformerFactory = informers.NewSharedInformerFactory(cfg.KubeClient, cfg.ResyncPeriod)
 	if cfg.LicenseProvided() {
-		info := license.MustLicenseEnforcer(cfg.ClientConfig, cfg.LicenseFile).LoadLicense()
+		info, _ := license.MustLicenseEnforcer(cfg.ClientConfig, cfg.LicenseFile).LoadLicense()
 		if info.Status != licenseapi.LicenseActive {
 			return fmt.Errorf("license status %s, reason: %s", info.Status, info.Reason)
 		}
