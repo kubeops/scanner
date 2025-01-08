@@ -9,10 +9,9 @@ spec:
   group: postgres.kubedb.com
   names:
     categories:
-    - datastore
+    - pgstore
     - kubedb
     - appscode
-    - all
     kind: Publisher
     listKind: PublisherList
     plural: publishers
@@ -69,11 +68,13 @@ spec:
                                   items:
                                     type: string
                                   type: array
+                                  x-kubernetes-list-type: atomic
                               required:
                               - key
                               - operator
                               type: object
                             type: array
+                            x-kubernetes-list-type: atomic
                           matchLabels:
                             additionalProperties:
                               type: string
@@ -94,11 +95,13 @@ spec:
                               items:
                                 type: string
                               type: array
+                              x-kubernetes-list-type: atomic
                           required:
                           - key
                           - operator
                           type: object
                         type: array
+                        x-kubernetes-list-type: atomic
                       matchLabels:
                         additionalProperties:
                           type: string
@@ -108,6 +111,13 @@ spec:
                 type: object
               databaseName:
                 type: string
+              databaseRef:
+                properties:
+                  name:
+                    default: ""
+                    type: string
+                type: object
+                x-kubernetes-map-type: atomic
               deletionPolicy:
                 default: Delete
                 enum:
@@ -134,20 +144,14 @@ spec:
                 type: object
               publishAllTables:
                 type: boolean
-              serverRef:
-                properties:
-                  name:
-                    type: string
-                type: object
-                x-kubernetes-map-type: atomic
               tables:
                 items:
                   type: string
                 type: array
             required:
             - databaseName
+            - databaseRef
             - name
-            - serverRef
             type: object
           status:
             properties:

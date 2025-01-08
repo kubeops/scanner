@@ -9,7 +9,7 @@ spec:
   group: ops.kubedb.com
   names:
     categories:
-    - datastore
+    - ops
     - kubedb
     - appscode
     kind: ElasticsearchOpsRequest
@@ -48,6 +48,16 @@ spec:
                 - IfReady
                 - Always
                 type: string
+              authentication:
+                properties:
+                  secretRef:
+                    properties:
+                      name:
+                        default: ""
+                        type: string
+                    type: object
+                    x-kubernetes-map-type: atomic
+                type: object
               configuration:
                 properties:
                   applyConfig:
@@ -57,6 +67,7 @@ spec:
                   configSecret:
                     properties:
                       name:
+                        default: ""
                         type: string
                     type: object
                     x-kubernetes-map-type: atomic
@@ -67,6 +78,7 @@ spec:
                   secureConfigSecret:
                     properties:
                       name:
+                        default: ""
                         type: string
                     type: object
                     x-kubernetes-map-type: atomic
@@ -74,6 +86,7 @@ spec:
               databaseRef:
                 properties:
                   name:
+                    default: ""
                     type: string
                 type: object
                 x-kubernetes-map-type: atomic
@@ -238,6 +251,7 @@ spec:
                 - Restart
                 - Reconfigure
                 - ReconfigureTLS
+                - RotateAuth
                 type: string
               updateVersion:
                 properties:
@@ -249,9 +263,6 @@ spec:
                   coordinating:
                     properties:
                       nodeSelectionPolicy:
-                        enum:
-                        - LabelSelector
-                        - Taint
                         type: string
                       resources:
                         properties:
@@ -298,9 +309,6 @@ spec:
                   data:
                     properties:
                       nodeSelectionPolicy:
-                        enum:
-                        - LabelSelector
-                        - Taint
                         type: string
                       resources:
                         properties:
@@ -347,9 +355,6 @@ spec:
                   dataCold:
                     properties:
                       nodeSelectionPolicy:
-                        enum:
-                        - LabelSelector
-                        - Taint
                         type: string
                       resources:
                         properties:
@@ -396,9 +401,6 @@ spec:
                   dataContent:
                     properties:
                       nodeSelectionPolicy:
-                        enum:
-                        - LabelSelector
-                        - Taint
                         type: string
                       resources:
                         properties:
@@ -445,9 +447,6 @@ spec:
                   dataFrozen:
                     properties:
                       nodeSelectionPolicy:
-                        enum:
-                        - LabelSelector
-                        - Taint
                         type: string
                       resources:
                         properties:
@@ -494,9 +493,6 @@ spec:
                   dataHot:
                     properties:
                       nodeSelectionPolicy:
-                        enum:
-                        - LabelSelector
-                        - Taint
                         type: string
                       resources:
                         properties:
@@ -543,9 +539,6 @@ spec:
                   dataWarm:
                     properties:
                       nodeSelectionPolicy:
-                        enum:
-                        - LabelSelector
-                        - Taint
                         type: string
                       resources:
                         properties:
@@ -626,9 +619,6 @@ spec:
                   ingest:
                     properties:
                       nodeSelectionPolicy:
-                        enum:
-                        - LabelSelector
-                        - Taint
                         type: string
                       resources:
                         properties:
@@ -675,9 +665,6 @@ spec:
                   master:
                     properties:
                       nodeSelectionPolicy:
-                        enum:
-                        - LabelSelector
-                        - Taint
                         type: string
                       resources:
                         properties:
@@ -724,9 +711,6 @@ spec:
                   ml:
                     properties:
                       nodeSelectionPolicy:
-                        enum:
-                        - LabelSelector
-                        - Taint
                         type: string
                       resources:
                         properties:
@@ -773,9 +757,6 @@ spec:
                   node:
                     properties:
                       nodeSelectionPolicy:
-                        enum:
-                        - LabelSelector
-                        - Taint
                         type: string
                       resources:
                         properties:
@@ -822,9 +803,6 @@ spec:
                   transform:
                     properties:
                       nodeSelectionPolicy:
-                        enum:
-                        - LabelSelector
-                        - Taint
                         type: string
                       resources:
                         properties:
@@ -932,7 +910,6 @@ spec:
                     pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                     x-kubernetes-int-or-string: true
                   mode:
-                    default: Online
                     enum:
                     - Offline
                     - Online
@@ -949,6 +926,8 @@ spec:
                     - type: string
                     pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                     x-kubernetes-int-or-string: true
+                required:
+                - mode
                 type: object
             required:
             - databaseRef

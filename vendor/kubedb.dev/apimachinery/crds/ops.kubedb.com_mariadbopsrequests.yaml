@@ -9,7 +9,7 @@ spec:
   group: ops.kubedb.com
   names:
     categories:
-    - datastore
+    - ops
     - kubedb
     - appscode
     kind: MariaDBOpsRequest
@@ -48,6 +48,16 @@ spec:
                 - IfReady
                 - Always
                 type: string
+              authentication:
+                properties:
+                  secretRef:
+                    properties:
+                      name:
+                        default: ""
+                        type: string
+                    type: object
+                    x-kubernetes-map-type: atomic
+                type: object
               configuration:
                 properties:
                   applyConfig:
@@ -57,17 +67,17 @@ spec:
                   configSecret:
                     properties:
                       name:
+                        default: ""
                         type: string
                     type: object
                     x-kubernetes-map-type: atomic
-                  inlineConfig:
-                    type: string
                   removeCustomConfig:
                     type: boolean
                 type: object
               databaseRef:
                 properties:
                   name:
+                    default: ""
                     type: string
                 type: object
                 x-kubernetes-map-type: atomic
@@ -201,6 +211,7 @@ spec:
                 - Restart
                 - Reconfigure
                 - ReconfigureTLS
+                - RotateAuth
                 type: string
               updateVersion:
                 properties:
@@ -280,9 +291,6 @@ spec:
                   mariadb:
                     properties:
                       nodeSelectionPolicy:
-                        enum:
-                        - LabelSelector
-                        - Taint
                         type: string
                       resources:
                         properties:
@@ -340,6 +348,8 @@ spec:
                     - Offline
                     - Online
                     type: string
+                required:
+                - mode
                 type: object
             required:
             - databaseRef

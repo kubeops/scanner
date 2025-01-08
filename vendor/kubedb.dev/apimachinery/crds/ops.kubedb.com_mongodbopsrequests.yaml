@@ -9,7 +9,7 @@ spec:
   group: ops.kubedb.com
   names:
     categories:
-    - datastore
+    - ops
     - kubedb
     - appscode
     kind: MongoDBOpsRequest
@@ -68,6 +68,16 @@ spec:
                 - operation
                 - ref
                 type: object
+              authentication:
+                properties:
+                  secretRef:
+                    properties:
+                      name:
+                        default: ""
+                        type: string
+                    type: object
+                    x-kubernetes-map-type: atomic
+                type: object
               configuration:
                 properties:
                   arbiter:
@@ -79,11 +89,10 @@ spec:
                       configSecret:
                         properties:
                           name:
+                            default: ""
                             type: string
                         type: object
                         x-kubernetes-map-type: atomic
-                      inlineConfig:
-                        type: string
                       removeCustomConfig:
                         type: boolean
                     type: object
@@ -96,11 +105,10 @@ spec:
                       configSecret:
                         properties:
                           name:
+                            default: ""
                             type: string
                         type: object
                         x-kubernetes-map-type: atomic
-                      inlineConfig:
-                        type: string
                       removeCustomConfig:
                         type: boolean
                     type: object
@@ -113,11 +121,10 @@ spec:
                       configSecret:
                         properties:
                           name:
+                            default: ""
                             type: string
                         type: object
                         x-kubernetes-map-type: atomic
-                      inlineConfig:
-                        type: string
                       removeCustomConfig:
                         type: boolean
                     type: object
@@ -130,11 +137,10 @@ spec:
                       configSecret:
                         properties:
                           name:
+                            default: ""
                             type: string
                         type: object
                         x-kubernetes-map-type: atomic
-                      inlineConfig:
-                        type: string
                       removeCustomConfig:
                         type: boolean
                     type: object
@@ -147,11 +153,10 @@ spec:
                       configSecret:
                         properties:
                           name:
+                            default: ""
                             type: string
                         type: object
                         x-kubernetes-map-type: atomic
-                      inlineConfig:
-                        type: string
                       removeCustomConfig:
                         type: boolean
                     type: object
@@ -164,11 +169,10 @@ spec:
                       configSecret:
                         properties:
                           name:
+                            default: ""
                             type: string
                         type: object
                         x-kubernetes-map-type: atomic
-                      inlineConfig:
-                        type: string
                       removeCustomConfig:
                         type: boolean
                     type: object
@@ -181,11 +185,10 @@ spec:
                       configSecret:
                         properties:
                           name:
+                            default: ""
                             type: string
                         type: object
                         x-kubernetes-map-type: atomic
-                      inlineConfig:
-                        type: string
                       removeCustomConfig:
                         type: boolean
                     type: object
@@ -193,6 +196,7 @@ spec:
               databaseRef:
                 properties:
                   name:
+                    default: ""
                     type: string
                 type: object
                 x-kubernetes-map-type: atomic
@@ -363,6 +367,7 @@ spec:
                 - Reconfigure
                 - ReconfigureTLS
                 - Reprovision
+                - RotateAuth
                 type: string
               updateVersion:
                 properties:
@@ -374,9 +379,6 @@ spec:
                   arbiter:
                     properties:
                       nodeSelectionPolicy:
-                        enum:
-                        - LabelSelector
-                        - Taint
                         type: string
                       resources:
                         properties:
@@ -423,9 +425,6 @@ spec:
                   configServer:
                     properties:
                       nodeSelectionPolicy:
-                        enum:
-                        - LabelSelector
-                        - Taint
                         type: string
                       resources:
                         properties:
@@ -540,9 +539,6 @@ spec:
                   hidden:
                     properties:
                       nodeSelectionPolicy:
-                        enum:
-                        - LabelSelector
-                        - Taint
                         type: string
                       resources:
                         properties:
@@ -589,9 +585,6 @@ spec:
                   mongos:
                     properties:
                       nodeSelectionPolicy:
-                        enum:
-                        - LabelSelector
-                        - Taint
                         type: string
                       resources:
                         properties:
@@ -638,9 +631,6 @@ spec:
                   replicaSet:
                     properties:
                       nodeSelectionPolicy:
-                        enum:
-                        - LabelSelector
-                        - Taint
                         type: string
                       resources:
                         properties:
@@ -687,9 +677,6 @@ spec:
                   shard:
                     properties:
                       nodeSelectionPolicy:
-                        enum:
-                        - LabelSelector
-                        - Taint
                         type: string
                       resources:
                         properties:
@@ -736,9 +723,6 @@ spec:
                   standalone:
                     properties:
                       nodeSelectionPolicy:
-                        enum:
-                        - LabelSelector
-                        - Taint
                         type: string
                       resources:
                         properties:
@@ -798,7 +782,6 @@ spec:
                     pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                     x-kubernetes-int-or-string: true
                   mode:
-                    default: Online
                     enum:
                     - Offline
                     - Online
@@ -821,6 +804,8 @@ spec:
                     - type: string
                     pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                     x-kubernetes-int-or-string: true
+                required:
+                - mode
                 type: object
             required:
             - databaseRef
