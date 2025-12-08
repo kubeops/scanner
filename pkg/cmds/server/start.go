@@ -28,10 +28,9 @@ import (
 	"github.com/spf13/pflag"
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 	"k8s.io/apiserver/pkg/endpoints/openapi"
-	"k8s.io/apiserver/pkg/features"
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	genericoptions "k8s.io/apiserver/pkg/server/options"
-	"k8s.io/apiserver/pkg/util/feature"
+	utilversion "k8s.io/component-base/version"
 	"kmodules.xyz/client-go/tools/clientcmd"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -50,7 +49,6 @@ type ScannerServerOptions struct {
 
 // NewScannerServerOptions returns a new ScannerServerOptions
 func NewScannerServerOptions(out, errOut io.Writer) *ScannerServerOptions {
-	_ = feature.DefaultMutableFeatureGate.Set(fmt.Sprintf("%s=false", features.APIPriorityAndFairness))
 	o := &ScannerServerOptions{
 		RecommendedOptions: genericoptions.NewRecommendedOptions(
 			defaultEtcdPathPrefix,
@@ -98,6 +96,7 @@ func (o *ScannerServerOptions) Config() (*apiserver.Config, error) {
 	}
 	// Fixes https://github.com/Azure/AKS/issues/522
 	clientcmd.Fix(serverConfig.ClientConfig)
+	serverConfig.EffectiveVersion = utilversion.NewEffectiveVersion("v1.0.0")
 
 	ignore := []string{
 		"/swaggerapi",
@@ -153,7 +152,7 @@ func (o ScannerServerOptions) Run(ctx context.Context) error {
 	}
 
 	server.GenericAPIServer.AddPostStartHookOrDie("start-scanner-informers", func(context genericapiserver.PostStartHookContext) error {
-		config.GenericConfig.SharedInformerFactory.Start(context.StopCh)
+		config.GenericConfig.SharedInformerFactory.Start(context.Done())
 		return nil
 	})
 

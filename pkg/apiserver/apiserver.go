@@ -44,7 +44,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
-	"k8s.io/apimachinery/pkg/version"
 	"k8s.io/apiserver/pkg/registry/rest"
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	"k8s.io/client-go/informers"
@@ -153,11 +152,6 @@ func (cfg *Config) Complete() CompletedConfig {
 		&cfg.ExtraConfig,
 	}
 
-	c.GenericConfig.Version = &version.Info{
-		Major: "1",
-		Minor: "0",
-	}
-
 	return CompletedConfig{&c}
 }
 
@@ -213,14 +207,12 @@ func (c completedConfig) New(ctx context.Context) (*ScannerServer, error) {
 			Mapper:          mapper,
 			ClusterMetadata: cmeta,
 		}
-		auditor = auditlib.NewResilientEventPublisher(func() (*auditlib.NatsConfig, auditlib.LicenseIDGetter, error) {
-			return auditlib.NewNatsConfig(c.ExtraConfig.ClientConfig, cmeta.UID, c.ExtraConfig.LicenseFile)
-		}, mapper, fn.CreateEvent)
-		nc, err = auditor.NatsClient()
+		nc2 := auditlib.NewNatsClient(c.ExtraConfig.ClientConfig, cmeta.UID, c.ExtraConfig.LicenseFile)
+		nc, err = nc2.Connect()
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to connect to nats, reason: %v", err)
 		}
-
+		auditor = auditlib.NewEventPublisher(nc2, mapper, fn.CreateEvent)
 		if !c.ExtraConfig.License.DisableAnalytics() {
 			err = auditor.SetupSiteInfoPublisher(c.ExtraConfig.ClientConfig, c.ExtraConfig.KubeClient, c.ExtraConfig.KubeInformerFactory)
 			if err != nil {
