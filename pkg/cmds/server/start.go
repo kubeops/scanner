@@ -157,7 +157,7 @@ func (o ScannerServerOptions) Run(ctx context.Context) error {
 	})
 
 	err = server.Manager.Add(manager.RunnableFunc(func(ctx context.Context) error {
-		return server.GenericAPIServer.PrepareRun().Run(ctx.Done())
+		return server.GenericAPIServer.PrepareRun().RunWithContext(ctx)
 	}))
 	if err != nil {
 		return err

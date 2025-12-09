@@ -25,7 +25,6 @@ import (
 
 	batch "k8s.io/api/batch/v1"
 	core "k8s.io/api/core/v1"
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
@@ -34,7 +33,6 @@ import (
 	cu "kmodules.xyz/client-go/client"
 	"kmodules.xyz/client-go/client/apiutil"
 	core_util "kmodules.xyz/client-go/core/v1"
-	coreapi "kmodules.xyz/client-go/core/v1"
 	"kmodules.xyz/go-containerregistry/name"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -50,10 +48,10 @@ const (
 	containerUploader = "uploader"
 )
 
-func (r *RequestReconciler) ensureJob(sa string, pullSecrets []corev1.LocalObjectReference) (*batch.Job, error) {
+func (r *RequestReconciler) ensureJob(sa string, pullSecrets []core.LocalObjectReference) (*batch.Job, error) {
 	if r.req.Status.JobName != "" {
 		var job batch.Job
-		err := r.Client.Get(r.ctx, types.NamespacedName{
+		err := r.Get(r.ctx, types.NamespacedName{
 			Name:      r.req.Status.JobName,
 			Namespace: r.workspace,
 		}, &job)
@@ -194,8 +192,8 @@ func (r *RequestReconciler) getPrivateImageScannerJob() (*batch.Job, error) {
 	return &job, err
 }
 
-func (r *RequestReconciler) getPrivateImageScannerPod(job *batch.Job) (*corev1.Pod, error) {
-	var podList corev1.PodList
+func (r *RequestReconciler) getPrivateImageScannerPod(job *batch.Job) (*core.Pod, error) {
+	var podList core.PodList
 	podSelectors := job.Spec.Template.Labels
 	err := r.List(r.ctx, &podList, &client.ListOptions{
 		LabelSelector: labels.Set(podSelectors).AsSelector(),
@@ -205,7 +203,7 @@ func (r *RequestReconciler) getPrivateImageScannerPod(job *batch.Job) (*corev1.P
 		return nil, err
 	}
 	for _, pod := range podList.Items {
-		owned, _ := coreapi.IsOwnedBy(&pod, job)
+		owned, _ := core_util.IsOwnedBy(&pod, job)
 		if owned {
 			return &pod, nil
 		}
@@ -213,10 +211,10 @@ func (r *RequestReconciler) getPrivateImageScannerPod(job *batch.Job) (*corev1.P
 	return nil, nil
 }
 
-func (r *RequestReconciler) getPrivateImageScannerInitContainer(pod *corev1.Pod) (corev1.Container, corev1.ContainerStatus, bool) {
+func (r *RequestReconciler) getPrivateImageScannerInitContainer(pod *core.Pod) (core.Container, core.ContainerStatus, bool) {
 	var (
-		container       corev1.Container
-		containerStatus corev1.ContainerStatus
+		container       core.Container
+		containerStatus core.ContainerStatus
 		found           bool
 	)
 	if pod == nil {

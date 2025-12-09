@@ -59,13 +59,14 @@ func (mgr *Manager) getBucketResponse(img string) (*trivy.BackendResponse, error
 	if err != nil {
 		s := ErrorToAPIStatus(err)
 		data, _ = json.Marshal(s)
-		if s.Code == http.StatusNotFound {
+		switch s.Code {
+		case http.StatusNotFound:
 			err = mgr.submitScanRequest(img)
 			if err != nil {
 				klog.ErrorS(err, "failed to parse or get", "image", img)
 				return nil, err
 			}
-		} else if s.Code == http.StatusTooManyRequests {
+		case http.StatusTooManyRequests:
 			go func() {
 				time.Sleep(dockerHubRateLimitDelay)
 				err = mgr.submitScanRequest(img)
@@ -120,7 +121,7 @@ func ExistsReport(fs blobfs.Interface, img string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	return !res.TrivyVersion.VulnerabilityDB.UpdatedAt.Time.Before(ver.VulnerabilityDB.UpdatedAt.Time), nil
+	return !res.TrivyVersion.VulnerabilityDB.UpdatedAt.Before(ver.VulnerabilityDB.UpdatedAt.Time), nil
 }
 
 func UploadReport(fs blobfs.Interface, img string) error {

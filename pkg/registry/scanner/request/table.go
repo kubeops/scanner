@@ -84,7 +84,7 @@ func (c defaultTableConvertor) ConvertToTable(ctx context.Context, object runtim
 		}
 
 		table.Rows = append(table.Rows, metav1.TableRow{
-			Cells: []interface{}{
+			Cells: []any{
 				m.GetName(),
 				image,
 				reportName,

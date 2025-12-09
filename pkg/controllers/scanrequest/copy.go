@@ -37,7 +37,7 @@ func (r *RequestReconciler) copyRequiredObjects() (string, []corev1.LocalObjectR
 	}
 
 	var sa corev1.ServiceAccount
-	err = r.Client.Get(r.ctx, types.NamespacedName{
+	err = r.Get(r.ctx, types.NamespacedName{
 		Name:      r.req.Spec.ServiceAccountName,
 		Namespace: r.req.Spec.Namespace,
 	}, &sa)
@@ -62,7 +62,7 @@ func (r *RequestReconciler) copySecrets(secrets []corev1.LocalObjectReference) (
 	secList := make([]corev1.LocalObjectReference, 0)
 	for _, secretName := range secrets {
 		var sec corev1.Secret
-		err := r.Client.Get(r.ctx, types.NamespacedName{
+		err := r.Get(r.ctx, types.NamespacedName{
 			Name:      secretName.Name,
 			Namespace: r.req.Spec.Namespace,
 		}, &sec)

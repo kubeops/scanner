@@ -152,7 +152,7 @@ func GetAttrs(obj runtime.Object) (labels.Set, fields.Set, error) {
 	if !ok {
 		return nil, nil, fmt.Errorf("given object is not a replication controller")
 	}
-	return labels.Set(rc.ObjectMeta.Labels), ControllerToSelectableFields(rc), nil
+	return labels.Set(rc.Labels), ControllerToSelectableFields(rc), nil
 }
 
 // MatchController is the filter used by the generic etcd backend to route

@@ -231,7 +231,7 @@ func (r *Reconciler) watcherFuncForJob() handler.MapFunc {
 			return reqs
 		}
 
-		err := r.Client.List(ctx, &scanReqs, &client.ListOptions{})
+		err := r.List(ctx, &scanReqs, &client.ListOptions{})
 		if err != nil {
 			return reqs
 		}

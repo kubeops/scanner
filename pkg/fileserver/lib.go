@@ -33,7 +33,6 @@ import (
 
 	securejoin "github.com/cyphar/filepath-securejoin"
 	"github.com/dustin/go-humanize"
-	_ "github.com/dustin/go-humanize"
 	"github.com/go-chi/chi/v5"
 	hw "go.wandrs.dev/http"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -85,7 +84,7 @@ func FileSave(prefix, dir string, r *http.Request) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer f.Close() // nolint:errcheck
 
 	size, err := getSize(f)
 	if err != nil {
@@ -119,7 +118,7 @@ func FileSave(prefix, dir string, r *http.Request) error {
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer file.Close() // nolint:errcheck
 	// Copy the file to the destination path
 	_, err = io.Copy(file, f)
 	if err != nil {
