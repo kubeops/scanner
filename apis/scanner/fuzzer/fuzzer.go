@@ -19,22 +19,22 @@ package fuzzer
 import (
 	"kubeops.dev/scanner/apis/scanner"
 
-	fuzz "github.com/google/gofuzz"
 	runtimeserializer "k8s.io/apimachinery/pkg/runtime/serializer"
+	"sigs.k8s.io/randfill"
 )
 
 // Funcs returns the fuzzer functions for this api group.
 var Funcs = func(codecs runtimeserializer.CodecFactory) []any {
 	return []any{
 		// v1alpha1
-		func(s *scanner.ImageScanRequest, c fuzz.Continue) {
-			c.FuzzNoCustom(s) // fuzz self without calling this function again
+		func(s *scanner.ImageScanRequest, c randfill.Continue) {
+			c.Fill(s) // fuzz self without calling this function again
 		},
-		func(s *scanner.ImageScanReport, c fuzz.Continue) {
-			c.FuzzNoCustom(s) // fuzz self without calling this function again
+		func(s *scanner.ImageScanReport, c randfill.Continue) {
+			c.Fill(s) // fuzz self without calling this function again
 		},
-		func(s *scanner.Vulnerability, c fuzz.Continue) {
-			c.FuzzNoCustom(s) // fuzz self without calling this function again
+		func(s *scanner.Vulnerability, c randfill.Continue) {
+			c.Fill(s) // fuzz self without calling this function again
 		},
 	}
 }
