@@ -52,8 +52,16 @@ type MariaDBVersion struct {
 type MariaDBVersionSpec struct {
 	// Version
 	Version string `json:"version"`
+
+	// EndOfLife refers if this version reached into its end of the life or not, based on https://endoflife.date/
+	// +optional
+	EndOfLife bool `json:"endOfLife"`
+
 	// Database Image
 	DB MariaDBVersionDatabase `json:"db"`
+	// Maxscale Image
+	// +optional
+	Maxscale MariaDBVersionMaxscale `json:"maxscale"`
 	// Exporter Image
 	Exporter MariaDBVersionExporter `json:"exporter"`
 	// Coordinator Image
@@ -85,6 +93,14 @@ type MariaDBVersionSpec struct {
 // MariaDBVersionDatabase is the mariadb image
 type MariaDBVersionDatabase struct {
 	Image string `json:"image"`
+}
+
+// MariaDBVersionMaxscale is the mariadb maxscale image
+type MariaDBVersionMaxscale struct {
+	Image string `json:"image"`
+	// SecurityContext is for the additional config for the maxscale container
+	// +optional
+	SecurityContext SecurityContext `json:"securityContext"`
 }
 
 // MariaDBVersionExporter is the image for the MariaDB exporter

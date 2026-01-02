@@ -216,6 +216,12 @@ func SetObjectDefaults_Workload(in *Workload) {
 						b.ValueFrom.SecretKeyRef.LocalObjectReference.Name = ""
 					}
 				}
+				if b.ValueFrom.FileKeyRef != nil {
+					if b.ValueFrom.FileKeyRef.Optional == nil {
+						var ptrVar1 bool = false
+						b.ValueFrom.FileKeyRef.Optional = &ptrVar1
+					}
+				}
 			}
 		}
 		if a.LivenessProbe != nil {
@@ -277,6 +283,12 @@ func SetObjectDefaults_Workload(in *Workload) {
 						b.ValueFrom.SecretKeyRef.LocalObjectReference.Name = ""
 					}
 				}
+				if b.ValueFrom.FileKeyRef != nil {
+					if b.ValueFrom.FileKeyRef.Optional == nil {
+						var ptrVar1 bool = false
+						b.ValueFrom.FileKeyRef.Optional = &ptrVar1
+					}
+				}
 			}
 		}
 		if a.LivenessProbe != nil {
@@ -336,6 +348,12 @@ func SetObjectDefaults_Workload(in *Workload) {
 				if b.ValueFrom.SecretKeyRef != nil {
 					if b.ValueFrom.SecretKeyRef.LocalObjectReference.Name == "" {
 						b.ValueFrom.SecretKeyRef.LocalObjectReference.Name = ""
+					}
+				}
+				if b.ValueFrom.FileKeyRef != nil {
+					if b.ValueFrom.FileKeyRef.Optional == nil {
+						var ptrVar1 bool = false
+						b.ValueFrom.FileKeyRef.Optional = &ptrVar1
 					}
 				}
 			}
