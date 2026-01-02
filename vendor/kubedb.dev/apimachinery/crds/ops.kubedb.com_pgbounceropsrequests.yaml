@@ -52,9 +52,17 @@ spec:
                 properties:
                   secretRef:
                     properties:
-                      name:
+                      apiGroup:
                         default: ""
                         type: string
+                      kind:
+                        default: Secret
+                        type: string
+                      name:
+                        type: string
+                    required:
+                    - kind
+                    - name
                     type: object
                     x-kubernetes-map-type: atomic
                 type: object
@@ -92,6 +100,10 @@ spec:
                     format: int32
                     type: integer
                 type: object
+              maxRetries:
+                default: 1
+                format: int32
+                type: integer
               restart:
                 type: object
               timeout:
@@ -183,6 +195,11 @@ spec:
                       - alias
                       type: object
                     type: array
+                  clientAuthMode:
+                    enum:
+                    - md5
+                    - scram-sha-256
+                    type: string
                   issuerRef:
                     properties:
                       apiGroup:
@@ -200,6 +217,15 @@ spec:
                     type: boolean
                   rotateCertificates:
                     type: boolean
+                  sslMode:
+                    enum:
+                    - disable
+                    - allow
+                    - prefer
+                    - require
+                    - verify-ca
+                    - verify-full
+                    type: string
                 type: object
               type:
                 enum:
@@ -209,6 +235,7 @@ spec:
                 - Reconfigure
                 - RotateAuth
                 - Restart
+                - ReconfigureTLS
                 type: string
               updateVersion:
                 properties:
@@ -225,6 +252,8 @@ spec:
                             items:
                               properties:
                                 name:
+                                  type: string
+                                request:
                                   type: string
                               required:
                               - name
@@ -261,6 +290,8 @@ spec:
                             items:
                               properties:
                                 name:
+                                  type: string
+                                request:
                                   type: string
                               required:
                               - name
