@@ -36,10 +36,12 @@ type ImageScanReportReconciler struct {
 	Scheme        *runtime.Scheme
 	FileServerDir string
 	ReportTTL     time.Duration
+	dbGateLog     fileserver.ThrottledLogger
 }
 
 func (r *ImageScanReportReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	if !fileserver.MetadataFileExists(r.FileServerDir) {
+		fileserver.LogMetadataMissing(&r.dbGateLog, log.FromContext(ctx), r.FileServerDir)
 		return ctrl.Result{RequeueAfter: time.Minute}, nil
 	}
 	log := log.FromContext(ctx)

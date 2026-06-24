@@ -47,6 +47,7 @@ type Reconciler struct {
 	fileServerDir        string
 	scanRequestTTLPeriod time.Duration
 	workspace            string
+	dbGateLog            fileserver.ThrottledLogger
 }
 
 type RequestReconciler struct {
@@ -77,6 +78,7 @@ func NewImageScanRequestReconciler(
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	if !fileserver.MetadataFileExists(r.fileServerDir) {
+		fileserver.LogMetadataMissing(&r.dbGateLog, log.FromContext(ctx), r.fileServerDir)
 		return ctrl.Result{RequeueAfter: time.Minute}, nil
 	}
 

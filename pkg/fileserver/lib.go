@@ -28,12 +28,15 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync/atomic"
+	"time"
 
 	"kubeops.dev/scanner/apis/trivy"
 
 	securejoin "github.com/cyphar/filepath-securejoin"
 	"github.com/dustin/go-humanize"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-logr/logr"
 	hw "go.wandrs.dev/http"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 )
@@ -154,8 +157,36 @@ func VulnerabilityDBLastUpdatedAt(fsDir string) (*trivy.Time, error) {
 	return &ver.UpdatedAt, nil
 }
 
+func MetadataFilePath(fsDir string) string {
+	return filepath.Join(fsDir, "trivy", "metadata.json")
+}
+
 func MetadataFileExists(fsDir string) bool {
-	fileName := filepath.Join(fsDir, "trivy", "metadata.json")
-	_, err := os.Stat(fileName)
+	_, err := os.Stat(MetadataFilePath(fsDir))
 	return !os.IsNotExist(err)
+}
+
+// ThrottledLogger emits a log line at most once per minute. The zero value is ready and safe for concurrent use.
+type ThrottledLogger struct {
+	lastLogged atomic.Int64
+}
+
+func (l *ThrottledLogger) Log(logger logr.Logger, msg string, keysAndValues ...any) {
+	now := time.Now().UnixNano()
+	last := l.lastLogged.Load()
+	if now-last < int64(time.Minute) {
+		return
+	}
+	if !l.lastLogged.CompareAndSwap(last, now) {
+		return
+	}
+	logger.Info(msg, keysAndValues...)
+}
+
+// LogMetadataMissing reports (throttled) that the trivy DB metadata is absent,
+// so the otherwise-silent reconciler gate is diagnosable from the logs.
+func LogMetadataMissing(l *ThrottledLogger, logger logr.Logger, fsDir string) {
+	l.Log(logger, "trivy DB metadata not found; pausing scan reconciles until it is seeded",
+		"path", MetadataFilePath(fsDir),
+		"hint", "ensure the trivydb cacher has run, e.g. kubectl create job --from=cronjob/scanner-trivydb-cacher <name>")
 }
