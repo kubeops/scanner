@@ -117,7 +117,11 @@ func (o *ScannerServerOptions) Config() (*apiserver.Config, error) {
 		openapi.NewDefinitionNamer(apiserver.Scheme))
 	serverConfig.OpenAPIV3Config.Info.Title = "scanner"
 	serverConfig.OpenAPIV3Config.Info.Version = api.SchemeGroupVersion.Version
-	serverConfig.OpenAPIV3Config.IgnorePrefixes = ignore
+	// Do NOT reuse `ignore` here: the v3 config feeds the server-side-apply
+	// managed-fields type converter (getOpenAPIModels), and ignoring the scanner
+	// group prefix drops its resources from the converter, causing
+	// "no corresponding type for scanner.appscode.com/v1alpha1" on every write.
+	serverConfig.OpenAPIV3Config.IgnorePrefixes = []string{"/swaggerapi"}
 
 	extraConfig := apiserver.ExtraConfig{
 		ClientConfig:         serverConfig.ClientConfig,
