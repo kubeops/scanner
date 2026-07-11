@@ -72,7 +72,7 @@ func (o ScannerServerOptions) AddFlags(fs *pflag.FlagSet) {
 
 // Validate validates ScannerServerOptions
 func (o ScannerServerOptions) Validate(args []string) error {
-	var errors []error
+	errors := make([]error, 0, 2)
 	errors = append(errors, o.RecommendedOptions.Validate()...)
 	errors = append(errors, o.ExtraOptions.Validate()...)
 	return utilerrors.NewAggregate(errors)
@@ -107,14 +107,16 @@ func (o *ScannerServerOptions) Config() (*apiserver.Config, error) {
 
 	serverConfig.OpenAPIConfig = genericapiserver.DefaultOpenAPIConfig(
 		api.GetOpenAPIDefinitions,
-		openapi.NewDefinitionNamer(apiserver.Scheme))
+		openapi.NewDefinitionNamer(apiserver.Scheme),
+	)
 	serverConfig.OpenAPIConfig.Info.Title = "scanner"
 	serverConfig.OpenAPIConfig.Info.Version = api.SchemeGroupVersion.Version
 	serverConfig.OpenAPIConfig.IgnorePrefixes = ignore
 
 	serverConfig.OpenAPIV3Config = genericapiserver.DefaultOpenAPIV3Config(
 		api.GetOpenAPIDefinitions,
-		openapi.NewDefinitionNamer(apiserver.Scheme))
+		openapi.NewDefinitionNamer(apiserver.Scheme),
+	)
 	serverConfig.OpenAPIV3Config.Info.Title = "scanner"
 	serverConfig.OpenAPIV3Config.Info.Version = api.SchemeGroupVersion.Version
 	serverConfig.OpenAPIV3Config.IgnorePrefixes = ignore
