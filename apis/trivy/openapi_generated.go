@@ -20887,16 +20887,8 @@ func schema_kubeopsdev_scanner_apis_trivy_Time(ref common.ReferenceCallback) com
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Type: []string{"object"},
-				Properties: map[string]spec.Schema{
-					"Time": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "date-time",
-						},
-					},
-				},
-				Required: []string{"Time"},
+				Type:   Time{}.OpenAPISchemaType(),
+				Format: Time{}.OpenAPISchemaFormat(),
 			},
 		},
 	}
