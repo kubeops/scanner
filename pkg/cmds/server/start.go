@@ -72,7 +72,7 @@ func (o ScannerServerOptions) AddFlags(fs *pflag.FlagSet) {
 
 // Validate validates ScannerServerOptions
 func (o ScannerServerOptions) Validate(args []string) error {
-	var errors []error
+	errors := make([]error, 0, 2)
 	errors = append(errors, o.RecommendedOptions.Validate()...)
 	errors = append(errors, o.ExtraOptions.Validate()...)
 	return utilerrors.NewAggregate(errors)
