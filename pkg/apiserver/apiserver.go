@@ -79,7 +79,8 @@ func init() {
 
 	// TODO: keep the generic API server from wanting this
 	unversioned := schema.GroupVersion{Group: "", Version: "v1"}
-	Scheme.AddUnversionedTypes(unversioned,
+	Scheme.AddUnversionedTypes(
+		unversioned,
 		&metav1.Status{},
 		&metav1.APIVersions{},
 		&metav1.APIGroupList{},
@@ -118,7 +119,8 @@ func (c ExtraConfig) LicenseProvided() bool {
 	ok, _ := discovery.HasGVK(
 		c.KubeClient.Discovery(),
 		proxyserver.SchemeGroupVersion.String(),
-		proxyserver.ResourceKindLicenseRequest)
+		proxyserver.ResourceKindLicenseRequest,
+	)
 	return ok
 }
 
@@ -226,7 +228,7 @@ func (c completedConfig) New(ctx context.Context) (*ScannerServer, error) {
 		}
 	}
 
-	if err = (scanrequest.NewImageScanRequestReconciler(
+	if err = scanrequest.NewImageScanRequestReconciler(
 		mgr.GetClient(),
 		nc,
 		c.ExtraConfig.ScannerImage,
@@ -236,7 +238,7 @@ func (c completedConfig) New(ctx context.Context) (*ScannerServer, error) {
 		c.ExtraConfig.FileServerFilesDir,
 		c.ExtraConfig.ScanRequestTTLPeriod,
 		c.ExtraConfig.Workspace,
-	)).SetupWithManager(mgr); err != nil {
+	).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "ImageScanRequest")
 		os.Exit(1)
 	}
