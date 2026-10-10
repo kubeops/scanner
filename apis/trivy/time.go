@@ -79,6 +79,14 @@ func (t Time) MarshalJSON() ([]byte, error) {
 	return buf, nil
 }
 
+// OpenAPISchemaType and OpenAPISchemaFormat mirror metav1.Time so openapi-gen
+// emits a scalar date-time string. Without them, defining Time as a new named
+// type strips metav1.Time's methods and the generated schema becomes an object,
+// breaking the server-side-apply type converter.
+func (Time) OpenAPISchemaType() []string { return []string{"string"} }
+
+func (Time) OpenAPISchemaFormat() string { return "date-time" }
+
 func init() {
 	utilruntime.Must(
 		apiequality.Semantic.AddFunc(func(a, b Time) bool {
