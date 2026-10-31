@@ -5,7 +5,8 @@ go 1.25.0
 require (
 	github.com/cyphar/filepath-securejoin v0.6.1
 	github.com/dustin/go-humanize v1.0.1
-	github.com/go-chi/chi/v5 v5.2.3
+	github.com/go-chi/chi/v5 v5.4.0
+	github.com/go-logr/logr v1.4.3
 	github.com/google/go-containerregistry v0.20.7
 	github.com/json-iterator/go v1.1.12
 	github.com/nats-io/nats.go v1.48.0
@@ -95,7 +96,6 @@ require (
 	github.com/fxamacker/cbor/v2 v2.9.0 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-errors/errors v1.4.2 // indirect
-	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-openapi/jsonpointer v0.22.1 // indirect
 	github.com/go-openapi/jsonreference v0.21.2 // indirect
