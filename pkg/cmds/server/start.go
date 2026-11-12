@@ -119,7 +119,9 @@ func (o *ScannerServerOptions) Config() (*apiserver.Config, error) {
 	)
 	serverConfig.OpenAPIV3Config.Info.Title = "scanner"
 	serverConfig.OpenAPIV3Config.Info.Version = api.SchemeGroupVersion.Version
-	serverConfig.OpenAPIV3Config.IgnorePrefixes = ignore
+	// The SSA managedFields type converter is built from the v3 spec minus IgnorePrefixes,
+	// so ignoring the scanner group here drops its kinds and breaks managedFields tracking.
+	serverConfig.OpenAPIV3Config.IgnorePrefixes = []string{"/swaggerapi"}
 
 	extraConfig := apiserver.ExtraConfig{
 		ClientConfig:         serverConfig.ClientConfig,
